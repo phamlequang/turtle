@@ -8,21 +8,27 @@ pub fn run() {
     let mut quit = false;
 
     while !quit {
-        print!("[turtle] > ");
-        io::stdout().flush().unwrap();
-
-        let mut line = String::new();
-        io::stdin()
-            .read_line(&mut line)
-            .expect("failed to read line");
-
-        let command = line.to_lowercase();
-        let command = command.trim();
-        println!("your command is: {}", command);
-
-        match command {
-            QUIT | EXIT => quit = true,
-            _ => println!("unknown command, please try again"),
-        }
+        let command = prompt("turtle > ");
+        quit = execute(&command)
     }
+}
+
+fn prompt(message: &str) -> String {
+    print!("{}", message);
+    io::stdout().flush().unwrap();
+
+    let mut line = String::new();
+    io::stdin()
+        .read_line(&mut line)
+        .expect("failed to read line");
+
+    return line.trim().to_lowercase();
+}
+
+fn execute(command: &str) -> bool {
+    match command {
+        QUIT | EXIT => return true,
+        _ => println!("unknown command, please try again"),
+    }
+    return false;
 }
