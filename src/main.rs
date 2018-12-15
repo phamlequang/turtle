@@ -1,24 +1,33 @@
 use std::io;
 use std::io::Write;
 
-fn main() {
-    let mut quit = false;
+struct Turtle {}
 
-    while !quit {
-        print!("[turtle] > ");
-        io::stdout().flush().unwrap();
+impl Turtle {
+    fn run(&self) {
+        let mut quit = false;
 
-        let mut line = String::new();
-        io::stdin()
-            .read_line(&mut line)
-            .expect("failed to read line");
+        while !quit {
+            print!("[turtle] > ");
+            io::stdout().flush().unwrap();
 
-        let command = line.trim();
-        println!("your command is: {}", command);
+            let mut line = String::new();
+            io::stdin()
+                .read_line(&mut line)
+                .expect("failed to read line");
 
-        match command {
-            "quit" | "exit" => quit = true,
-            _ => println!("unknown command, please try again"),
+            let command = line.trim();
+            println!("your command is: {}", command);
+
+            match command {
+                "quit" | "exit" => quit = true,
+                _ => println!("unknown command, please try again"),
+            }
         }
     }
+}
+
+fn main() {
+    let turtle = Turtle {};
+    turtle.run();
 }
