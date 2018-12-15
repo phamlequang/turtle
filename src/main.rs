@@ -1,6 +1,9 @@
 use std::io;
 use std::io::Write;
 
+const QUIT: &str = "quit";
+const EXIT: &str = "exit";
+
 struct Turtle {}
 
 impl Turtle {
@@ -16,11 +19,12 @@ impl Turtle {
                 .read_line(&mut line)
                 .expect("failed to read line");
 
-            let command = line.trim();
+            let command = line.to_lowercase();
+            let command = command.trim();
             println!("your command is: {}", command);
 
             match command {
-                "quit" | "exit" => quit = true,
+                QUIT | EXIT => quit = true,
                 _ => println!("unknown command, please try again"),
             }
         }
