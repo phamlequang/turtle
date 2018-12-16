@@ -4,7 +4,6 @@ use std::io::Write;
 use std::process;
 
 const TURTLE: &str = "turtle > ";
-const EMPTY: &str = "";
 const QUIT: &str = "quit";
 const EXIT: &str = "exit";
 
@@ -17,37 +16,30 @@ pub fn run() {
     }
 }
 
-// Prompt a message to ask for a new command
+// Prompt a message and read a new line from stdin
 fn prompt(message: &str) -> String {
     print!("{}", message);
     io::stdout().flush().unwrap();
 
     let mut line = String::new();
-    match io::stdin().read_line(&mut line) {
-        Ok(_) => return line.trim().to_owned(),
-        Err(e) => {
-            println!("failed to read line: {}", e);
-            return String::new();
+    if let Err(e) = io::stdin().read_line(&mut line) {
+        println!("failed to read line: {}", e);
+    }
+    return line;
+}
+
+// Execute a command and return true if it is a quit or exit
+fn execute(command: &str) -> bool {
+    let mut tokens = command.trim().split_whitespace();
+
+    if let Some(program) = tokens.next() {
+        match program {
+            QUIT | EXIT => return true,
+            _ => spawn(program, tokens),
         }
     }
-}
 
-// Execute a command
-fn execute(command: &str) -> bool {
-    match command {
-        EMPTY => (),
-        QUIT | EXIT => return true,
-        _ => system(command),
-    }
     return false;
-}
-
-// Run any system command as a new child process
-fn system(command: &str) {
-    let mut tokens = command.split_whitespace();
-    if let Some(program) = tokens.next() {
-        spawn(program, tokens);
-    }
 }
 
 // Spawn a program as a child process and wait for it to finish
