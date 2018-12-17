@@ -18,7 +18,13 @@ branch = "master"
     [[repositories.services]]
     name = "camellia"
     folder = "camellia"
+    build = "cargo build"
+    test = "cargo test"
+    run = "cargo run"
 
     [[repositories.services]]
     name = "lotus"
     folder = "lotus"
+    build = "cargo build"
+    test = "cargo test"
+    run = "cargo run"
