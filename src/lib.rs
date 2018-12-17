@@ -1,4 +1,9 @@
+#[macro_use]
+extern crate serde_derive;
+extern crate toml;
+
 use std::ffi::OsStr;
+use std::fs;
 use std::io;
 use std::io::Write;
 use std::process;
@@ -7,8 +12,52 @@ const TURTLE: &str = "turtle > ";
 const QUIT: &str = "quit";
 const EXIT: &str = "exit";
 
+#[derive(Serialize, Deserialize, Debug)]
+struct Config {
+    docker_machine: DockerMachine,
+    dependencies: Option<Vec<Dependency>>,
+    repositories: Option<Vec<Repository>>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+struct DockerMachine {
+    name: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+struct Dependency {
+    name: String,
+    version: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+struct Repository {
+    name: String,
+    remote: String,
+    local: String,
+    branch: String,
+    services: Vec<Service>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+struct Service {
+    name: String,
+    folder: String,
+}
+
+impl Config {
+    fn new(file_path: &str) -> Config {
+        let content = fs::read_to_string(file_path).unwrap();
+        let config: Config = toml::from_str(&content).unwrap();
+        return config;
+    }
+}
+
 // Run turtle shell
 pub fn run() {
+    let config = Config::new("turtle.toml");
+    println!("{:#?}", config);
+
     let mut quit = false;
     while !quit {
         let command = prompt(TURTLE);
