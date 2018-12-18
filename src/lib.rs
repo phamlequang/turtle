@@ -23,6 +23,7 @@ impl Turtle {
 
         return turtle;
     }
+
     // Run turtle shell
     pub fn run(&self) {
         let mut quit = false;
@@ -46,12 +47,12 @@ impl Turtle {
 
     // Execute a command and return true if it is a quit or exit
     fn execute(&self, command: &str) -> bool {
-        let mut tokens = command.trim().split_whitespace();
+        let mut args = command.trim().split_whitespace();
 
-        if let Some(program) = tokens.next() {
+        if let Some(program) = args.next() {
             match program {
                 QUIT | EXIT => return true,
-                _ => self.spawn(program, tokens),
+                _ => self.spawn(program, args),
             }
         }
 

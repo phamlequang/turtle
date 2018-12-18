@@ -28,3 +28,31 @@ branch = "master"
     build = "cargo build"
     test = "cargo test"
     run = "cargo run"
+
+[[repositories]]
+name = "tree"
+remote = "git@github.com:phamlequang/tree.git"
+local = "/Users/phamlequang/projects/tree"
+branch = "master"
+
+    [[repositories.services]]
+    name = "tree"
+    folder = "."
+    build = "cargo build"
+    test = "cargo test"
+    run = "cargo run"
+
+[[groups]]
+name = "forest"
+dependencies = ["postgres", "redis"]
+repositories = ["flowers", "tree"]
+
+[[groups]]
+name = "dep"
+dependencies = ["postgres", "redis"]
+repositories = []
+
+[[groups]]
+name = "rep"
+dependencies = []
+repositories = ["flowers", "tree"]

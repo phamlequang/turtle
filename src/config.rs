@@ -6,6 +6,7 @@ pub struct Config {
     pub docker_machine: DockerMachine,
     pub dependencies: Option<Vec<Dependency>>,
     pub repositories: Option<Vec<Repository>>,
+    pub groups: Option<Vec<Group>>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -33,6 +34,13 @@ pub struct Service {
     pub name: String,
     pub folder: String,
     pub build: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Group {
+    pub name: String,
+    pub dependencies: Vec<String>,
+    pub repositories: Vec<String>,
 }
 
 impl Config {
