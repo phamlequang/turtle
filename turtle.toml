@@ -1,0 +1,56 @@
+[docker_machine]
+name = "turtle"
+
+[[dependencies]]
+name = "postgres"
+version = "11.1-alpine"
+
+[[dependencies]]
+name = "redis"
+version = "5.0.3-alpine"
+
+[[repositories]]
+name = "flowers"
+remote = "git@github.com:phamlequang/flowers.git"
+local = "/Users/phamlequang/projects/flowers"
+branch = "master"
+
+    [[repositories.services]]
+    name = "camellia"
+    folder = "camellia"
+    build = "cargo build"
+    test = "cargo test"
+    run = "cargo run"
+
+    [[repositories.services]]
+    name = "lotus"
+    folder = "lotus"
+    build = "cargo build"
+    test = "cargo test"
+    run = "cargo run"
+
+[[repositories]]
+name = "tree"
+remote = "git@github.com:phamlequang/tree.git"
+local = "/Users/phamlequang/projects/tree"
+branch = "master"
+
+    [[repositories.services]]
+    name = "tree"
+    folder = "."
+    build = "cargo build"
+    test = "cargo test"
+    run = "cargo run"
+
+[[groups]]
+name = "forest"
+dependencies = ["postgres", "redis"]
+repositories = ["flowers", "tree"]
+
+[[groups]]
+name = "dep"
+dependencies = ["postgres", "redis"]
+
+[[groups]]
+name = "rep"
+repositories = ["flowers", "tree"]

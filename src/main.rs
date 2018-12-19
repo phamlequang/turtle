@@ -1,5 +1,5 @@
 use turtle;
 
 fn main() {
-    turtle::run();
+    turtle::Turtle::new().run();
 }
