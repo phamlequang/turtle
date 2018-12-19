@@ -16,7 +16,7 @@ pub struct Turtle {
 
 impl Turtle {
     pub fn new() -> Turtle {
-        let config = config::Config::load(CONFIG_FILE);
+        let config = config::Config::load(CONFIG_FILE).unwrap();
 
         let turtle = Turtle { config };
         println!("{:#?}", turtle.config);

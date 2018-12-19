@@ -50,9 +50,7 @@ repositories = ["flowers", "tree"]
 [[groups]]
 name = "dep"
 dependencies = ["postgres", "redis"]
-repositories = []
 
 [[groups]]
 name = "rep"
-dependencies = []
 repositories = ["flowers", "tree"]

@@ -1,5 +1,9 @@
+#[cfg(test)]
+mod test;
+
 use serde_derive::{Deserialize, Serialize};
 use std::fs;
+use std::io::{Error, ErrorKind};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Config {
@@ -26,7 +30,7 @@ pub struct Repository {
     pub remote: String,
     pub local: String,
     pub branch: String,
-    pub services: Vec<Service>,
+    pub services: Option<Vec<Service>>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -39,14 +43,22 @@ pub struct Service {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Group {
     pub name: String,
-    pub dependencies: Vec<String>,
-    pub repositories: Vec<String>,
+    pub dependencies: Option<Vec<String>>,
+    pub repositories: Option<Vec<String>>,
 }
 
 impl Config {
-    pub fn load(file_path: &str) -> Config {
-        let content = fs::read_to_string(file_path).unwrap();
-        let config: Config = toml::from_str(&content).unwrap();
-        return config;
+    pub fn load(file_path: &str) -> Result<Config, Error> {
+        match fs::read_to_string(file_path) {
+            Ok(toml_text) => return Config::parse(&toml_text),
+            Err(e) => return Err(e),
+        }
+    }
+
+    pub fn parse(toml_text: &str) -> Result<Config, Error> {
+        match toml::from_str(&toml_text) {
+            Ok(config) => return Ok(config),
+            Err(e) => return Err(Error::new(ErrorKind::InvalidData, e)),
+        }
     }
 }
