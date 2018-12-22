@@ -1,18 +1,9 @@
 use super::*;
 use crate::config::Config;
 
-fn empty_config() -> Config {
-    return Config {
-        docker_machine: None,
-        dependencies: None,
-        repositories: None,
-        groups: None,
-    };
-}
-
 #[test]
-fn test_generate_quit_instruction() {
-    let config = empty_config();
+fn test_generate_terminate_instruction_quit() {
+    let config = Config::new();
     let generator = Generator::new(config);
     let instruction = generator.generate("quit");
 
@@ -21,8 +12,8 @@ fn test_generate_quit_instruction() {
 }
 
 #[test]
-fn test_generate_exit_instruction() {
-    let config = empty_config();
+fn test_generate_terminate_instruction_exit() {
+    let config = Config::new();
     let generator = Generator::new(config);
     let instruction = generator.generate("exit");
 
@@ -32,7 +23,7 @@ fn test_generate_exit_instruction() {
 
 #[test]
 fn test_generate_other_instruction() {
-    let config = empty_config();
+    let config = Config::new();
     let generator = Generator::new(config);
     let instruction = generator.generate("ls -la");
 

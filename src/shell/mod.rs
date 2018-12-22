@@ -87,16 +87,12 @@ impl Generator {
     pub fn generate(&self, raw: &str) -> Instruction {
         let mut tokens = raw.trim().split_whitespace();
 
-        if let Some(first) = tokens.next() {
-            let program = first.to_owned();
-            let tokens: Vec<String> = tokens.map(|t| t.to_owned()).collect();
-            let args = if tokens.is_empty() {
-                None
-            } else {
-                Some(tokens)
-            };
+        if let Some(head) = tokens.next() {
+            let program = head.to_owned();
+            let tail: Vec<String> = tokens.map(|t| t.to_owned()).collect();
+            let args = if tail.is_empty() { None } else { Some(tail) };
 
-            match first {
+            match head {
                 QUIT | EXIT => return self.terminate_instruction(),
                 CLONE => return self.clone_instruction(args),
                 _ => return self.other_instruction(program, args),
