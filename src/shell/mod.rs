@@ -60,8 +60,10 @@ impl Generator {
             let mut commands: Vec<Command> = Vec::with_capacity(names.len());
             for name in &names {
                 if let Some(repository) = self.config.search_repository(name) {
-                    let command = git::clone(repository);
-                    commands.push(command);
+                    commands.push(git::clone(repository));
+                } else {
+                    let message = format!("unknown repository {}", name);
+                    commands.push(Command::echo(&message));
                 }
             }
 
