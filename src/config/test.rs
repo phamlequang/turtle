@@ -4,7 +4,7 @@ use std::io::ErrorKind;
 #[test]
 fn test_load_config_ok() {
     let result = Config::load("turtle.toml");
-    assert!(result.is_ok())
+    assert!(result.is_ok());
 }
 
 #[test]

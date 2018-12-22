@@ -1,27 +1,21 @@
 mod config;
+mod shell;
 
-use std::ffi::OsStr;
 use std::io;
 use std::io::Write;
-use std::process;
 
 const CONFIG_FILE: &str = "turtle.toml";
 const TURTLE: &str = "turtle > ";
-const QUIT: &str = "quit";
-const EXIT: &str = "exit";
 
 pub struct Turtle {
-    config: config::Config,
+    generator: shell::Generator,
 }
 
 impl Turtle {
     pub fn new() -> Turtle {
         let config = config::Config::load(CONFIG_FILE).unwrap();
-
-        let turtle = Turtle { config };
-        println!("{:#?}", turtle.config);
-
-        return turtle;
+        let generator = shell::Generator::new(config);
+        return Turtle { generator };
     }
 
     // Run turtle shell
@@ -47,34 +41,8 @@ impl Turtle {
 
     // Execute a command and return true if it is a quit or exit
     fn execute(&self, command: &str) -> bool {
-        let mut args = command.trim().split_whitespace();
-
-        if let Some(program) = args.next() {
-            match program {
-                QUIT | EXIT => return true,
-                _ => self.spawn(program, args),
-            }
-        }
-
-        return false;
-    }
-
-    // Spawn a program as a child process and wait for it to finish
-    fn spawn<I, S>(&self, program: &str, args: I)
-    where
-        I: IntoIterator<Item = S>,
-        S: AsRef<OsStr>,
-    {
-        let mut command = process::Command::new(program);
-        command.args(args);
-
-        match command.spawn() {
-            Ok(mut child) => {
-                if let Err(e) = child.wait() {
-                    println!("failed to wait for child process: {}", e);
-                }
-            }
-            Err(e) => println!("failed to execute command: {}", e),
-        }
+        let instructions = self.generator.gen(command);
+        instructions.execute();
+        return instructions.terminate;
     }
 }
