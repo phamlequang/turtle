@@ -2,7 +2,6 @@
 mod test;
 
 use super::config::Config;
-use std::ffi::OsStr;
 use std::process;
 
 const QUIT: &str = "quit";
@@ -10,28 +9,19 @@ const EXIT: &str = "exit";
 const CLONE: &str = "clone";
 
 #[derive(Debug)]
-pub struct Command<S>
-where
-    S: AsRef<OsStr>,
-{
-    pub program: S,
-    pub args: Option<Vec<S>>,
+pub struct Command {
+    pub program: String,
+    pub args: Option<Vec<String>>,
 }
 
-impl<S> Command<S>
-where
-    S: AsRef<OsStr>,
-{
-    pub fn new(program: S, args: Option<Vec<S>>) -> Self
-    where
-        S: AsRef<OsStr>,
-    {
+impl Command {
+    pub fn new(program: String, args: Option<Vec<String>>) -> Self {
         return Self { program, args };
     }
 
     // Execute command as a child process and wait for it to finish
     pub fn execute(&self) {
-        let mut command = process::Command::new(self.program.as_ref());
+        let mut command = process::Command::new(&self.program);
         if let Some(args) = self.args.as_ref() {
             command.args(args);
         }
@@ -47,19 +37,14 @@ where
     }
 }
 
-pub struct Instruction<S>
-where
-    S: AsRef<OsStr>,
-{
-    pub commands: Option<Vec<Command<S>>>,
+#[derive(Debug)]
+pub struct Instruction {
+    pub commands: Option<Vec<Command>>,
     pub should_terminate: bool,
 }
 
-impl<S> Instruction<S>
-where
-    S: AsRef<OsStr>,
-{
-    pub fn new(commands: Option<Vec<Command<S>>>, should_terminate: bool) -> Self {
+impl Instruction {
+    pub fn new(commands: Option<Vec<Command>>, should_terminate: bool) -> Self {
         return Self {
             commands,
             should_terminate,
@@ -74,7 +59,7 @@ where
         return Self::new(None, true);
     }
 
-    pub fn normal(commands: Vec<Command<S>>) -> Self {
+    pub fn normal(commands: Vec<Command>) -> Self {
         return Self::new(Some(commands), false);
     }
 
@@ -88,6 +73,7 @@ where
     }
 }
 
+#[derive(Debug)]
 pub struct Generator {
     config: Config,
 }
@@ -98,7 +84,7 @@ impl Generator {
     }
 
     // Takes a raw instruction string, returns a list of instructions to execute
-    pub fn generate(&self, raw: &str) -> Instruction<String> {
+    pub fn generate(&self, raw: &str) -> Instruction {
         let mut tokens = raw.trim().split_whitespace();
 
         if let Some(first) = tokens.next() {
@@ -120,22 +106,22 @@ impl Generator {
         return Instruction::do_nothing();
     }
 
-    fn terminate_instruction(&self) -> Instruction<String> {
+    fn terminate_instruction(&self) -> Instruction {
         return Instruction::terminate();
     }
 
-    fn other_instruction(&self, program: String, args: Option<Vec<String>>) -> Instruction<String> {
-        let command: Command<String> = Command::new(program, args);
+    fn other_instruction(&self, program: String, args: Option<Vec<String>>) -> Instruction {
+        let command = Command::new(program, args);
         return Instruction::new(Some(vec![command]), false);
     }
 
-    fn clone_instruction(&self, args: Option<Vec<String>>) -> Instruction<String> {
+    fn clone_instruction(&self, args: Option<Vec<String>>) -> Instruction {
         if let Some(repos) = args {
             if repos.is_empty() {
                 return Instruction::do_nothing();
             }
 
-            let mut commands: Vec<Command<String>> = Vec::with_capacity(repos.len());
+            let mut commands: Vec<Command> = Vec::with_capacity(repos.len());
 
             for name in &repos {
                 let result = self.config.search_repository(name);
@@ -146,7 +132,7 @@ impl Generator {
                         repository.remote.clone(),
                         repository.local.clone(),
                     ];
-                    let command: Command<String> = Command {
+                    let command: Command = Command {
                         program: program,
                         args: Some(args),
                     };
