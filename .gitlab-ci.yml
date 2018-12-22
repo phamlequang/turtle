@@ -1,9 +1,8 @@
-# Official language image. Look for the different tagged releases at:
-# https://hub.docker.com/r/library/rust/tags/
+# use the latest version of rust: https://hub.docker.com/r/library/rust/tags/
 image: "rust:latest"
 
-# Use cargo to test the project
-test:cargo:
+# use cargo to test the project
+test:
   script:
-  - rustc --version && cargo --version      # Print version info for debugging
+  - rustc --version && cargo --version
   - cargo test --all --verbose

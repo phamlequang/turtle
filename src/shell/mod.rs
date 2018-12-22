@@ -47,7 +47,7 @@ impl Generator {
     }
 
     fn other_instruction(&self, program: String, args: Option<Vec<String>>) -> Instruction {
-        let command = Command::new(program, args);
+        let command = Command::new(program, args, false);
         return Instruction::new(Some(vec![command]), false);
     }
 
@@ -60,8 +60,10 @@ impl Generator {
             let mut commands: Vec<Command> = Vec::with_capacity(names.len());
             for name in &names {
                 if let Some(repository) = self.config.search_repository(name) {
-                    let command = git::clone(repository);
-                    commands.push(command);
+                    commands.push(git::clone(repository));
+                } else {
+                    let message = format!("unknown repository {}", name);
+                    commands.push(Command::echo(&message));
                 }
             }
 
