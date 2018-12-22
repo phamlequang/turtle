@@ -1,14 +1,12 @@
 use super::cmd::Command;
-use crate::config::*;
+use crate::config::Repository;
 
 pub fn clone(repository: &Repository) -> Command {
-    let program = String::from("git");
-
     let args = vec![
         String::from("clone"),
         repository.remote.clone(),
         repository.local.clone(),
     ];
 
-    return Command::with_args(program, args, true);
+    return Command::new("git", args, "", true);
 }

@@ -1,37 +1,43 @@
+use std::env;
 use std::fmt;
+use std::path::Path;
 use std::process;
 
 #[derive(Debug)]
 pub struct Command {
     pub program: String,
-    pub args: Option<Vec<String>>,
+    pub args: Vec<String>,
+    pub dir: String,
     pub verbose: bool,
 }
 
 impl Command {
-    pub fn new(program: String, args: Option<Vec<String>>, verbose: bool) -> Self {
+    pub fn new(program: &str, args: Vec<String>, dir: &str, verbose: bool) -> Self {
         return Self {
-            program,
-            args,
-            verbose,
+            program: program.to_owned(),
+            args: args,
+            dir: dir.to_owned(),
+            verbose: verbose,
         };
     }
 
-    pub fn with_args(program: String, args: Vec<String>, verbose: bool) -> Self {
-        return Self::new(program, Some(args), verbose);
-    }
-
     pub fn echo(message: &str) -> Self {
-        let program = String::from("echo");
         let args = vec![message.to_owned()];
-        return Self::with_args(program, args, false);
+        return Self::new("echo", args, "", false);
     }
 
     // Execute command as a child process and wait for it to finish
     pub fn execute(&self) {
+        let ok = self.change_directory();
+
+        if !ok || self.program.is_empty() {
+            println!();
+            return;
+        }
+
         let mut command = process::Command::new(&self.program);
-        if let Some(args) = &self.args {
-            command.args(args);
+        if !self.args.is_empty() {
+            command.args(&self.args);
         }
 
         if self.verbose {
@@ -49,13 +55,31 @@ impl Command {
 
         println!();
     }
+
+    pub fn change_directory(&self) -> bool {
+        if self.dir.is_empty() {
+            return true;
+        }
+
+        let path = Path::new(&self.dir);
+        if let Err(e) = env::set_current_dir(path) {
+            println!(
+                "--> cannot change directory to [ {} ]: {}",
+                path.display(),
+                e
+            );
+            return false;
+        }
+
+        return true;
+    }
 }
 
 impl fmt::Display for Command {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match &self.args {
-            Some(args) => write!(f, "{} {}", self.program, args.join(" ")),
-            None => write!(f, "{}", self.program),
+        if self.args.is_empty() {
+            return write!(f, "{}", self.program);
         }
+        return write!(f, "{} {}", self.program, self.args.join(" "));
     }
 }
