@@ -17,7 +17,7 @@ pub fn run() {
     while !done {
         let line = prompt(TURTLE);
 
-        let instruction = generator.gen(&line);
+        let instruction = generator.generate(&line);
         instruction.execute();
 
         done = instruction.should_terminate;

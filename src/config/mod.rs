@@ -56,4 +56,15 @@ impl Config {
             Err(e) => return Err(Error::new(ErrorKind::InvalidData, e)),
         }
     }
+
+    pub fn search_repository(&self, name: &str) -> Option<&Repository> {
+        if let Some(repositories) = &self.repositories {
+            for repository in repositories {
+                if repository.name == name {
+                    return Some(repository);
+                }
+            }
+        }
+        return None;
+    }
 }
