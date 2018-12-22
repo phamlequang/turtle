@@ -2,7 +2,7 @@ run:
 	cargo run
 
 test:
-	cargo test --lib
+	cargo test --all
 
 update:
 	cargo update

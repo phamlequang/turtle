@@ -47,7 +47,7 @@ impl Generator {
     }
 
     fn other_instruction(&self, program: String, args: Option<Vec<String>>) -> Instruction {
-        let command = Command::new(program, args);
+        let command = Command::new(program, args, false);
         return Instruction::new(Some(vec![command]), false);
     }
 

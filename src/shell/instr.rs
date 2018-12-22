@@ -28,7 +28,7 @@ impl Instruction {
 
     // Executes all commands sequentially
     pub fn execute(&self) {
-        if let Some(commands) = self.commands.as_ref() {
+        if let Some(commands) = &self.commands {
             for cmd in commands {
                 cmd.execute();
             }
