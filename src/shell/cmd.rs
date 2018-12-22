@@ -4,12 +4,12 @@ use std::process;
 #[derive(Debug)]
 pub struct Command {
     pub program: String,
-    pub args: Option<Vec<String>>,
+    pub args: Vec<String>,
     pub verbose: bool,
 }
 
 impl Command {
-    pub fn new(program: String, args: Option<Vec<String>>, verbose: bool) -> Self {
+    pub fn new(program: String, args: Vec<String>, verbose: bool) -> Self {
         return Self {
             program,
             args,
@@ -17,21 +17,17 @@ impl Command {
         };
     }
 
-    pub fn with_args(program: String, args: Vec<String>, verbose: bool) -> Self {
-        return Self::new(program, Some(args), verbose);
-    }
-
     pub fn echo(message: &str) -> Self {
         let program = String::from("echo");
         let args = vec![message.to_owned()];
-        return Self::with_args(program, args, false);
+        return Self::new(program, args, false);
     }
 
     // Execute command as a child process and wait for it to finish
     pub fn execute(&self) {
         let mut command = process::Command::new(&self.program);
-        if let Some(args) = &self.args {
-            command.args(args);
+        if !self.args.is_empty() {
+            command.args(&self.args);
         }
 
         if self.verbose {
@@ -53,9 +49,9 @@ impl Command {
 
 impl fmt::Display for Command {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match &self.args {
-            Some(args) => write!(f, "{} {}", self.program, args.join(" ")),
-            None => write!(f, "{}", self.program),
+        if self.args.is_empty() {
+            return write!(f, "{}", self.program);
         }
+        return write!(f, "{} {}", self.program, self.args.join(" "));
     }
 }

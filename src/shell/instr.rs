@@ -2,12 +2,12 @@ use super::cmd::Command;
 
 #[derive(Debug)]
 pub struct Instruction {
-    pub commands: Option<Vec<Command>>,
+    pub commands: Vec<Command>,
     pub should_terminate: bool,
 }
 
 impl Instruction {
-    pub fn new(commands: Option<Vec<Command>>, should_terminate: bool) -> Self {
+    pub fn new(commands: Vec<Command>, should_terminate: bool) -> Self {
         return Self {
             commands,
             should_terminate,
@@ -15,23 +15,17 @@ impl Instruction {
     }
 
     pub fn do_nothing() -> Self {
-        return Self::new(None, false);
+        return Self::new(Vec::new(), false);
     }
 
     pub fn terminate() -> Self {
-        return Self::new(None, true);
-    }
-
-    pub fn normal(commands: Vec<Command>) -> Self {
-        return Self::new(Some(commands), false);
+        return Self::new(Vec::new(), true);
     }
 
     // Executes all commands sequentially
     pub fn execute(&self) {
-        if let Some(commands) = &self.commands {
-            for cmd in commands {
-                cmd.execute();
-            }
+        for cmd in &self.commands {
+            cmd.execute();
         }
     }
 }

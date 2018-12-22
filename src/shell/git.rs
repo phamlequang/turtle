@@ -10,5 +10,5 @@ pub fn clone(repository: &Repository) -> Command {
         repository.local.clone(),
     ];
 
-    return Command::with_args(program, args, true);
+    return Command::new(program, args, true);
 }

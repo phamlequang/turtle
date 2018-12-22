@@ -12,6 +12,7 @@ use super::config::*;
 const QUIT: &str = "quit";
 const EXIT: &str = "exit";
 const CLONE: &str = "clone";
+const CD: &str = "cd";
 
 #[derive(Debug)]
 pub struct Generator {
@@ -29,11 +30,11 @@ impl Generator {
 
         if let Some(head) = tokens.next() {
             let program = head.to_owned();
-            let tail: Vec<String> = tokens.map(|t| t.to_owned()).collect();
-            let args = if tail.is_empty() { None } else { Some(tail) };
+            let args: Vec<String> = tokens.map(|t| t.to_owned()).collect();
 
             match head {
                 QUIT | EXIT => return self.terminate_instruction(),
+                CD => return self.change_directory_instruction(args),
                 CLONE => return self.clone_instruction(args),
                 _ => return self.other_instruction(program, args),
             }
@@ -46,30 +47,30 @@ impl Generator {
         return Instruction::terminate();
     }
 
-    fn other_instruction(&self, program: String, args: Option<Vec<String>>) -> Instruction {
+    fn other_instruction(&self, program: String, args: Vec<String>) -> Instruction {
         let command = Command::new(program, args, false);
-        return Instruction::new(Some(vec![command]), false);
+        return Instruction::new(vec![command], false);
     }
 
-    fn clone_instruction(&self, args: Option<Vec<String>>) -> Instruction {
-        if let Some(names) = args {
-            if names.is_empty() {
-                return Instruction::do_nothing();
-            }
+    fn change_directory_instruction(&self, args: Vec<String>) -> Instruction {
+        return Instruction::do_nothing();
+    }
 
-            let mut commands: Vec<Command> = Vec::with_capacity(names.len());
-            for name in &names {
-                if let Some(repository) = self.config.search_repository(name) {
-                    commands.push(git::clone(repository));
-                } else {
-                    let message = format!("unknown repository {}", name);
-                    commands.push(Command::echo(&message));
-                }
-            }
-
-            return Instruction::normal(commands);
+    fn clone_instruction(&self, args: Vec<String>) -> Instruction {
+        if args.is_empty() {
+            return Instruction::do_nothing();
         }
 
-        return Instruction::do_nothing();
+        let mut commands: Vec<Command> = Vec::with_capacity(args.len());
+        for name in &args {
+            if let Some(repository) = self.config.search_repository(name) {
+                commands.push(git::clone(repository));
+            } else {
+                let message = format!("--> unknown repository [ {} ]", name);
+                commands.push(Command::echo(&message));
+            }
+        }
+
+        return Instruction::new(commands, false);
     }
 }
