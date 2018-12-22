@@ -28,11 +28,10 @@ impl Command {
 
     // Execute command as a child process and wait for it to finish
     pub fn execute(&self) {
-        if !self.change_directory() {
-            return;
-        }
+        let ok = self.change_directory();
 
-        if self.program.is_empty() {
+        if !ok || self.program.is_empty() {
+            println!();
             return;
         }
 

@@ -40,6 +40,9 @@ fn test_generate_other_instruction() {
 
     let arg = args.first().unwrap();
     assert_eq!(arg, "-la");
+
+    assert!(command.dir.is_empty());
+    assert!(!command.verbose);
 }
 
 #[test]
@@ -54,7 +57,6 @@ fn test_generate_clone_instruction() {
     assert_eq!(commands.len(), 2);
 
     let cmd1 = commands.first().unwrap();
-    assert!(cmd1.verbose);
     assert_eq!(cmd1.program, "git");
     assert_eq!(
         cmd1.args,
@@ -64,9 +66,29 @@ fn test_generate_clone_instruction() {
             "/Users/phamlequang/projects/flowers"
         ]
     );
+    assert!(cmd1.dir.is_empty());
+    assert!(cmd1.verbose);
 
     let cmd2 = commands.last().unwrap();
-    assert!(!cmd2.verbose);
     assert_eq!(cmd2.program, "echo");
     assert_eq!(cmd2.args, vec!["--> unknown repository [ tree ]"]);
+    assert!(cmd2.dir.is_empty());
+    assert!(!cmd2.verbose);
+}
+
+#[test]
+fn test_change_directory_instruction() {
+    let config = Config::new();
+    let generator = Generator::new(config);
+    let instruction = generator.generate("cd ..");
+
+    assert!(!instruction.should_terminate);
+
+    let commands = &instruction.commands;
+    assert_eq!(commands.len(), 1);
+
+    let command = commands.first().unwrap();
+    assert!(command.program.is_empty());
+    assert_eq!(command.dir, "..");
+    assert!(!command.verbose);
 }
