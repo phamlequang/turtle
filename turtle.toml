@@ -1,5 +1,4 @@
-[docker_machine]
-name = "turtle"
+docker_machine = "turtle"
 
 [[dependencies]]
 name = "postgres"

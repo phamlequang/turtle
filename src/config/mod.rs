@@ -6,22 +6,16 @@ use std::fs;
 use std::io::{Error, ErrorKind};
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct Config {
-    pub docker_machine: DockerMachine,
-    pub dependencies: Option<Vec<Dependency>>,
-    pub repositories: Option<Vec<Repository>>,
-    pub groups: Option<Vec<Group>>,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct DockerMachine {
-    pub name: String,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
 pub struct Dependency {
     pub name: String,
     pub version: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Service {
+    pub name: String,
+    pub folder: String,
+    pub build: String,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -34,31 +28,53 @@ pub struct Repository {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct Service {
-    pub name: String,
-    pub folder: String,
-    pub build: String,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
 pub struct Group {
     pub name: String,
     pub dependencies: Option<Vec<String>>,
     pub repositories: Option<Vec<String>>,
 }
 
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Config {
+    pub docker_machine: Option<String>,
+    pub dependencies: Option<Vec<Dependency>>,
+    pub repositories: Option<Vec<Repository>>,
+    pub groups: Option<Vec<Group>>,
+}
+
 impl Config {
-    pub fn load(file_path: &str) -> Result<Config, Error> {
+    #[cfg(test)]
+    pub fn new() -> Self {
+        return Self {
+            docker_machine: None,
+            dependencies: None,
+            repositories: None,
+            groups: None,
+        };
+    }
+
+    pub fn load(file_path: &str) -> Result<Self, Error> {
         match fs::read_to_string(file_path) {
-            Ok(toml_text) => return Config::parse(&toml_text),
+            Ok(toml_text) => return Self::parse(&toml_text),
             Err(e) => return Err(e),
         }
     }
 
-    pub fn parse(toml_text: &str) -> Result<Config, Error> {
+    pub fn parse(toml_text: &str) -> Result<Self, Error> {
         match toml::from_str(&toml_text) {
             Ok(config) => return Ok(config),
             Err(e) => return Err(Error::new(ErrorKind::InvalidData, e)),
         }
+    }
+
+    pub fn search_repository(&self, name: &str) -> Option<&Repository> {
+        if let Some(repositories) = &self.repositories {
+            for repository in repositories {
+                if repository.name == name {
+                    return Some(repository);
+                }
+            }
+        }
+        return None;
     }
 }
