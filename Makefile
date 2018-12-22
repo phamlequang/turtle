@@ -1,10 +1,10 @@
-update:
-	cargo update
+run:
+	cargo run
 
 test:
 	cargo test --lib
 
-run:
-	cargo run
+update:
+	cargo update
 
-.PHONY: update test run
+.PHONY: run test update
