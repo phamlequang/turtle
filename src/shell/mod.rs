@@ -8,6 +8,7 @@ use std::process;
 const QUIT: &str = "quit";
 const EXIT: &str = "exit";
 
+#[derive(Debug)]
 pub struct Command<S>
 where
     S: AsRef<OsStr>,
@@ -24,7 +25,7 @@ where
     where
         S: AsRef<OsStr>,
     {
-        return Command { program, args };
+        return Self { program, args };
     }
 
     // Execute command as a child process and wait for it to finish
@@ -45,31 +46,31 @@ where
     }
 }
 
-pub struct Instructions<S>
+pub struct Instruction<S>
 where
     S: AsRef<OsStr>,
 {
     pub commands: Option<Vec<Command<S>>>,
-    pub terminate: bool,
+    pub should_terminate: bool,
 }
 
-impl<S> Instructions<S>
+impl<S> Instruction<S>
 where
     S: AsRef<OsStr>,
 {
-    pub fn new(commands: Option<Vec<Command<S>>>, terminate: bool) -> Self {
-        return Instructions {
+    pub fn new(commands: Option<Vec<Command<S>>>, should_terminate: bool) -> Self {
+        return Self {
             commands,
-            terminate,
+            should_terminate,
         };
     }
 
     pub fn do_nothing() -> Self {
-        return Instructions::new(None, false);
+        return Self::new(None, false);
     }
 
     pub fn terminate() -> Self {
-        return Instructions::new(None, true);
+        return Self::new(None, true);
     }
 
     // Executes all commands sequentially
@@ -88,36 +89,36 @@ pub struct Generator {
 
 impl Generator {
     pub fn new(config: Config) -> Generator {
-        return Generator { config };
+        return Self { config };
     }
 
     // Takes a raw instruction string, returns a list of instructions to execute
-    pub fn gen(&self, raw: &str) -> Instructions<String> {
+    pub fn gen(&self, raw: &str) -> Instruction<String> {
         let mut tokens = raw.trim().split_whitespace();
 
         if let Some(first) = tokens.next() {
             let program = first.to_owned();
-            let owned_tokens: Vec<String> = tokens.map(|t| t.to_owned()).collect();
-            let args: Option<Vec<String>> = if owned_tokens.is_empty() {
+            let tokens: Vec<String> = tokens.map(|t| t.to_owned()).collect();
+            let args = if tokens.is_empty() {
                 None
             } else {
-                Some(owned_tokens)
+                Some(tokens)
             };
 
             match first {
-                QUIT | EXIT => return Instructions::terminate(),
+                QUIT | EXIT => return Instruction::terminate(),
                 _ => return self.other(program, args),
             }
         }
 
-        return Instructions::do_nothing();
+        return Instruction::do_nothing();
     }
 
-    fn other<S>(&self, program: S, args: Option<Vec<S>>) -> Instructions<S>
+    fn other<S>(&self, program: S, args: Option<Vec<S>>) -> Instruction<S>
     where
         S: AsRef<OsStr>,
     {
         let command: Command<S> = Command::new(program, args);
-        return Instructions::new(Some(vec![command]), false);
+        return Instruction::new(Some(vec![command]), false);
     }
 }

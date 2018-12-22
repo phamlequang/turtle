@@ -7,15 +7,10 @@ use std::io::{Error, ErrorKind};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Config {
-    pub docker_machine: DockerMachine,
+    pub docker_machine: Option<String>,
     pub dependencies: Option<Vec<Dependency>>,
     pub repositories: Option<Vec<Repository>>,
     pub groups: Option<Vec<Group>>,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct DockerMachine {
-    pub name: String,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -48,14 +43,14 @@ pub struct Group {
 }
 
 impl Config {
-    pub fn load(file_path: &str) -> Result<Config, Error> {
+    pub fn load(file_path: &str) -> Result<Self, Error> {
         match fs::read_to_string(file_path) {
-            Ok(toml_text) => return Config::parse(&toml_text),
+            Ok(toml_text) => return Self::parse(&toml_text),
             Err(e) => return Err(e),
         }
     }
 
-    pub fn parse(toml_text: &str) -> Result<Config, Error> {
+    pub fn parse(toml_text: &str) -> Result<Self, Error> {
         match toml::from_str(&toml_text) {
             Ok(config) => return Ok(config),
             Err(e) => return Err(Error::new(ErrorKind::InvalidData, e)),
