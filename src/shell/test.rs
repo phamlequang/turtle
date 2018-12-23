@@ -109,7 +109,7 @@ fn test_create_docker_machine_instruction() {
                   --driver virtualbox \
                   --virtualbox-host-dns-resolver \
                   --virtualbox-cpu-count 2 \
-                  --virtualbox-disk-size 10240 \
+                  --virtualbox-disk-size 16384 \
                   --virtualbox-memory 4096 \
                   turtle";
 

@@ -19,7 +19,7 @@ impl DockerMachine {
         DockerMachine {
             name: String::from("turtle"),
             cpu_count: 2,
-            disk_size: 10240,
+            disk_size: 16384,
             memory: 4096,
         }
     }
