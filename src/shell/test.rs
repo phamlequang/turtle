@@ -33,16 +33,9 @@ fn test_generate_other_instruction() {
     assert_eq!(commands.len(), 1);
 
     let command = commands.first().unwrap();
-    assert_eq!(command.program, "ls");
-
-    let args = &command.args;
-    assert_eq!(args.len(), 1);
-
-    let arg = args.first().unwrap();
-    assert_eq!(arg, "-la");
-
+    assert_eq!(command.raw, "ls -la");
     assert!(command.dir.is_empty());
-    assert!(!command.verbose);
+    assert!(!command.show);
 }
 
 #[test]
@@ -57,23 +50,18 @@ fn test_generate_clone_instruction() {
     assert_eq!(commands.len(), 2);
 
     let cmd1 = commands.first().unwrap();
-    assert_eq!(cmd1.program, "git");
-    assert_eq!(
-        cmd1.args,
-        vec![
-            "clone",
-            "git@gitlab.com:phamlequang/flowers.git",
-            "/Users/phamlequang/projects/flowers"
-        ]
-    );
+    let expect = "git clone \
+                  git@gitlab.com:phamlequang/flowers.git \
+                  /Users/phamlequang/projects/flowers";
+    assert_eq!(cmd1.raw, expect);
     assert!(cmd1.dir.is_empty());
-    assert!(cmd1.verbose);
+    assert!(cmd1.show);
 
     let cmd2 = commands.last().unwrap();
-    assert_eq!(cmd2.program, "echo");
-    assert_eq!(cmd2.args, vec!["--> unknown repository [ tree ]"]);
+    let expect = "echo \"--> unknown repository [ tree ]\"";
+    assert_eq!(cmd2.raw, expect);
     assert!(cmd2.dir.is_empty());
-    assert!(!cmd2.verbose);
+    assert!(!cmd2.show);
 }
 
 #[test]
@@ -88,9 +76,9 @@ fn test_change_directory_instruction() {
     assert_eq!(commands.len(), 1);
 
     let command = commands.first().unwrap();
-    assert!(command.program.is_empty());
+    assert!(command.raw.is_empty());
     assert_eq!(command.dir, "..");
-    assert!(!command.verbose);
+    assert!(!command.show);
 }
 
 #[test]
@@ -113,11 +101,9 @@ fn test_create_docker_machine_instruction() {
                   --virtualbox-memory 4096 \
                   turtle";
 
-    assert_eq!(command.display(), expect);
-    assert_eq!(command.program, "docker-machine");
-    assert_eq!(command.args.len(), 11);
+    assert_eq!(command.raw, expect);
     assert!(command.dir.is_empty());
-    assert!(command.verbose);
+    assert!(command.show);
 }
 
 #[test]
@@ -133,12 +119,9 @@ fn test_remove_docker_machine_instruction() {
 
     let command = commands.first().unwrap();
     let expect = "docker-machine rm turtle";
-
-    assert_eq!(command.display(), expect);
-    assert_eq!(command.program, "docker-machine");
-    assert_eq!(command.args.len(), 2);
+    assert_eq!(command.raw, expect);
     assert!(command.dir.is_empty());
-    assert!(command.verbose);
+    assert!(command.show);
 }
 
 #[test]
@@ -154,12 +137,9 @@ fn test_restart_docker_machine_instruction() {
 
     let command = commands.first().unwrap();
     let expect = "docker-machine restart turtle";
-
-    assert_eq!(command.display(), expect);
-    assert_eq!(command.program, "docker-machine");
-    assert_eq!(command.args.len(), 2);
+    assert_eq!(command.raw, expect);
     assert!(command.dir.is_empty());
-    assert!(command.verbose);
+    assert!(command.show);
 }
 
 #[test]
@@ -175,10 +155,7 @@ fn test_update_certificates_docker_machine_instruction() {
 
     let command = commands.first().unwrap();
     let expect = "docker-machine regenerate-certs --force --client-certs turtle";
-
-    assert_eq!(command.display(), expect);
-    assert_eq!(command.program, "docker-machine");
-    assert_eq!(command.args.len(), 4);
+    assert_eq!(command.raw, expect);
     assert!(command.dir.is_empty());
-    assert!(command.verbose);
+    assert!(command.show);
 }

@@ -32,7 +32,7 @@ impl Instruction {
 
     pub fn change_directory(args: Vec<String>) -> Self {
         if let Some(dir) = args.first() {
-            let command = Command::new("", Vec::new(), &dir, false);
+            let command = Command::new("", &dir, false);
             return Self::new(vec![command], false);
         }
         return Self::do_nothing();
@@ -105,8 +105,8 @@ impl Instruction {
         }
     }
 
-    pub fn other(program: &str, args: Vec<String>) -> Self {
-        let command = Command::new(program, args, "", false);
+    pub fn other(raw: &str) -> Self {
+        let command = Command::new(raw, "", false);
         return Self::new(vec![command], false);
     }
 
