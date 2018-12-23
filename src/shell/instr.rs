@@ -59,13 +59,25 @@ impl Instruction {
     pub fn docker_machine(args: Vec<String>, config: &Config) -> Self {
         if let Some(machine) = &config.docker_machine {
             match args.first() {
-                Some(action) => {
-                    if action == "create" {
+                Some(action) => match action.as_ref() {
+                    "create" => {
                         let command = docker::create_machine(machine);
                         return Self::new(vec![command], false);
                     }
-                    return Self::do_nothing();
-                }
+                    "remove" => {
+                        let command = docker::remove_machine(machine);
+                        return Self::new(vec![command], false);
+                    }
+                    "restart" | "env" | "inspect" | "ip" | "kill" | "ls" | "start" | "status"
+                    | "stop" | "upgrade" | "url" | "version" => {
+                        let command = docker::do_with_machine(action, machine);
+                        return Self::new(vec![command], false);
+                    }
+                    _ => {
+                        let message = format!("--> unknown action [ {} ]", action);
+                        return Self::echo(&message);
+                    }
+                },
                 None => return Self::do_nothing(),
             }
         }

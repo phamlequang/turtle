@@ -4,17 +4,28 @@ use crate::config::DockerMachine;
 pub fn create_machine(machine: &DockerMachine) -> Command {
     let args = vec![
         String::from("create"),
-        machine.name.clone(),
+        String::from("--driver"),
+        String::from("virtualbox"),
         String::from("--virtualbox-host-dns-resolver"),
         String::from("--virtualbox-cpu-count"),
-        format!(r#""{}""#, machine.cpu_count),
+        format!("{}", machine.cpu_count),
         String::from("--virtualbox-disk-size"),
-        format!(r#""{}""#, machine.disk_size),
+        format!("{}", machine.disk_size),
         String::from("--virtualbox-memory"),
-        format!(r#""{}""#, machine.memory),
+        format!("{}", machine.memory),
+        machine.name.clone(),
     ];
 
     return Command::new("docker-machine", args, "", true);
+}
+
+pub fn do_with_machine(action: &str, machine: &DockerMachine) -> Command {
+    let args = vec![action.to_owned(), machine.name.clone()];
+    return Command::new("docker-machine", args, "", true);
+}
+
+pub fn remove_machine(machine: &DockerMachine) -> Command {
+    return do_with_machine("rm", machine);
 }
 
 #[cfg(test)]
@@ -23,22 +34,48 @@ mod test {
 
     #[test]
     fn test_create_machine() {
-        let machine = DockerMachine {
-            name: String::from("turtle"),
-            cpu_count: 2,
-            disk_size: 10240,
-            memory: 4096,
-        };
+        let machine = DockerMachine::default();
 
         let command = create_machine(&machine);
-        let expect = "docker-machine create turtle \
+        let expect = "docker-machine create \
+                      --driver virtualbox \
                       --virtualbox-host-dns-resolver \
-                      --virtualbox-cpu-count \"2\" \
-                      --virtualbox-disk-size \"10240\" \
-                      --virtualbox-memory \"4096\"";
+                      --virtualbox-cpu-count 2 \
+                      --virtualbox-disk-size 10240 \
+                      --virtualbox-memory 4096 \
+                      turtle";
+
         assert_eq!(command.display(), expect);
         assert_eq!(command.program, "docker-machine");
-        assert_eq!(command.args.len(), 9);
+        assert_eq!(command.args.len(), 11);
+        assert!(command.dir.is_empty());
+        assert!(command.verbose);
+    }
+
+    #[test]
+    fn test_remove_machine() {
+        let machine = DockerMachine::default();
+
+        let command = remove_machine(&machine);
+        let expect = "docker-machine rm turtle";
+
+        assert_eq!(command.display(), expect);
+        assert_eq!(command.program, "docker-machine");
+        assert_eq!(command.args.len(), 2);
+        assert!(command.dir.is_empty());
+        assert!(command.verbose);
+    }
+
+    #[test]
+    fn test_do_with_machine() {
+        let machine = DockerMachine::default();
+
+        let command = do_with_machine("restart", &machine);
+        let expect = "docker-machine restart turtle";
+
+        assert_eq!(command.display(), expect);
+        assert_eq!(command.program, "docker-machine");
+        assert_eq!(command.args.len(), 2);
         assert!(command.dir.is_empty());
         assert!(command.verbose);
     }

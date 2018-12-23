@@ -47,7 +47,7 @@ fn test_generate_other_instruction() {
 
 #[test]
 fn test_generate_clone_instruction() {
-    let config = Config::load("turtle.toml").unwrap();
+    let config = Config::default();
     let generator = Generator::new(config);
     let instruction = generator.generate("clone flowers tree");
 
@@ -95,7 +95,7 @@ fn test_change_directory_instruction() {
 
 #[test]
 fn test_create_docker_machine_instruction() {
-    let config = Config::load("turtle.toml").unwrap();
+    let config = Config::default();
     let generator = Generator::new(config);
     let instruction = generator.generate("machine create");
 
@@ -105,14 +105,59 @@ fn test_create_docker_machine_instruction() {
     assert_eq!(commands.len(), 1);
 
     let command = commands.first().unwrap();
-    let expect = "docker-machine create turtle \
+    let expect = "docker-machine create \
+                  --driver virtualbox \
                   --virtualbox-host-dns-resolver \
-                  --virtualbox-cpu-count \"2\" \
-                  --virtualbox-disk-size \"10240\" \
-                  --virtualbox-memory \"4096\"";
+                  --virtualbox-cpu-count 2 \
+                  --virtualbox-disk-size 10240 \
+                  --virtualbox-memory 4096 \
+                  turtle";
+
     assert_eq!(command.display(), expect);
     assert_eq!(command.program, "docker-machine");
-    assert_eq!(command.args.len(), 9);
+    assert_eq!(command.args.len(), 11);
+    assert!(command.dir.is_empty());
+    assert!(command.verbose);
+}
+
+#[test]
+fn test_remove_docker_machine_instruction() {
+    let config = Config::default();
+    let generator = Generator::new(config);
+    let instruction = generator.generate("machine remove");
+
+    assert!(!instruction.should_terminate);
+
+    let commands = &instruction.commands;
+    assert_eq!(commands.len(), 1);
+
+    let command = commands.first().unwrap();
+    let expect = "docker-machine rm turtle";
+
+    assert_eq!(command.display(), expect);
+    assert_eq!(command.program, "docker-machine");
+    assert_eq!(command.args.len(), 2);
+    assert!(command.dir.is_empty());
+    assert!(command.verbose);
+}
+
+#[test]
+fn test_restart_docker_machine_instruction() {
+    let config = Config::default();
+    let generator = Generator::new(config);
+    let instruction = generator.generate("machine restart");
+
+    assert!(!instruction.should_terminate);
+
+    let commands = &instruction.commands;
+    assert_eq!(commands.len(), 1);
+
+    let command = commands.first().unwrap();
+    let expect = "docker-machine restart turtle";
+
+    assert_eq!(command.display(), expect);
+    assert_eq!(command.program, "docker-machine");
+    assert_eq!(command.args.len(), 2);
     assert!(command.dir.is_empty());
     assert!(command.verbose);
 }

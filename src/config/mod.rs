@@ -13,6 +13,18 @@ pub struct DockerMachine {
     pub memory: u32,
 }
 
+impl DockerMachine {
+    #[cfg(test)]
+    pub fn default() -> Self {
+        DockerMachine {
+            name: String::from("turtle"),
+            cpu_count: 2,
+            disk_size: 10240,
+            memory: 4096,
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Dependency {
     pub name: String,
@@ -53,12 +65,17 @@ pub struct Config {
 impl Config {
     #[cfg(test)]
     pub fn new() -> Self {
-        return Self {
+        Self {
             docker_machine: None,
             dependencies: None,
             repositories: None,
             groups: None,
-        };
+        }
+    }
+
+    #[cfg(test)]
+    pub fn default() -> Self {
+        return Self::load("turtle.toml").unwrap();
     }
 
     pub fn load(file_path: &str) -> Result<Self, Error> {
