@@ -1,6 +1,10 @@
 use super::cmd::Command;
 use crate::config::DockerMachine;
 
+pub fn machine_command(args: Vec<String>) -> Command {
+    return Command::new("docker-machine", args, "", true);
+}
+
 pub fn create_machine(machine: &DockerMachine) -> Command {
     let args = vec![
         String::from("create"),
@@ -15,17 +19,26 @@ pub fn create_machine(machine: &DockerMachine) -> Command {
         format!("{}", machine.memory),
         machine.name.clone(),
     ];
-
-    return Command::new("docker-machine", args, "", true);
+    return machine_command(args);
 }
 
 pub fn do_with_machine(action: &str, machine: &DockerMachine) -> Command {
     let args = vec![action.to_owned(), machine.name.clone()];
-    return Command::new("docker-machine", args, "", true);
+    return machine_command(args);
 }
 
 pub fn remove_machine(machine: &DockerMachine) -> Command {
     return do_with_machine("rm", machine);
+}
+
+pub fn update_certificates(machine: &DockerMachine) -> Command {
+    let args = vec![
+        String::from("regenerate-certs"),
+        String::from("--force"),
+        String::from("--client-certs"),
+        machine.name.clone(),
+    ];
+    return machine_command(args);
 }
 
 #[cfg(test)]
@@ -76,6 +89,20 @@ mod test {
         assert_eq!(command.display(), expect);
         assert_eq!(command.program, "docker-machine");
         assert_eq!(command.args.len(), 2);
+        assert!(command.dir.is_empty());
+        assert!(command.verbose);
+    }
+
+    #[test]
+    fn test_update_certificates() {
+        let machine = DockerMachine::default();
+
+        let command = update_certificates(&machine);
+        let expect = "docker-machine regenerate-certs --force --client-certs turtle";
+
+        assert_eq!(command.display(), expect);
+        assert_eq!(command.program, "docker-machine");
+        assert_eq!(command.args.len(), 4);
         assert!(command.dir.is_empty());
         assert!(command.verbose);
     }

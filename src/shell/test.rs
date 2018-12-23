@@ -161,3 +161,24 @@ fn test_restart_docker_machine_instruction() {
     assert!(command.dir.is_empty());
     assert!(command.verbose);
 }
+
+#[test]
+fn test_update_certificates_docker_machine_instruction() {
+    let config = Config::default();
+    let generator = Generator::new(config);
+    let instruction = generator.generate("machine gencerts");
+
+    assert!(!instruction.should_terminate);
+
+    let commands = &instruction.commands;
+    assert_eq!(commands.len(), 1);
+
+    let command = commands.first().unwrap();
+    let expect = "docker-machine regenerate-certs --force --client-certs turtle";
+
+    assert_eq!(command.display(), expect);
+    assert_eq!(command.program, "docker-machine");
+    assert_eq!(command.args.len(), 4);
+    assert!(command.dir.is_empty());
+    assert!(command.verbose);
+}

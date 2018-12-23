@@ -72,13 +72,17 @@ impl Instruction {
                 let command = docker::create_machine(machine);
                 return Self::new(vec![command], false);
             }
-            "remove" => {
+            "remove" | "rm" => {
                 let command = docker::remove_machine(machine);
                 return Self::new(vec![command], false);
             }
             "restart" | "env" | "inspect" | "ip" | "kill" | "ls" | "start" | "status" | "stop"
             | "upgrade" | "url" | "version" => {
                 let command = docker::do_with_machine(action, machine);
+                return Self::new(vec![command], false);
+            }
+            "upcerts" | "gencerts" | "regenerate-certs" => {
+                let command = docker::update_certificates(machine);
                 return Self::new(vec![command], false);
             }
             _ => {
