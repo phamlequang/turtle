@@ -2,6 +2,7 @@ use std::env;
 use std::fmt;
 use std::path::Path;
 use std::process;
+use subprocess;
 
 #[derive(Debug)]
 pub struct Command {
@@ -47,18 +48,29 @@ impl Command {
             command.args(&self.args);
         }
 
-        if self.verbose {
-            println!("$ {}", self);
-        }
+        let raw = format!("{}", self);
+        // if self.verbose {
+        println!("$ {}", raw);
+        // }
 
-        match command.spawn() {
-            Ok(mut child) => {
-                if let Err(e) = child.wait() {
-                    println!("failed to wait for child process: {}", e);
+        let result = subprocess::Exec::shell(raw).join();
+        match result {
+            Ok(status) => {
+                if !status.success() {
+                    println!("--> failed with exit status = {:?}", status);
                 }
             }
-            Err(e) => println!("failed to execute command: {}", e),
+            Err(e) => println!("--> error executing command: {}", e),
         }
+
+        // match command.spawn() {
+        //     Ok(mut child) => {
+        //         if let Err(e) = child.wait() {
+        //             println!("failed to wait for child process: {}", e);
+        //         }
+        //     }
+        //     Err(e) => println!("failed to execute command: {}", e),
+        // }
 
         println!();
     }
