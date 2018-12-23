@@ -27,10 +27,6 @@ pub fn do_with_machine(action: &str, machine: &DockerMachine) -> Command {
     return machine_command(args);
 }
 
-pub fn remove_machine(machine: &DockerMachine) -> Command {
-    return do_with_machine("rm", machine);
-}
-
 pub fn update_certificates(machine: &DockerMachine) -> Command {
     let args = vec![
         String::from("regenerate-certs"),
@@ -61,20 +57,6 @@ mod test {
         assert_eq!(command.display(), expect);
         assert_eq!(command.program, "docker-machine");
         assert_eq!(command.args.len(), 11);
-        assert!(command.dir.is_empty());
-        assert!(command.verbose);
-    }
-
-    #[test]
-    fn test_remove_machine() {
-        let machine = DockerMachine::default();
-
-        let command = remove_machine(&machine);
-        let expect = "docker-machine rm turtle";
-
-        assert_eq!(command.display(), expect);
-        assert_eq!(command.program, "docker-machine");
-        assert_eq!(command.args.len(), 2);
         assert!(command.dir.is_empty());
         assert!(command.verbose);
     }

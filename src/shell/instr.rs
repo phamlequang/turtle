@@ -73,10 +73,14 @@ impl Instruction {
                 return Self::new(vec![command], false);
             }
             "remove" | "rm" => {
-                let command = docker::remove_machine(machine);
+                let command = docker::do_with_machine("rm", machine);
                 return Self::new(vec![command], false);
             }
-            "restart" | "env" | "inspect" | "ip" | "kill" | "ls" | "start" | "status" | "stop"
+            "list" | "ls" => {
+                let command = docker::do_with_machine("ls", machine);
+                return Self::new(vec![command], false);
+            }
+            "restart" | "env" | "inspect" | "ip" | "kill" | "start" | "status" | "stop"
             | "upgrade" | "url" | "version" => {
                 let command = docker::do_with_machine(action, machine);
                 return Self::new(vec![command], false);
@@ -90,7 +94,7 @@ impl Instruction {
                     docker::create_machine(machine),
                     docker::do_with_machine("start", machine),
                     docker::update_certificates(machine),
-                    docker::do_with_machine("status", machine),
+                    docker::do_with_machine("ls", machine),
                 ];
                 return Self::new(commands, false);
             }
