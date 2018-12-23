@@ -1,4 +1,5 @@
 use super::cmd::Command;
+use super::docker;
 use super::git;
 use crate::config::Config;
 
@@ -22,6 +23,11 @@ impl Instruction {
 
     pub fn terminate() -> Self {
         return Self::new(Vec::new(), true);
+    }
+
+    pub fn echo(message: &str) -> Self {
+        let command = Command::echo(message);
+        return Self::new(vec![command], false);
     }
 
     pub fn change_directory(args: Vec<String>) -> Self {
@@ -48,6 +54,22 @@ impl Instruction {
         }
 
         return Self::new(commands, false);
+    }
+
+    pub fn docker_machine(args: Vec<String>, config: &Config) -> Self {
+        if let Some(machine) = &config.docker_machine {
+            match args.first() {
+                Some(action) => {
+                    if action == "create" {
+                        let command = docker::create_machine(machine);
+                        return Self::new(vec![command], false);
+                    }
+                    return Self::do_nothing();
+                }
+                None => return Self::do_nothing(),
+            }
+        }
+        return Self::echo("--> docker machine config is missing");
     }
 
     pub fn other(program: &str, args: Vec<String>) -> Self {

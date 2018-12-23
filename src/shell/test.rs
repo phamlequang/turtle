@@ -92,3 +92,27 @@ fn test_change_directory_instruction() {
     assert_eq!(command.dir, "..");
     assert!(!command.verbose);
 }
+
+#[test]
+fn test_create_docker_machine_instruction() {
+    let config = Config::load("turtle.toml").unwrap();
+    let generator = Generator::new(config);
+    let instruction = generator.generate("machine create");
+
+    assert!(!instruction.should_terminate);
+
+    let commands = &instruction.commands;
+    assert_eq!(commands.len(), 1);
+
+    let command = commands.first().unwrap();
+    let expect = "docker-machine create turtle \
+                  --virtualbox-host-dns-resolver \
+                  --virtualbox-cpu-count \"2\" \
+                  --virtualbox-disk-size \"10240\" \
+                  --virtualbox-memory \"4096\"";
+    assert_eq!(command.display(), expect);
+    assert_eq!(command.program, "docker-machine");
+    assert_eq!(command.args.len(), 9);
+    assert!(command.dir.is_empty());
+    assert!(command.verbose);
+}
