@@ -85,6 +85,15 @@ impl Instruction {
                 let command = docker::update_certificates(machine);
                 return Self::new(vec![command], false);
             }
+            "setup" => {
+                let commands = vec![
+                    docker::create_machine(machine),
+                    docker::do_with_machine("start", machine),
+                    docker::update_certificates(machine),
+                    docker::do_with_machine("status", machine),
+                ];
+                return Self::new(commands, false);
+            }
             _ => {
                 let message = format!("--> unknown action [ {} ]", action);
                 return Self::echo(&message);

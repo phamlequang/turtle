@@ -37,7 +37,6 @@ impl Generator {
                 CD => return Instruction::change_directory(args),
                 CLONE => return Instruction::clone_repositories(args, &self.config),
                 MACHINE => return Instruction::docker_machine(args, &self.config),
-
                 _ => return Instruction::other(program, args),
             }
         }
