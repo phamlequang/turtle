@@ -1,66 +1,55 @@
 use std::env;
-use std::fmt;
 use std::path::Path;
-use std::process;
+use subprocess;
 
 #[derive(Debug)]
 pub struct Command {
-    pub program: String,
-    pub args: Vec<String>,
+    pub raw: String,
     pub dir: String,
-    pub verbose: bool,
+    pub show: bool,
 }
 
 impl Command {
-    pub fn new(program: &str, args: Vec<String>, dir: &str, verbose: bool) -> Self {
+    pub fn new(raw: &str, dir: &str, show: bool) -> Self {
         return Self {
-            program: program.to_owned(),
-            args: args,
+            raw: raw.to_owned(),
             dir: dir.to_owned(),
-            verbose: verbose,
+            show: show,
         };
     }
 
     pub fn echo(message: &str) -> Self {
-        let args = vec![message.to_owned()];
-        return Self::new("echo", args, "", false);
-    }
-
-    pub fn display(&self) -> String {
-        if self.args.is_empty() {
-            return format!("{}", self.program);
-        }
-        return format!("{} {}", self.program, self.args.join(" "));
+        let raw = format!("echo \"{}\"", message);
+        return Self::new(&raw, "", false);
     }
 
     // Execute command as a child process and wait for it to finish
-    pub fn execute(&self) {
+    pub fn execute(&self) -> bool {
         let ok = self.change_directory();
-
-        if !ok || self.program.is_empty() {
+        if !ok || self.raw.is_empty() {
             println!();
-            return;
+            return true;
         }
 
-        let mut command = process::Command::new(&self.program);
-        if !self.args.is_empty() {
-            command.args(&self.args);
+        if self.show {
+            println!("$ {}", self.raw);
         }
 
-        if self.verbose {
-            println!("$ {}", self);
-        }
-
-        match command.spawn() {
-            Ok(mut child) => {
-                if let Err(e) = child.wait() {
-                    println!("failed to wait for child process: {}", e);
+        let result = subprocess::Exec::shell(&self.raw).join();
+        match result {
+            Ok(status) => {
+                if status.success() {
+                    println!();
+                    return true;
                 }
+                println!("--> failed with exit status = {:?}\n", status);
             }
-            Err(e) => println!("failed to execute command: {}", e),
+            Err(e) => {
+                println!("--> execute error: {}\n", e);
+            }
         }
 
-        println!();
+        return false;
     }
 
     pub fn change_directory(&self) -> bool {
@@ -79,11 +68,5 @@ impl Command {
         }
 
         return true;
-    }
-}
-
-impl fmt::Display for Command {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        return write!(f, "{}", self.display());
     }
 }

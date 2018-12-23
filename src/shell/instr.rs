@@ -32,7 +32,7 @@ impl Instruction {
 
     pub fn change_directory(args: Vec<String>) -> Self {
         if let Some(dir) = args.first() {
-            let command = Command::new("", Vec::new(), &dir, false);
+            let command = Command::new("", &dir, false);
             return Self::new(vec![command], false);
         }
         return Self::do_nothing();
@@ -73,16 +73,16 @@ impl Instruction {
                 return Self::new(vec![command], false);
             }
             "remove" | "rm" => {
-                let command = docker::do_with_machine("rm", machine);
+                let command = docker::machine_command("rm", Some(&machine.name));
                 return Self::new(vec![command], false);
             }
             "list" | "ls" => {
-                let command = docker::do_with_machine("ls", machine);
+                let command = docker::machine_command("ls", None);
                 return Self::new(vec![command], false);
             }
             "restart" | "env" | "inspect" | "ip" | "kill" | "start" | "status" | "stop"
             | "upgrade" | "url" | "version" => {
-                let command = docker::do_with_machine(action, machine);
+                let command = docker::machine_command(action, Some(&machine.name));
                 return Self::new(vec![command], false);
             }
             "upcerts" | "gencerts" | "regenerate-certs" => {
@@ -92,9 +92,8 @@ impl Instruction {
             "setup" => {
                 let commands = vec![
                     docker::create_machine(machine),
-                    docker::do_with_machine("start", machine),
                     docker::update_certificates(machine),
-                    docker::do_with_machine("ls", machine),
+                    docker::machine_command("ls", None),
                 ];
                 return Self::new(commands, false);
             }
@@ -105,15 +104,18 @@ impl Instruction {
         }
     }
 
-    pub fn other(program: &str, args: Vec<String>) -> Self {
-        let command = Command::new(program, args, "", false);
+    pub fn other(raw: &str) -> Self {
+        let command = Command::new(raw, "", false);
         return Self::new(vec![command], false);
     }
 
-    // Executes all commands sequentially
+    // Executes all commands sequentially, stop immediately in case of failure
     pub fn execute(&self) {
         for cmd in &self.commands {
-            cmd.execute();
+            let success = cmd.execute();
+            if !success {
+                return;
+            }
         }
     }
 }
