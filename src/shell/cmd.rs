@@ -26,6 +26,13 @@ impl Command {
         return Self::new("echo", args, "", false);
     }
 
+    pub fn display(&self) -> String {
+        if self.args.is_empty() {
+            return format!("{}", self.program);
+        }
+        return format!("{} {}", self.program, self.args.join(" "));
+    }
+
     // Execute command as a child process and wait for it to finish
     pub fn execute(&self) {
         let ok = self.change_directory();
@@ -77,9 +84,6 @@ impl Command {
 
 impl fmt::Display for Command {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        if self.args.is_empty() {
-            return write!(f, "{}", self.program);
-        }
-        return write!(f, "{} {}", self.program, self.args.join(" "));
+        return write!(f, "{}", self.display());
     }
 }

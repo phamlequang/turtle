@@ -2,6 +2,7 @@
 mod test;
 
 mod cmd;
+mod docker;
 mod git;
 mod instr;
 
@@ -12,6 +13,7 @@ const QUIT: &str = "quit";
 const EXIT: &str = "exit";
 const CLONE: &str = "clone";
 const CD: &str = "cd";
+const MACHINE: &str = "machine";
 
 #[derive(Debug)]
 pub struct Generator {
@@ -34,6 +36,7 @@ impl Generator {
                 QUIT | EXIT => return Instruction::terminate(),
                 CD => return Instruction::change_directory(args),
                 CLONE => return Instruction::clone_repositories(args, &self.config),
+                MACHINE => return Instruction::docker_machine(args, &self.config),
                 _ => return Instruction::other(program, args),
             }
         }

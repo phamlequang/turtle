@@ -6,6 +6,26 @@ use std::fs;
 use std::io::{Error, ErrorKind};
 
 #[derive(Serialize, Deserialize, Debug)]
+pub struct DockerMachine {
+    pub name: String,
+    pub cpu_count: u32,
+    pub disk_size: u32,
+    pub memory: u32,
+}
+
+impl DockerMachine {
+    #[cfg(test)]
+    pub fn default() -> Self {
+        DockerMachine {
+            name: String::from("turtle"),
+            cpu_count: 2,
+            disk_size: 16384,
+            memory: 4096,
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Dependency {
     pub name: String,
     pub version: String,
@@ -36,7 +56,7 @@ pub struct Group {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Config {
-    pub docker_machine: Option<String>,
+    pub docker_machine: Option<DockerMachine>,
     pub dependencies: Option<Vec<Dependency>>,
     pub repositories: Option<Vec<Repository>>,
     pub groups: Option<Vec<Group>>,
@@ -45,12 +65,17 @@ pub struct Config {
 impl Config {
     #[cfg(test)]
     pub fn new() -> Self {
-        return Self {
+        Self {
             docker_machine: None,
             dependencies: None,
             repositories: None,
             groups: None,
-        };
+        }
+    }
+
+    #[cfg(test)]
+    pub fn default() -> Self {
+        return Self::load("turtle.toml").unwrap();
     }
 
     pub fn load(file_path: &str) -> Result<Self, Error> {

@@ -5,6 +5,12 @@ use std::io::ErrorKind;
 fn test_load_config_ok() {
     let result = Config::load("turtle.toml");
     assert!(result.is_ok());
+
+    let config = result.unwrap();
+    assert!(config.docker_machine.is_some());
+    assert!(config.dependencies.is_some());
+    assert!(config.repositories.is_some());
+    assert!(config.groups.is_some());
 }
 
 #[test]
@@ -33,7 +39,7 @@ fn test_parse_config_invalid() {
 
 #[test]
 fn test_search_repository_found() {
-    let config = Config::load("turtle.toml").unwrap();
+    let config = Config::default();
     let name = "flowers";
 
     let found = config.search_repository(name);
@@ -45,7 +51,7 @@ fn test_search_repository_found() {
 
 #[test]
 fn test_search_repository_not_found() {
-    let config = Config::load("turtle.toml").unwrap();
+    let config = Config::default();
     let name = "unknown";
 
     let found = config.search_repository(name);
