@@ -1,5 +1,8 @@
+use std::fs;
+use std::io;
+
 use super::cmd::Command;
-use crate::config::DockerMachine;
+use crate::config::{Config, Docker, DockerMachine};
 
 pub fn create_machine(machine: &DockerMachine) -> Command {
     let raw = format!(
@@ -29,6 +32,109 @@ pub fn update_certificates(machine: &DockerMachine) -> Command {
         machine.name
     );
     return Command::new(&raw, "", true);
+}
+
+pub fn generate_compose_file(file_path: &str, config: &Config) -> io::Result<()> {
+    let contents = generate_compose_text(config);
+    return fs::write(file_path, contents);
+}
+
+pub fn generate_compose_text(config: &Config) -> String {
+    let mut lines: Vec<String> = Vec::new();
+
+    lines.push("version:\"3\"".to_owned());
+
+    if let Some(volumes) = &config.docker_machine.volumes {
+        lines.push(format!("volumes:"));
+        for v in volumes {
+            lines.push(format!("  {}:", v));
+            lines.push(format!("    external: {}", true));
+        }
+    }
+
+    lines.push("services:".to_owned());
+
+    if let Some(dependencies) = &config.dependencies {
+        for dependency in dependencies {
+            let more = compose_service(&dependency.name, &dependency.docker);
+            lines.extend(more);
+        }
+    }
+
+    if let Some(respositories) = &config.repositories {
+        for repository in respositories {
+            if let Some(services) = &repository.services {
+                for service in services {
+                    let more = compose_service(&service.name, &service.docker);
+                    lines.extend(more);
+                }
+            }
+        }
+    }
+
+    return lines.join("\n");
+}
+
+fn compose_service(name: &str, docker: &Docker) -> Vec<String> {
+    let mut lines: Vec<String> = Vec::new();
+
+    lines.push(format!("  {}:", name));
+    lines.push(format!("    image: {}", docker.image));
+
+    if let Some(build) = &docker.build {
+        lines.push(format!("    build:"));
+        for b in build {
+            lines.push(format!("      {}", b));
+        }
+    }
+
+    if let Some(ports) = &docker.ports {
+        lines.push(format!("    ports:"));
+        for p in ports {
+            lines.push(format!("      - {}", p));
+        }
+    }
+
+    if let Some(volumes) = &docker.volumes {
+        lines.push(format!("    volumes:"));
+        for v in volumes {
+            lines.push(format!("      - {}", v));
+        }
+    }
+
+    if let Some(environment) = &docker.environment {
+        lines.push(format!("    environment:"));
+        for e in environment {
+            lines.push(format!("      - {}", e));
+        }
+    }
+
+    if let Some(env_file) = &docker.env_file {
+        lines.push(format!("    env_file:"));
+        for f in env_file {
+            lines.push(format!("      - {}", f));
+        }
+    }
+
+    if let Some(depends_on) = &docker.depends_on {
+        lines.push(format!("    depends_on:"));
+        for d in depends_on {
+            lines.push(format!("      - {}", d));
+        }
+    }
+
+    if let Some(command) = &docker.command {
+        lines.push(format!("    command: {}", command));
+    }
+
+    if let Some(labels) = &docker.labels {
+        lines.push(format!("    labels:"));
+        for l in labels {
+            lines.push(format!("      {}", l));
+        }
+    }
+
+    return lines;
 }
 
 #[cfg(test)]
@@ -75,5 +181,54 @@ mod test {
         assert_eq!(command.raw, expect);
         assert!(command.dir.is_empty());
         assert!(command.show);
+    }
+
+    #[test]
+    fn test_generate_compose_text() {
+        let expect = r#"version:"3"
+volumes:
+  postgres_data:
+    external: true
+services:
+  postgres:
+    image: postgres:11.1-alpine
+    ports:
+      - 5432:5432
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=secret
+  camellia:
+    image: camellia
+    build:
+      context: /Users/phamlequang/projects/flowers
+      dockerfile: camellia/Dockerfile
+    ports:
+      - 8000:8000
+    env_file:
+      - /Users/phamlequang/projects/flowers/camellia/.env
+    depends_on:
+      - postgres
+    command: cargo run
+    labels:
+      traefik.port=8000
+  lotus:
+    image: lotus
+    build:
+      context: /Users/phamlequang/projects/flowers
+      dockerfile: lotus/Dockerfile
+    ports:
+      - 8001:8001
+    env_file:
+      - /Users/phamlequang/projects/flowers/lotus/.env
+    depends_on:
+      - postgres
+    command: cargo run
+    labels:
+      traefik.port=8001"#;
+
+        let config = Config::default();
+        let result = generate_compose_text(&config);
+        assert_eq!(result, expect);
     }
 }

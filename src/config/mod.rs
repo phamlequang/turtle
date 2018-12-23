@@ -3,7 +3,7 @@ mod test;
 
 use serde_derive::{Deserialize, Serialize};
 use std::fs;
-use std::io::{Error, ErrorKind};
+use std::io;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct DockerMachine {
@@ -11,6 +11,7 @@ pub struct DockerMachine {
     pub cpu_count: u32,
     pub disk_size: u32,
     pub memory: u32,
+    pub volumes: Option<Vec<String>>,
 }
 
 impl DockerMachine {
@@ -21,6 +22,7 @@ impl DockerMachine {
             cpu_count: 2,
             disk_size: 16384,
             memory: 4096,
+            volumes: None,
         }
     }
 }
@@ -32,7 +34,7 @@ pub struct Docker {
     pub ports: Option<Vec<String>>,
     pub volumes: Option<Vec<String>>,
     pub environment: Option<Vec<String>>,
-    pub env_file: Option<String>,
+    pub env_file: Option<Vec<String>>,
     pub depends_on: Option<Vec<String>>,
     pub command: Option<String>,
     pub labels: Option<Vec<String>>,
@@ -71,7 +73,7 @@ pub struct Group {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Config {
-    pub docker_machine: Option<DockerMachine>,
+    pub docker_machine: DockerMachine,
     pub dependencies: Option<Vec<Dependency>>,
     pub repositories: Option<Vec<Repository>>,
     pub groups: Option<Vec<Group>>,
@@ -81,7 +83,7 @@ impl Config {
     #[cfg(test)]
     pub fn new() -> Self {
         Self {
-            docker_machine: None,
+            docker_machine: DockerMachine::default(),
             dependencies: None,
             repositories: None,
             groups: None,
@@ -93,17 +95,17 @@ impl Config {
         return Self::load("turtle.toml").unwrap();
     }
 
-    pub fn load(file_path: &str) -> Result<Self, Error> {
+    pub fn load(file_path: &str) -> Result<Self, io::Error> {
         match fs::read_to_string(file_path) {
             Ok(toml_text) => return Self::parse(&toml_text),
             Err(e) => return Err(e),
         }
     }
 
-    pub fn parse(toml_text: &str) -> Result<Self, Error> {
+    pub fn parse(toml_text: &str) -> Result<Self, io::Error> {
         match toml::from_str(&toml_text) {
             Ok(config) => return Ok(config),
-            Err(e) => return Err(Error::new(ErrorKind::InvalidData, e)),
+            Err(e) => return Err(io::Error::new(io::ErrorKind::InvalidData, e)),
         }
     }
 

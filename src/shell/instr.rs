@@ -57,13 +57,10 @@ impl Instruction {
     }
 
     pub fn docker_machine(args: Vec<String>, config: &Config) -> Self {
-        if let Some(machine) = &config.docker_machine {
-            match args.first() {
-                Some(action) => return Self::do_with_docker_machine(action, machine),
-                None => return Self::do_nothing(),
-            }
+        if let Some(action) = args.first() {
+            return Self::do_with_docker_machine(action, &config.docker_machine);
         }
-        return Self::echo("--> docker machine config is missing");
+        return Self::do_nothing();
     }
 
     pub fn do_with_docker_machine(action: &str, machine: &DockerMachine) -> Instruction {

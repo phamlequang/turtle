@@ -5,7 +5,7 @@ use crate::config::Config;
 fn test_generate_terminate_instruction_quit() {
     let config = Config::new();
     let generator = Generator::new(config);
-    let instruction = generator.generate("quit");
+    let instruction = generator.generate_instruction("quit");
 
     assert!(instruction.should_terminate);
     assert!(instruction.commands.is_empty());
@@ -15,7 +15,7 @@ fn test_generate_terminate_instruction_quit() {
 fn test_generate_terminate_instruction_exit() {
     let config = Config::new();
     let generator = Generator::new(config);
-    let instruction = generator.generate("exit");
+    let instruction = generator.generate_instruction("exit");
 
     assert!(instruction.should_terminate);
     assert!(instruction.commands.is_empty());
@@ -25,7 +25,7 @@ fn test_generate_terminate_instruction_exit() {
 fn test_generate_other_instruction() {
     let config = Config::new();
     let generator = Generator::new(config);
-    let instruction = generator.generate("ls -la");
+    let instruction = generator.generate_instruction("ls -la");
 
     assert!(!instruction.should_terminate);
 
@@ -42,7 +42,7 @@ fn test_generate_other_instruction() {
 fn test_generate_clone_instruction() {
     let config = Config::default();
     let generator = Generator::new(config);
-    let instruction = generator.generate("clone flowers tree");
+    let instruction = generator.generate_instruction("clone flowers tree");
 
     assert!(!instruction.should_terminate);
 
@@ -68,7 +68,7 @@ fn test_generate_clone_instruction() {
 fn test_change_directory_instruction() {
     let config = Config::new();
     let generator = Generator::new(config);
-    let instruction = generator.generate("cd ..");
+    let instruction = generator.generate_instruction("cd ..");
 
     assert!(!instruction.should_terminate);
 
@@ -85,7 +85,7 @@ fn test_change_directory_instruction() {
 fn test_create_docker_machine_instruction() {
     let config = Config::default();
     let generator = Generator::new(config);
-    let instruction = generator.generate("machine create");
+    let instruction = generator.generate_instruction("machine create");
 
     assert!(!instruction.should_terminate);
 
@@ -109,7 +109,7 @@ fn test_create_docker_machine_instruction() {
 fn test_remove_docker_machine_instruction() {
     let config = Config::default();
     let generator = Generator::new(config);
-    let instruction = generator.generate("machine remove");
+    let instruction = generator.generate_instruction("machine remove");
 
     assert!(!instruction.should_terminate);
 
@@ -127,7 +127,7 @@ fn test_remove_docker_machine_instruction() {
 fn test_restart_docker_machine_instruction() {
     let config = Config::default();
     let generator = Generator::new(config);
-    let instruction = generator.generate("machine restart");
+    let instruction = generator.generate_instruction("machine restart");
 
     assert!(!instruction.should_terminate);
 
@@ -145,7 +145,7 @@ fn test_restart_docker_machine_instruction() {
 fn test_update_certificates_docker_machine_instruction() {
     let config = Config::default();
     let generator = Generator::new(config);
-    let instruction = generator.generate("machine gencerts");
+    let instruction = generator.generate_instruction("machine gencerts");
 
     assert!(!instruction.should_terminate);
 
@@ -163,7 +163,7 @@ fn test_update_certificates_docker_machine_instruction() {
 fn test_setup_docker_machine_instruction() {
     let config = Config::default();
     let generator = Generator::new(config);
-    let instruction = generator.generate("machine setup");
+    let instruction = generator.generate_instruction("machine setup");
 
     assert!(!instruction.should_terminate);
 

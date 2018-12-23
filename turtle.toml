@@ -3,14 +3,16 @@ name = "turtle"
 cpu_count = 2
 disk_size = 16384
 memory = 4096
+volumes = ["postgres_data"]
 
 [[dependencies]]
 name = "postgres"
 
     [dependencies.docker]
-        image = "postgres:11.1-alpine"
-        ports = ["5432:5432"]
-        volumes = ["postgres_data:/var/lib/postgresql/data"]
+    image = "postgres:11.1-alpine"
+    ports = ["5432:5432"]
+    environment = ["POSTGRES_PASSWORD=secret"]
+    volumes = ["postgres_data:/var/lib/postgresql/data"]
 
 [[repositories]]
 name = "flowers"
@@ -26,8 +28,12 @@ branch = "master"
 
         [repositories.services.docker]
         image = "camellia"
+        build = ["context: /Users/phamlequang/projects/flowers", "dockerfile: camellia/Dockerfile"]
         ports = ["8000:8000"]
+        env_file = ["/Users/phamlequang/projects/flowers/camellia/.env"]
+        depends_on = ["postgres"]
         command = "cargo run"
+        labels = ["traefik.port=8000"]
 
     [[repositories.services]]
     name = "lotus"
@@ -37,8 +43,12 @@ branch = "master"
 
         [repositories.services.docker]
         image = "lotus"
+        build = ["context: /Users/phamlequang/projects/flowers", "dockerfile: lotus/Dockerfile"]
         ports = ["8001:8001"]
+        env_file = ["/Users/phamlequang/projects/flowers/lotus/.env"]
+        depends_on = ["postgres"]
         command = "cargo run"
+        labels = ["traefik.port=8001"]
 
 [[groups]]
 name = "forest"

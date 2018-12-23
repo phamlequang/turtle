@@ -7,7 +7,6 @@ fn test_load_config_ok() {
     assert!(result.is_ok());
 
     let config = result.unwrap();
-    assert!(config.docker_machine.is_some());
     assert!(config.dependencies.is_some());
     assert!(config.repositories.is_some());
     assert!(config.groups.is_some());
