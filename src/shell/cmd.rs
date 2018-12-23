@@ -24,11 +24,11 @@ impl Command {
     }
 
     // Execute command as a child process and wait for it to finish
-    pub fn execute(&self) {
+    pub fn execute(&self) -> bool {
         let ok = self.change_directory();
         if !ok || self.raw.is_empty() {
             println!();
-            return;
+            return true;
         }
 
         if self.show {
@@ -38,14 +38,18 @@ impl Command {
         let result = subprocess::Exec::shell(&self.raw).join();
         match result {
             Ok(status) => {
-                if !status.success() {
-                    println!("--> failed with exit status = {:?}", status);
+                if status.success() {
+                    println!();
+                    return true;
                 }
+                println!("--> failed with exit status = {:?}\n", status);
             }
-            Err(e) => println!("--> execute error: {}", e),
+            Err(e) => {
+                println!("--> execute error: {}\n", e);
+            }
         }
 
-        println!();
+        return false;
     }
 
     pub fn change_directory(&self) -> bool {

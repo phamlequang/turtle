@@ -15,8 +15,11 @@ pub fn create_machine(machine: &DockerMachine) -> Command {
     return Command::new(&raw, "", true);
 }
 
-pub fn do_with_machine(action: &str, machine: &DockerMachine) -> Command {
-    let raw = format!("docker-machine {} {}", action, machine.name);
+pub fn machine_command(action: &str, machine_name: Option<&str>) -> Command {
+    let raw = match machine_name {
+        Some(name) => format!("docker-machine {} {}", action, name),
+        None => format!("docker-machine {}", action),
+    };
     return Command::new(&raw, "", true);
 }
 
@@ -54,7 +57,7 @@ mod test {
     fn test_do_with_machine() {
         let machine = DockerMachine::default();
 
-        let command = do_with_machine("restart", &machine);
+        let command = machine_command("restart", Some(&machine.name));
         let expect = "docker-machine restart turtle";
 
         assert_eq!(command.raw, expect);
