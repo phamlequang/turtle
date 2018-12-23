@@ -6,6 +6,14 @@ use std::fs;
 use std::io::{Error, ErrorKind};
 
 #[derive(Serialize, Deserialize, Debug)]
+pub struct DockerMachine {
+    pub name: String,
+    pub cpu_count: u32,
+    pub disk_size: u32,
+    pub memory: u32,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Dependency {
     pub name: String,
     pub version: String,
@@ -36,7 +44,7 @@ pub struct Group {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Config {
-    pub docker_machine: Option<String>,
+    pub docker_machine: Option<DockerMachine>,
     pub dependencies: Option<Vec<Dependency>>,
     pub repositories: Option<Vec<Repository>>,
     pub groups: Option<Vec<Group>>,

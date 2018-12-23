@@ -1,4 +1,8 @@
-docker_machine = "turtle"
+[docker_machine]
+name = "turtle"
+cpu_count = 2
+disk_size = 10240
+memory = 4096
 
 [[dependencies]]
 name = "postgres"
@@ -31,7 +35,7 @@ branch = "master"
 [[groups]]
 name = "forest"
 dependencies = ["postgres", "redis"]
-repositories = ["flowers", "tree"]
+repositories = ["flowers"]
 
 [[groups]]
 name = "dep"
@@ -39,4 +43,4 @@ dependencies = ["postgres", "redis"]
 
 [[groups]]
 name = "rep"
-repositories = ["flowers", "tree"]
+repositories = ["flowers"]

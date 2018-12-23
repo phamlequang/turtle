@@ -2,6 +2,7 @@
 mod test;
 
 mod cmd;
+mod docker;
 mod git;
 mod instr;
 

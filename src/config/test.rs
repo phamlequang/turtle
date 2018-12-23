@@ -5,6 +5,12 @@ use std::io::ErrorKind;
 fn test_load_config_ok() {
     let result = Config::load("turtle.toml");
     assert!(result.is_ok());
+
+    let config = result.unwrap();
+    assert!(config.docker_machine.is_some());
+    assert!(config.dependencies.is_some());
+    assert!(config.repositories.is_some());
+    assert!(config.groups.is_some());
 }
 
 #[test]
