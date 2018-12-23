@@ -6,11 +6,11 @@ memory = 4096
 
 [[dependencies]]
 name = "postgres"
-version = "11.1-alpine"
 
-[[dependencies]]
-name = "redis"
-version = "5.0.3-alpine"
+    [dependencies.docker]
+        image = "postgres:11.1-alpine"
+        ports = ["5432:5432"]
+        volumes = ["postgres_data:/var/lib/postgresql/data"]
 
 [[repositories]]
 name = "flowers"
@@ -23,24 +23,24 @@ branch = "master"
     folder = "camellia"
     build = "cargo build"
     test = "cargo test"
-    run = "cargo run"
+
+        [repositories.services.docker]
+        image = "camellia"
+        ports = ["8000:8000"]
+        command = "cargo run"
 
     [[repositories.services]]
     name = "lotus"
     folder = "lotus"
     build = "cargo build"
     test = "cargo test"
-    run = "cargo run"
+
+        [repositories.services.docker]
+        image = "lotus"
+        ports = ["8001:8001"]
+        command = "cargo run"
 
 [[groups]]
 name = "forest"
-dependencies = ["postgres", "redis"]
-repositories = ["flowers"]
-
-[[groups]]
-name = "dep"
-dependencies = ["postgres", "redis"]
-
-[[groups]]
-name = "rep"
+dependencies = ["postgres"]
 repositories = ["flowers"]

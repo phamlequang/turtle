@@ -26,9 +26,22 @@ impl DockerMachine {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
+pub struct Docker {
+    pub image: String,
+    pub build: Option<Vec<String>>,
+    pub ports: Option<Vec<String>>,
+    pub volumes: Option<Vec<String>>,
+    pub environment: Option<Vec<String>>,
+    pub env_file: Option<String>,
+    pub depends_on: Option<Vec<String>>,
+    pub command: Option<String>,
+    pub labels: Option<Vec<String>>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Dependency {
     pub name: String,
-    pub version: String,
+    pub docker: Docker,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -36,6 +49,8 @@ pub struct Service {
     pub name: String,
     pub folder: String,
     pub build: String,
+    pub test: String,
+    pub docker: Docker,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
