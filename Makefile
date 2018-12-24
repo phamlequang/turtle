@@ -2,7 +2,7 @@ run:
 	cargo run
 
 test:
-	cargo test --all
+	cargo test --all -- --nocapture
 
 update:
 	cargo update

@@ -25,8 +25,15 @@ impl Generator {
         return Self { config };
     }
 
+    pub fn generate_docker_compose_file(&self, file_path: &str) {
+        if let Err(e) = docker::generate_compose_file(file_path, &self.config) {
+            println!("--> failed to generate docker-compose file: {}", e);
+        }
+        println!("> docker-compose file was generated: {}", file_path);
+    }
+
     // Takes a raw instruction string, returns a list of instructions to execute
-    pub fn generate(&self, raw: &str) -> Instruction {
+    pub fn generate_instruction(&self, raw: &str) -> Instruction {
         let mut tokens = raw.trim().split_whitespace();
 
         if let Some(program) = tokens.next() {

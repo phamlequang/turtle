@@ -1,0 +1,41 @@
+version:"3"
+volumes:
+  postgres_data:
+    external: true
+services:
+  postgres:
+    image: postgres:11.1-alpine
+    ports:
+      - 5432:5432
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=secret
+  camellia:
+    image: camellia
+    build:
+      context: /Users/phamlequang/projects/flowers
+      dockerfile: camellia/Dockerfile
+    ports:
+      - 8000:8000
+    env_file:
+      - /Users/phamlequang/projects/flowers/camellia/.env
+    depends_on:
+      - postgres
+    command: cargo run
+    labels:
+      traefik.port=8000
+  lotus:
+    image: lotus
+    build:
+      context: /Users/phamlequang/projects/flowers
+      dockerfile: lotus/Dockerfile
+    ports:
+      - 8001:8001
+    env_file:
+      - /Users/phamlequang/projects/flowers/lotus/.env
+    depends_on:
+      - postgres
+    command: cargo run
+    labels:
+      traefik.port=8001

@@ -3,14 +3,16 @@ name = "turtle"
 cpu_count = 2
 disk_size = 16384
 memory = 4096
+volumes = ["postgres_data"]
 
 [[dependencies]]
 name = "postgres"
-version = "11.1-alpine"
 
-[[dependencies]]
-name = "redis"
-version = "5.0.3-alpine"
+    [dependencies.docker]
+    image = "postgres:11.1-alpine"
+    ports = ["5432:5432"]
+    environment = ["POSTGRES_PASSWORD=secret"]
+    volumes = ["postgres_data:/var/lib/postgresql/data"]
 
 [[repositories]]
 name = "flowers"
@@ -23,24 +25,32 @@ branch = "master"
     folder = "camellia"
     build = "cargo build"
     test = "cargo test"
-    run = "cargo run"
+
+        [repositories.services.docker]
+        image = "camellia"
+        build = ["context: /Users/phamlequang/projects/flowers", "dockerfile: camellia/Dockerfile"]
+        ports = ["8000:8000"]
+        env_file = ["/Users/phamlequang/projects/flowers/camellia/.env"]
+        depends_on = ["postgres"]
+        command = "cargo run"
+        labels = ["traefik.port=8000"]
 
     [[repositories.services]]
     name = "lotus"
     folder = "lotus"
     build = "cargo build"
     test = "cargo test"
-    run = "cargo run"
+
+        [repositories.services.docker]
+        image = "lotus"
+        build = ["context: /Users/phamlequang/projects/flowers", "dockerfile: lotus/Dockerfile"]
+        ports = ["8001:8001"]
+        env_file = ["/Users/phamlequang/projects/flowers/lotus/.env"]
+        depends_on = ["postgres"]
+        command = "cargo run"
+        labels = ["traefik.port=8001"]
 
 [[groups]]
 name = "forest"
-dependencies = ["postgres", "redis"]
-repositories = ["flowers"]
-
-[[groups]]
-name = "dep"
-dependencies = ["postgres", "redis"]
-
-[[groups]]
-name = "rep"
+dependencies = ["postgres"]
 repositories = ["flowers"]
