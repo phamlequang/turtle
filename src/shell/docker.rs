@@ -18,6 +18,14 @@ pub fn create_machine(machine: &DockerMachine) -> Command {
     return Command::new(&raw, "", true);
 }
 
+pub fn update_certificates(machine: &DockerMachine) -> Command {
+    let raw = format!(
+        "docker-machine regenerate-certs --force --client-certs {}",
+        machine.name
+    );
+    return Command::new(&raw, "", true);
+}
+
 pub fn machine_command(action: &str, machine_name: Option<&str>) -> Command {
     let raw = match machine_name {
         Some(name) => format!("docker-machine {} {}", action, name),
@@ -26,12 +34,13 @@ pub fn machine_command(action: &str, machine_name: Option<&str>) -> Command {
     return Command::new(&raw, "", true);
 }
 
-pub fn update_certificates(machine: &DockerMachine) -> Command {
-    let raw = format!(
-        "docker-machine regenerate-certs --force --client-certs {}",
-        machine.name
-    );
+pub fn compose_command(action: &str, project_name: &str) -> Command {
+    let raw = format!("docker-compose --project-name {} {}", project_name, action);
     return Command::new(&raw, "", true);
+}
+
+pub fn compose_up(project_name: &str) -> Command {
+    return compose_command("up --detach", project_name);
 }
 
 pub fn generate_compose_file(file_path: &str, config: &Config) -> io::Result<()> {
@@ -195,5 +204,15 @@ mod test {
         let result = generate_compose_text(&config);
         let expect = fs::read_to_string("docker-compose.yml").unwrap();
         assert_eq!(result, expect);
+    }
+
+    #[test]
+    fn test_compose_up() {
+        let command = compose_up("turtle");
+        let expect = "docker-compose --project-name turtle up --detach";
+
+        assert_eq!(command.raw, expect);
+        assert!(command.dir.is_empty());
+        assert!(command.show);
     }
 }

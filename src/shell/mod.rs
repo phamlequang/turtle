@@ -14,6 +14,7 @@ const EXIT: &str = "exit";
 const CLONE: &str = "clone";
 const CD: &str = "cd";
 const MACHINE: &str = "machine";
+const COMPOSE: &str = "compose";
 
 #[derive(Debug)]
 pub struct Generator {
@@ -29,7 +30,6 @@ impl Generator {
         if let Err(e) = docker::generate_compose_file(file_path, &self.config) {
             println!("--> failed to generate docker-compose file: {}", e);
         }
-        println!("> docker-compose file was generated: {}", file_path);
     }
 
     // Takes a raw instruction string, returns a list of instructions to execute
@@ -44,6 +44,7 @@ impl Generator {
                 CD => return Instruction::change_directory(args),
                 CLONE => return Instruction::clone_repositories(args, &self.config),
                 MACHINE => return Instruction::docker_machine(args, &self.config),
+                COMPOSE => return Instruction::docker_compose(args, &self.config),
                 _ => return Instruction::other(raw),
             }
         }

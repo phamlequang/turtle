@@ -69,16 +69,12 @@ impl Instruction {
                 let command = docker::create_machine(machine);
                 return Self::new(vec![command], false);
             }
-            "remove" | "rm" => {
-                let command = docker::machine_command("rm", Some(&machine.name));
-                return Self::new(vec![command], false);
-            }
             "list" | "ls" => {
                 let command = docker::machine_command("ls", None);
                 return Self::new(vec![command], false);
             }
             "restart" | "env" | "inspect" | "ip" | "kill" | "start" | "status" | "stop"
-            | "upgrade" | "url" | "version" => {
+            | "upgrade" | "url" | "version" | "rm" => {
                 let command = docker::machine_command(action, Some(&machine.name));
                 return Self::new(vec![command], false);
             }
@@ -99,6 +95,27 @@ impl Instruction {
                 return Self::echo(&message);
             }
         }
+    }
+
+    pub fn docker_compose(args: Vec<String>, config: &Config) -> Self {
+        if let Some(action) = args.first() {
+            let project_name = &config.docker_machine.name;
+            match action.as_ref() {
+                "up" => {
+                    let command = docker::compose_up(&project_name);
+                    return Self::new(vec![command], false);
+                }
+                "down" => {
+                    let command = docker::compose_command(action, &project_name);
+                    return Self::new(vec![command], false);
+                }
+                _ => {
+                    let message = format!("--> unknown action [ {} ]", action);
+                    return Self::echo(&message);
+                }
+            }
+        }
+        return Self::do_nothing();
     }
 
     pub fn other(raw: &str) -> Self {

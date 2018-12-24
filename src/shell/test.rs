@@ -109,7 +109,7 @@ fn test_create_docker_machine_instruction() {
 fn test_remove_docker_machine_instruction() {
     let config = Config::default();
     let generator = Generator::new(config);
-    let instruction = generator.generate_instruction("machine remove");
+    let instruction = generator.generate_instruction("machine rm");
 
     assert!(!instruction.should_terminate);
 
