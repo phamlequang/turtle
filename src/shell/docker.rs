@@ -18,6 +18,14 @@ pub fn create_machine(machine: &DockerMachine) -> Command {
     return Command::new(&raw, "", true);
 }
 
+pub fn update_certificates(machine: &DockerMachine) -> Command {
+    let raw = format!(
+        "docker-machine regenerate-certs --force --client-certs {}",
+        machine.name
+    );
+    return Command::new(&raw, "", true);
+}
+
 pub fn machine_command(action: &str, machine_name: Option<&str>) -> Command {
     let raw = match machine_name {
         Some(name) => format!("docker-machine {} {}", action, name),
@@ -26,12 +34,13 @@ pub fn machine_command(action: &str, machine_name: Option<&str>) -> Command {
     return Command::new(&raw, "", true);
 }
 
-pub fn update_certificates(machine: &DockerMachine) -> Command {
-    let raw = format!(
-        "docker-machine regenerate-certs --force --client-certs {}",
-        machine.name
-    );
+pub fn compose_command(action: &str, project_name: &str) -> Command {
+    let raw = format!("docker-compose --project-name {} {}", project_name, action);
     return Command::new(&raw, "", true);
+}
+
+pub fn compose_up(project_name: &str) -> Command {
+    return compose_command("up --detach", project_name);
 }
 
 pub fn generate_compose_file(file_path: &str, config: &Config) -> io::Result<()> {
@@ -42,13 +51,13 @@ pub fn generate_compose_file(file_path: &str, config: &Config) -> io::Result<()>
 pub fn generate_compose_text(config: &Config) -> String {
     let mut lines: Vec<String> = Vec::new();
 
-    lines.push("version:\"3\"".to_owned());
+    lines.push("version: '3'".to_owned());
 
     if let Some(volumes) = &config.docker_machine.volumes {
         lines.push(format!("volumes:"));
         for v in volumes {
             lines.push(format!("  {}:", v));
-            lines.push(format!("    external: {}", true));
+            lines.push(format!("    external: {}", false));
         }
     }
 
@@ -72,6 +81,8 @@ pub fn generate_compose_text(config: &Config) -> String {
         }
     }
 
+    lines.push(format!(""));
+
     return lines.join("\n");
 }
 
@@ -93,6 +104,10 @@ fn compose_service(name: &str, docker: &Docker) -> Vec<String> {
         for p in ports {
             lines.push(format!("      - {}", p));
         }
+    }
+
+    if let Some(working_dir) = &docker.working_dir {
+        lines.push(format!("    working_dir: {}", working_dir));
     }
 
     if let Some(volumes) = &docker.volumes {
@@ -185,50 +200,19 @@ mod test {
 
     #[test]
     fn test_generate_compose_text() {
-        let expect = r#"version:"3"
-volumes:
-  postgres_data:
-    external: true
-services:
-  postgres:
-    image: postgres:11.1-alpine
-    ports:
-      - 5432:5432
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    environment:
-      - POSTGRES_PASSWORD=secret
-  camellia:
-    image: camellia
-    build:
-      context: /Users/phamlequang/projects/flowers
-      dockerfile: camellia/Dockerfile
-    ports:
-      - 8000:8000
-    env_file:
-      - /Users/phamlequang/projects/flowers/camellia/.env
-    depends_on:
-      - postgres
-    command: cargo run
-    labels:
-      traefik.port=8000
-  lotus:
-    image: lotus
-    build:
-      context: /Users/phamlequang/projects/flowers
-      dockerfile: lotus/Dockerfile
-    ports:
-      - 8001:8001
-    env_file:
-      - /Users/phamlequang/projects/flowers/lotus/.env
-    depends_on:
-      - postgres
-    command: cargo run
-    labels:
-      traefik.port=8001"#;
-
         let config = Config::default();
         let result = generate_compose_text(&config);
+        let expect = fs::read_to_string("docker-compose.yml").unwrap();
         assert_eq!(result, expect);
+    }
+
+    #[test]
+    fn test_compose_up() {
+        let command = compose_up("turtle");
+        let expect = "docker-compose --project-name turtle up --detach";
+
+        assert_eq!(command.raw, expect);
+        assert!(command.dir.is_empty());
+        assert!(command.show);
     }
 }

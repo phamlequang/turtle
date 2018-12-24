@@ -32,6 +32,7 @@ pub struct Docker {
     pub image: String,
     pub build: Option<Vec<String>>,
     pub ports: Option<Vec<String>>,
+    pub working_dir: Option<String>,
     pub volumes: Option<Vec<String>>,
     pub environment: Option<Vec<String>>,
     pub env_file: Option<Vec<String>>,
