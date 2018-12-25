@@ -8,7 +8,14 @@ fn test_generate_terminate_instruction_quit() {
     let instruction = generator.generate_instruction("quit");
 
     assert!(instruction.should_terminate);
-    assert!(instruction.commands.is_empty());
+
+    let commands = &instruction.commands;
+    assert_eq!(commands.len(), 1);
+
+    let command = commands.first().unwrap();
+    assert_eq!(command.raw, "echo \"goodbye!\"");
+    assert!(command.dir.is_empty());
+    assert!(!command.show);
 }
 
 #[test]
@@ -18,7 +25,14 @@ fn test_generate_terminate_instruction_exit() {
     let instruction = generator.generate_instruction("exit");
 
     assert!(instruction.should_terminate);
-    assert!(instruction.commands.is_empty());
+
+    let commands = &instruction.commands;
+    assert_eq!(commands.len(), 1);
+
+    let command = commands.first().unwrap();
+    assert_eq!(command.raw, "echo \"goodbye!\"");
+    assert!(command.dir.is_empty());
+    assert!(!command.show);
 }
 
 #[test]
@@ -145,7 +159,7 @@ fn test_restart_docker_machine_instruction() {
 fn test_update_certificates_docker_machine_instruction() {
     let config = Config::default();
     let generator = Generator::new(config);
-    let instruction = generator.generate_instruction("machine gencerts");
+    let instruction = generator.generate_instruction("machine upcerts");
 
     assert!(!instruction.should_terminate);
 
@@ -154,42 +168,6 @@ fn test_update_certificates_docker_machine_instruction() {
 
     let command = commands.first().unwrap();
     let expect = "docker-machine regenerate-certs --force --client-certs turtle";
-    assert_eq!(command.raw, expect);
-    assert!(command.dir.is_empty());
-    assert!(command.show);
-}
-
-#[test]
-fn test_setup_docker_machine_instruction() {
-    let config = Config::default();
-    let generator = Generator::new(config);
-    let instruction = generator.generate_instruction("machine setup");
-
-    assert!(!instruction.should_terminate);
-
-    let commands = &instruction.commands;
-    assert_eq!(commands.len(), 3);
-
-    let command = commands.get(0).unwrap();
-    let expect = "docker-machine create \
-                  --driver virtualbox \
-                  --virtualbox-host-dns-resolver \
-                  --virtualbox-cpu-count 2 \
-                  --virtualbox-disk-size 16384 \
-                  --virtualbox-memory 4096 \
-                  turtle";
-    assert_eq!(command.raw, expect);
-    assert!(command.dir.is_empty());
-    assert!(command.show);
-
-    let command = commands.get(1).unwrap();
-    let expect = "docker-machine regenerate-certs --force --client-certs turtle";
-    assert_eq!(command.raw, expect);
-    assert!(command.dir.is_empty());
-    assert!(command.show);
-
-    let command = commands.get(2).unwrap();
-    let expect = "docker-machine ls";
     assert_eq!(command.raw, expect);
     assert!(command.dir.is_empty());
     assert!(command.show);

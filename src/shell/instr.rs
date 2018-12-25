@@ -1,7 +1,7 @@
 use super::cmd::Command;
 use super::docker;
 use super::git;
-use crate::config::{Config, DockerMachine};
+use crate::config::Config;
 
 #[derive(Debug)]
 pub struct Instruction {
@@ -22,12 +22,8 @@ impl Instruction {
     }
 
     pub fn terminate() -> Self {
-        return Self::new(Vec::new(), true);
-    }
-
-    pub fn echo(message: &str) -> Self {
-        let command = Command::echo(message);
-        return Self::new(vec![command], false);
+        let command = Command::echo("goodbye!");
+        return Self::new(vec![command], true);
     }
 
     pub fn change_directory(args: Vec<String>) -> Self {
@@ -58,62 +54,32 @@ impl Instruction {
 
     pub fn docker_machine(args: Vec<String>, config: &Config) -> Self {
         if let Some(action) = args.first() {
-            return Self::do_with_docker_machine(action, &config.docker_machine);
+            let machine = &config.docker_machine;
+            match action.as_ref() {
+                "create" => {
+                    let command = docker::create_machine(machine);
+                    return Self::new(vec![command], false);
+                }
+                "upcerts" => {
+                    let command = docker::update_certificates(machine);
+                    return Self::new(vec![command], false);
+                }
+                _ => {
+                    let raw = args.join(" ");
+                    let command = docker::machine_command(&raw, machine);
+                    return Self::new(vec![command], false);
+                }
+            }
         }
         return Self::do_nothing();
     }
 
-    pub fn do_with_docker_machine(action: &str, machine: &DockerMachine) -> Instruction {
-        match action {
-            "create" => {
-                let command = docker::create_machine(machine);
-                return Self::new(vec![command], false);
-            }
-            "list" | "ls" => {
-                let command = docker::machine_command("ls", None);
-                return Self::new(vec![command], false);
-            }
-            "restart" | "env" | "inspect" | "ip" | "kill" | "start" | "status" | "stop"
-            | "upgrade" | "url" | "version" | "rm" => {
-                let command = docker::machine_command(action, Some(&machine.name));
-                return Self::new(vec![command], false);
-            }
-            "upcerts" | "gencerts" | "regenerate-certs" => {
-                let command = docker::update_certificates(machine);
-                return Self::new(vec![command], false);
-            }
-            "setup" => {
-                let commands = vec![
-                    docker::create_machine(machine),
-                    docker::update_certificates(machine),
-                    docker::machine_command("ls", None),
-                ];
-                return Self::new(commands, false);
-            }
-            _ => {
-                let message = format!("--> unknown action [ {} ]", action);
-                return Self::echo(&message);
-            }
-        }
-    }
-
     pub fn docker_compose(args: Vec<String>, config: &Config) -> Self {
-        if let Some(action) = args.first() {
+        if !args.is_empty() {
             let project_name = &config.docker_machine.name;
-            match action.as_ref() {
-                "up" => {
-                    let command = docker::compose_up(&project_name);
-                    return Self::new(vec![command], false);
-                }
-                "down" => {
-                    let command = docker::compose_command(action, &project_name);
-                    return Self::new(vec![command], false);
-                }
-                _ => {
-                    let message = format!("--> unknown action [ {} ]", action);
-                    return Self::echo(&message);
-                }
-            }
+            let action = args.join(" ");
+            let command = docker::compose_command(&action, &project_name);
+            return Self::new(vec![command], false);
         }
         return Self::do_nothing();
     }
