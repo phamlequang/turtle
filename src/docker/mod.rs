@@ -45,7 +45,7 @@ pub fn compose_command(action: &str, project_name: &str) -> Command {
 }
 
 pub fn service_logs(service_name: &str, project_name: &str) -> Command {
-    let action = format!("logs -f --tail=100 {}", service_name);
+    let action = format!("logs --tail=100 {}", service_name);
     return compose_command(&action, project_name);
 }
 

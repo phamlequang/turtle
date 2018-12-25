@@ -57,7 +57,7 @@ fn test_compose_command() {
 #[test]
 fn test_service_logs() {
     let command = service_logs("lotus", "turtle");
-    let expect = Command::basic("docker-compose -p turtle logs -f --tail=100 lotus");
+    let expect = Command::basic("docker-compose -p turtle logs --tail=100 lotus");
     assert_eq!(command, expect);
 }
 
