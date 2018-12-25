@@ -51,7 +51,13 @@ fn test_machine_command() {
 fn test_compose_command() {
     let command = compose_command("up -d", "turtle");
     let expect = Command::basic("docker-compose -p turtle up -d");
+    assert_eq!(command, expect);
+}
 
+#[test]
+fn test_service_logs() {
+    let command = service_logs("lotus", "turtle");
+    let expect = Command::basic("docker-compose -p turtle logs --tail=100 lotus");
     assert_eq!(command, expect);
 }
 

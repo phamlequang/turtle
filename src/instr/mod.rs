@@ -4,14 +4,33 @@ mod test;
 use std::cmp::PartialEq;
 
 use super::cmd::Command;
-use super::config::Config;
-use super::docker;
-use super::git;
 
 #[derive(Debug)]
 pub struct Instruction {
     pub commands: Vec<Command>,
     pub should_terminate: bool,
+}
+
+impl Instruction {
+    pub fn new(commands: Vec<Command>, should_terminate: bool) -> Self {
+        return Self {
+            commands,
+            should_terminate,
+        };
+    }
+
+    pub fn basic(commands: Vec<Command>) -> Self {
+        return Self::new(commands, false);
+    }
+
+    pub fn skip() -> Self {
+        return Self::basic(Vec::new());
+    }
+
+    pub fn terminate() -> Self {
+        let command = Command::echo("goodbye!");
+        return Self::new(vec![command], true);
+    }
 }
 
 impl PartialEq for Instruction {
@@ -33,107 +52,5 @@ impl PartialEq for Instruction {
         }
 
         return true;
-    }
-}
-
-impl Instruction {
-    pub fn new(commands: Vec<Command>, should_terminate: bool) -> Self {
-        return Self {
-            commands,
-            should_terminate,
-        };
-    }
-
-    pub fn do_nothing() -> Self {
-        return Self::new(Vec::new(), false);
-    }
-
-    pub fn terminate() -> Self {
-        let command = Command::echo("goodbye!");
-        return Self::new(vec![command], true);
-    }
-
-    pub fn change_directory(args: Vec<String>) -> Self {
-        if let Some(dir) = args.first() {
-            let command = Command::new("", &dir, false);
-            return Self::new(vec![command], false);
-        }
-        return Self::do_nothing();
-    }
-
-    pub fn clone_repositories(args: Vec<String>, config: &Config) -> Self {
-        if args.is_empty() {
-            return Self::do_nothing();
-        }
-
-        let mut commands: Vec<Command> = Vec::with_capacity(args.len());
-        for name in &args {
-            if let Some(repository) = config.search_repository(name) {
-                commands.push(git::clone_repository(repository));
-            } else {
-                let message = format!("--> unknown repository [ {} ]", name);
-                commands.push(Command::echo(&message));
-            }
-        }
-
-        return Self::new(commands, false);
-    }
-
-    pub fn docker_machine(args: Vec<String>, config: &Config) -> Self {
-        if let Some(action) = args.first() {
-            let machine = &config.docker_machine;
-            match action.as_ref() {
-                "create" => {
-                    let command = docker::create_machine(machine);
-                    return Self::new(vec![command], false);
-                }
-                "upcerts" => {
-                    let command = docker::update_certificates(machine);
-                    return Self::new(vec![command], false);
-                }
-                "load" => {
-                    let command = docker::load_environments(&machine);
-                    return Self::new(vec![command], false);
-                }
-                _ => {
-                    let raw = args.join(" ");
-                    let command = docker::machine_command(&raw, machine);
-                    return Self::new(vec![command], false);
-                }
-            }
-        }
-        return Self::do_nothing();
-    }
-
-    pub fn docker(args: Vec<String>) -> Self {
-        if let Some(action) = args.first() {
-            match action.as_ref() {
-                "ps" => {
-                    let command = docker::list_containers();
-                    return Self::new(vec![command], false);
-                }
-                _ => {
-                    let raw = args.join(" ");
-                    let command = docker::docker_command(&raw);
-                    return Self::new(vec![command], false);
-                }
-            }
-        }
-        return Self::do_nothing();
-    }
-
-    pub fn docker_compose(args: Vec<String>, config: &Config) -> Self {
-        if !args.is_empty() {
-            let project_name = &config.docker_machine.name;
-            let action = args.join(" ");
-            let command = docker::compose_command(&action, &project_name);
-            return Self::new(vec![command], false);
-        }
-        return Self::do_nothing();
-    }
-
-    pub fn other(raw: &str) -> Self {
-        let command = Command::new(raw, "", false);
-        return Self::new(vec![command], false);
     }
 }
