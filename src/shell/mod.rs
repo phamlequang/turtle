@@ -1,54 +1,95 @@
 #[cfg(test)]
 mod test;
 
-mod cmd;
-mod docker;
-mod git;
-mod instr;
+use super::cmd::Command;
+use super::instr::Instruction;
 
-use self::instr::Instruction;
-use super::config::*;
+use std::env;
+use std::io;
+use std::io::Write;
+use std::path::Path;
+use subprocess;
 
-const QUIT: &str = "quit";
-const EXIT: &str = "exit";
-const CLONE: &str = "clone";
-const CD: &str = "cd";
-const MACHINE: &str = "machine";
-const COMPOSE: &str = "compose";
-
-#[derive(Debug)]
-pub struct Generator {
-    config: Config,
+// Return current directory if success, or empty string if failure
+pub fn current_directory() -> String {
+    if let Ok(path) = env::current_dir() {
+        if let Some(s) = path.to_str() {
+            return s.to_owned();
+        }
+    }
+    return "".to_owned();
 }
 
-impl Generator {
-    pub fn new(config: Config) -> Generator {
-        return Self { config };
+// Change to a specific directory, return true if success
+pub fn change_directory(dir: &str) -> bool {
+    if dir.is_empty() {
+        return true;
     }
 
-    pub fn generate_docker_compose_file(&self, file_path: &str) {
-        if let Err(e) = docker::generate_compose_file(file_path, &self.config) {
-            println!("--> failed to generate docker-compose file: {}", e);
-        }
+    let path = Path::new(dir);
+    if let Err(e) = env::set_current_dir(path) {
+        println!(
+            "--> cannot change directory to [ {} ]: {}",
+            path.display(),
+            e
+        );
+        return false;
     }
 
-    // Takes a raw instruction string, returns a list of instructions to execute
-    pub fn generate_instruction(&self, raw: &str) -> Instruction {
-        let mut tokens = raw.trim().split_whitespace();
+    return true;
+}
 
-        if let Some(program) = tokens.next() {
-            let args: Vec<String> = tokens.map(|t| t.to_owned()).collect();
+// Execute command as a child process and wait for it to finish, return true if success
+pub fn run_command(command: &Command) -> bool {
+    let ok = change_directory(&command.dir);
+    let raw = &command.raw;
 
-            match program {
-                QUIT | EXIT => return Instruction::terminate(),
-                CD => return Instruction::change_directory(args),
-                CLONE => return Instruction::clone_repositories(args, &self.config),
-                MACHINE => return Instruction::docker_machine(args, &self.config),
-                COMPOSE => return Instruction::docker_compose(args, &self.config),
-                _ => return Instruction::other(raw),
+    if !ok || raw.is_empty() {
+        println!();
+        return true;
+    }
+
+    if command.show {
+        println!("$ {}", raw);
+    }
+
+    let result = subprocess::Exec::shell(raw).join();
+    match result {
+        Ok(status) => {
+            if status.success() {
+                println!();
+                return true;
             }
+            println!("--> failed with exit status = {:?}\n", status);
         }
-
-        return Instruction::do_nothing();
+        Err(e) => {
+            println!("--> execute error: {}\n", e);
+        }
     }
+
+    return false;
+}
+
+// Executes all commands sequentially, stop immediately in case of failure, return true if success
+pub fn run_instruction(instruction: &Instruction) -> bool {
+    for cmd in &instruction.commands {
+        let success = run_command(cmd);
+        if !success {
+            return false;
+        }
+    }
+    return true;
+}
+
+// Prompt current directory and read a new line from stdin
+pub fn prompt() -> String {
+    print!("{} ~ ", current_directory());
+    io::stdout().flush().unwrap();
+
+    let mut line = String::new();
+    if let Err(e) = io::stdin().read_line(&mut line) {
+        println!("failed to read line: {}", e);
+    }
+
+    return line;
 }
