@@ -13,6 +13,16 @@ fn test_new_command() {
 }
 
 #[test]
+fn test_basic_command() {
+    let raw = "cat test.txt";
+    let command = Command::basic(raw);
+
+    assert_eq!(command.raw, raw);
+    assert_eq!(command.dir, "");
+    assert_eq!(command.show, false);
+}
+
+#[test]
 fn test_echo_command() {
     let command = Command::echo("hello, i'm turtle");
     let expect = r#"echo "hello, i'm turtle""#;

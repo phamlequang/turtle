@@ -123,3 +123,29 @@ fn test_docker_machine_load_environment() {
     let expect = docker::load_environments(&machine);
     assert_eq!(&commands[0], &expect);
 }
+
+#[test]
+fn test_docker_list_containers() {
+    let args = vec!["ps".to_owned()];
+    let instruction = Instruction::docker(args);
+    assert!(!instruction.should_terminate);
+
+    let commands = &instruction.commands;
+    assert_eq!(commands.len(), 1);
+
+    let expect = docker::list_containers();
+    assert_eq!(&commands[0], &expect);
+}
+
+#[test]
+fn test_docker_images() {
+    let args = vec!["images".to_owned()];
+    let instruction = Instruction::docker(args);
+    assert!(!instruction.should_terminate);
+
+    let commands = &instruction.commands;
+    assert_eq!(commands.len(), 1);
+
+    let expect = docker::docker_command("images");
+    assert_eq!(&commands[0], &expect);
+}

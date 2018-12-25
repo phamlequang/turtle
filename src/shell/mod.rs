@@ -50,8 +50,9 @@ pub fn run_command(command: &Command) -> bool {
     }
 
     if command.show {
-        println!("$ {}", raw);
+        println!("\n$ {}", raw);
     }
+    println!();
 
     let result = subprocess::Exec::shell(raw).join();
     match result {

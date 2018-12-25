@@ -11,6 +11,7 @@ const CLONE: &str = "clone";
 const CD: &str = "cd";
 const MACHINE: &str = "machine";
 const COMPOSE: &str = "compose";
+const DOCKER: &str = "docker";
 
 #[derive(Debug)]
 pub struct Generator<'a> {
@@ -41,6 +42,7 @@ impl<'a> Generator<'a> {
                 CLONE => return Instruction::clone_repositories(args, &self.config),
                 MACHINE => return Instruction::docker_machine(args, &self.config),
                 COMPOSE => return Instruction::docker_compose(args, &self.config),
+                DOCKER => return Instruction::docker(args),
                 _ => return Instruction::other(raw),
             }
         }

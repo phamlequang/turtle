@@ -105,6 +105,23 @@ impl Instruction {
         return Self::do_nothing();
     }
 
+    pub fn docker(args: Vec<String>) -> Self {
+        if let Some(action) = args.first() {
+            match action.as_ref() {
+                "ps" => {
+                    let command = docker::list_containers();
+                    return Self::new(vec![command], false);
+                }
+                _ => {
+                    let raw = args.join(" ");
+                    let command = docker::docker_command(&raw);
+                    return Self::new(vec![command], false);
+                }
+            }
+        }
+        return Self::do_nothing();
+    }
+
     pub fn docker_compose(args: Vec<String>, config: &Config) -> Self {
         if !args.is_empty() {
             let project_name = &config.docker_machine.name;
