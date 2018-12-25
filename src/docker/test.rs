@@ -5,17 +5,19 @@ fn test_create_machine() {
     let machine = DockerMachine::default();
 
     let command = create_machine(&machine);
-    let expect = "docker-machine create \
-                  --driver virtualbox \
-                  --virtualbox-host-dns-resolver \
-                  --virtualbox-cpu-count 2 \
-                  --virtualbox-disk-size 16384 \
-                  --virtualbox-memory 4096 \
-                  turtle";
+    let expect = Command::new(
+        "docker-machine create \
+         --driver virtualbox \
+         --virtualbox-host-dns-resolver \
+         --virtualbox-cpu-count 2 \
+         --virtualbox-disk-size 16384 \
+         --virtualbox-memory 4096 \
+         turtle",
+        "",
+        true,
+    );
 
-    assert_eq!(command.raw, expect);
-    assert!(command.dir.is_empty());
-    assert!(command.show);
+    assert_eq!(command, expect);
 }
 
 #[test]
@@ -23,11 +25,22 @@ fn test_update_certificates() {
     let machine = DockerMachine::default();
 
     let command = update_certificates(&machine);
-    let expect = "docker-machine regenerate-certs --force --client-certs turtle";
+    let expect = Command::new(
+        "docker-machine regenerate-certs --force --client-certs turtle",
+        "",
+        true,
+    );
 
-    assert_eq!(command.raw, expect);
-    assert!(command.dir.is_empty());
-    assert!(command.show);
+    assert_eq!(command, expect);
+}
+
+#[test]
+fn test_load_environments() {
+    let machine = DockerMachine::default();
+
+    let command = load_environments(&machine);
+    let expect = Command::new("eval \"$(docker-machine env turtle)\"", "", true);
+    assert_eq!(command, expect);
 }
 
 #[test]
@@ -35,21 +48,17 @@ fn test_machine_command() {
     let machine = DockerMachine::default();
 
     let command = machine_command("restart", &machine);
-    let expect = "docker-machine restart turtle";
+    let expect = Command::new("docker-machine restart turtle", "", true);
 
-    assert_eq!(command.raw, expect);
-    assert!(command.dir.is_empty());
-    assert!(command.show);
+    assert_eq!(command, expect);
 }
 
 #[test]
 fn test_compose_command() {
     let command = compose_command("up -d", "turtle");
-    let expect = "docker-compose -p turtle up -d";
+    let expect = Command::new("docker-compose -p turtle up -d", "", true);
 
-    assert_eq!(command.raw, expect);
-    assert!(command.dir.is_empty());
-    assert!(command.show);
+    assert_eq!(command, expect);
 }
 
 #[test]
