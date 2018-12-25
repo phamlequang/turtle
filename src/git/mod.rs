@@ -1,5 +1,5 @@
 use super::cmd::Command;
-use crate::config::Repository;
+use super::config::Repository;
 
 pub fn clone(repository: &Repository) -> Command {
     let raw = format!("git clone {} {}", repository.remote, repository.local);

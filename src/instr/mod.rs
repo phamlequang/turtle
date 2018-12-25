@@ -1,7 +1,7 @@
 use super::cmd::Command;
+use super::config::Config;
 use super::docker;
 use super::git;
-use crate::config::Config;
 
 #[derive(Debug)]
 pub struct Instruction {
@@ -87,15 +87,5 @@ impl Instruction {
     pub fn other(raw: &str) -> Self {
         let command = Command::new(raw, "", false);
         return Self::new(vec![command], false);
-    }
-
-    // Executes all commands sequentially, stop immediately in case of failure
-    pub fn execute(&self) {
-        for cmd in &self.commands {
-            let success = cmd.execute();
-            if !success {
-                return;
-            }
-        }
     }
 }
