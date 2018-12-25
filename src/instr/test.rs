@@ -109,20 +109,17 @@ fn test_docker_machine_update_certificates() {
 }
 
 #[test]
-fn test_docker_machine_start() {
+fn test_docker_machine_load_environment() {
     let config = Config::default();
     let machine = &config.docker_machine;
 
-    let args = vec!["start".to_owned()];
+    let args = vec!["load".to_owned()];
     let instruction = Instruction::docker_machine(args, &config);
     assert!(!instruction.should_terminate);
 
     let commands = &instruction.commands;
-    assert_eq!(commands.len(), 2);
-
-    let expect = docker::machine_command("start", machine);
-    assert_eq!(&commands[0], &expect);
+    assert_eq!(commands.len(), 1);
 
     let expect = docker::load_environments(&machine);
-    assert_eq!(&commands[1], &expect);
+    assert_eq!(&commands[0], &expect);
 }
