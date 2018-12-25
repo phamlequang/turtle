@@ -4,10 +4,10 @@ mod docker;
 mod gen;
 mod git;
 mod instr;
+mod prompt;
 mod shell;
 
 use ctrlc;
-use rustyline::Editor;
 
 const CONFIG_FILE: &str = "turtle.toml";
 const COMPOSE_FILE: &str = "docker-compose.yml";
@@ -21,11 +21,11 @@ pub fn run() {
 
     ctrlc::set_handler(|| ()).expect("error setting ctrl-c handler");
 
-    let mut editor = Editor::<()>::new();
+    let mut prompt = prompt::Prompt::new();
     let mut stop = false;
 
     while !stop {
-        let line = shell::prompt(&mut editor);
+        let line = prompt.read_line();
 
         let instruction = generator.generate_instruction(&line);
         shell::run_instruction(&instruction);
