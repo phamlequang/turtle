@@ -13,7 +13,7 @@ const COMPOSE_FILE: &str = "docker-compose.yml";
 pub fn run() {
     let config = config::Config::load(CONFIG_FILE).unwrap();
 
-    let generator = gen::Generator::new(config);
+    let generator = gen::Generator::new(&config);
     generator.generate_docker_compose_file(COMPOSE_FILE);
 
     let mut stop = false;

@@ -1,3 +1,8 @@
+#[cfg(test)]
+mod test;
+
+use std::cmp::PartialEq;
+
 use super::cmd::Command;
 use super::config::Config;
 use super::docker;
@@ -7,6 +12,28 @@ use super::git;
 pub struct Instruction {
     pub commands: Vec<Command>,
     pub should_terminate: bool,
+}
+
+impl PartialEq for Instruction {
+    // Check if 2 instructions are identical or not
+    fn eq(&self, other: &Self) -> bool {
+        if self.should_terminate != other.should_terminate {
+            return false;
+        }
+
+        if self.commands.len() != other.commands.len() {
+            return false;
+        }
+
+        for (i, cmd1) in self.commands.iter().enumerate() {
+            let cmd2 = &other.commands[i];
+            if cmd1 != cmd2 {
+                return false;
+            }
+        }
+
+        return true;
+    }
 }
 
 impl Instruction {
@@ -42,7 +69,7 @@ impl Instruction {
         let mut commands: Vec<Command> = Vec::with_capacity(args.len());
         for name in &args {
             if let Some(repository) = config.search_repository(name) {
-                commands.push(git::clone(repository));
+                commands.push(git::clone_repository(repository));
             } else {
                 let message = format!("--> unknown repository [ {} ]", name);
                 commands.push(Command::echo(&message));

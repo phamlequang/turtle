@@ -2,173 +2,91 @@ use super::*;
 use crate::config::Config;
 
 #[test]
-fn test_generate_terminate_instruction_quit() {
+fn test_generate_instruction_terminate() {
     let config = Config::new();
-    let generator = Generator::new(config);
+    let generator = Generator::new(&config);
+
+    let expect = Instruction::terminate();
+
     let instruction = generator.generate_instruction("quit");
+    assert_eq!(instruction, expect);
 
-    assert!(instruction.should_terminate);
-
-    let commands = &instruction.commands;
-    assert_eq!(commands.len(), 1);
-
-    let command = commands.first().unwrap();
-    assert_eq!(command.raw, "echo \"goodbye!\"");
-    assert!(command.dir.is_empty());
-    assert!(!command.show);
-}
-
-#[test]
-fn test_generate_terminate_instruction_exit() {
-    let config = Config::new();
-    let generator = Generator::new(config);
     let instruction = generator.generate_instruction("exit");
-
-    assert!(instruction.should_terminate);
-
-    let commands = &instruction.commands;
-    assert_eq!(commands.len(), 1);
-
-    let command = commands.first().unwrap();
-    assert_eq!(command.raw, "echo \"goodbye!\"");
-    assert!(command.dir.is_empty());
-    assert!(!command.show);
+    assert_eq!(instruction, expect);
 }
 
 #[test]
-fn test_generate_other_instruction() {
+fn test_generate_instruction_other() {
     let config = Config::new();
-    let generator = Generator::new(config);
-    let instruction = generator.generate_instruction("ls -la");
+    let generator = Generator::new(&config);
 
-    assert!(!instruction.should_terminate);
+    let raw = "ls -la";
+    let instruction = generator.generate_instruction(raw);
+    let expect = Instruction::other(raw);
 
-    let commands = &instruction.commands;
-    assert_eq!(commands.len(), 1);
-
-    let command = commands.first().unwrap();
-    assert_eq!(command.raw, "ls -la");
-    assert!(command.dir.is_empty());
-    assert!(!command.show);
+    assert_eq!(instruction, expect);
 }
 
 #[test]
-fn test_generate_clone_instruction() {
+fn test_generate_instruction_clone() {
     let config = Config::default();
-    let generator = Generator::new(config);
-    let instruction = generator.generate_instruction("clone flowers tree");
+    let generator = Generator::new(&config);
 
-    assert!(!instruction.should_terminate);
+    let raw = "clone flowers tree";
+    let instruction = generator.generate_instruction(raw);
 
-    let commands = &instruction.commands;
-    assert_eq!(commands.len(), 2);
+    let args = vec!["flowers".to_owned(), "tree".to_owned()];
+    let expect = Instruction::clone_repositories(args, &config);
 
-    let cmd1 = commands.first().unwrap();
-    let expect = "git clone \
-                  git@gitlab.com:phamlequang/flowers.git \
-                  /Users/phamlequang/projects/flowers";
-    assert_eq!(cmd1.raw, expect);
-    assert!(cmd1.dir.is_empty());
-    assert!(cmd1.show);
-
-    let cmd2 = commands.last().unwrap();
-    let expect = "echo \"--> unknown repository [ tree ]\"";
-    assert_eq!(cmd2.raw, expect);
-    assert!(cmd2.dir.is_empty());
-    assert!(!cmd2.show);
+    assert_eq!(instruction, expect);
 }
 
 #[test]
-fn test_change_directory_instruction() {
+fn test_generate_instruction_change_directory() {
     let config = Config::new();
-    let generator = Generator::new(config);
+    let generator = Generator::new(&config);
+
     let instruction = generator.generate_instruction("cd ..");
+    let expect = Instruction::change_directory(vec!["..".to_owned()]);
 
-    assert!(!instruction.should_terminate);
-
-    let commands = &instruction.commands;
-    assert_eq!(commands.len(), 1);
-
-    let command = commands.first().unwrap();
-    assert!(command.raw.is_empty());
-    assert_eq!(command.dir, "..");
-    assert!(!command.show);
+    assert_eq!(instruction, expect);
 }
 
 #[test]
-fn test_create_docker_machine_instruction() {
+fn test_generate_instruction_machine_create() {
     let config = Config::default();
-    let generator = Generator::new(config);
+
+    let generator = Generator::new(&config);
     let instruction = generator.generate_instruction("machine create");
 
-    assert!(!instruction.should_terminate);
+    let args = vec!["create".to_owned()];
+    let expect = Instruction::docker_machine(args, &config);
 
-    let commands = &instruction.commands;
-    assert_eq!(commands.len(), 1);
-
-    let command = commands.first().unwrap();
-    let expect = "docker-machine create \
-                  --driver virtualbox \
-                  --virtualbox-host-dns-resolver \
-                  --virtualbox-cpu-count 2 \
-                  --virtualbox-disk-size 16384 \
-                  --virtualbox-memory 4096 \
-                  turtle";
-    assert_eq!(command.raw, expect);
-    assert!(command.dir.is_empty());
-    assert!(command.show);
+    assert_eq!(instruction, expect);
 }
 
 #[test]
-fn test_remove_docker_machine_instruction() {
+fn test_generate_instruction_machine_remove() {
     let config = Config::default();
-    let generator = Generator::new(config);
+
+    let generator = Generator::new(&config);
     let instruction = generator.generate_instruction("machine rm");
 
-    assert!(!instruction.should_terminate);
+    let args = vec!["rm".to_owned()];
+    let expect = Instruction::docker_machine(args, &config);
 
-    let commands = &instruction.commands;
-    assert_eq!(commands.len(), 1);
-
-    let command = commands.first().unwrap();
-    let expect = "docker-machine rm turtle";
-    assert_eq!(command.raw, expect);
-    assert!(command.dir.is_empty());
-    assert!(command.show);
+    assert_eq!(instruction, expect);
 }
 
 #[test]
-fn test_restart_docker_machine_instruction() {
+fn test_generate_instruction_machine_update_certificates() {
     let config = Config::default();
-    let generator = Generator::new(config);
-    let instruction = generator.generate_instruction("machine restart");
 
-    assert!(!instruction.should_terminate);
-
-    let commands = &instruction.commands;
-    assert_eq!(commands.len(), 1);
-
-    let command = commands.first().unwrap();
-    let expect = "docker-machine restart turtle";
-    assert_eq!(command.raw, expect);
-    assert!(command.dir.is_empty());
-    assert!(command.show);
-}
-
-#[test]
-fn test_update_certificates_docker_machine_instruction() {
-    let config = Config::default();
-    let generator = Generator::new(config);
+    let generator = Generator::new(&config);
     let instruction = generator.generate_instruction("machine upcerts");
 
-    assert!(!instruction.should_terminate);
+    let args = vec!["upcerts".to_owned()];
+    let expect = Instruction::docker_machine(args, &config);
 
-    let commands = &instruction.commands;
-    assert_eq!(commands.len(), 1);
-
-    let command = commands.first().unwrap();
-    let expect = "docker-machine regenerate-certs --force --client-certs turtle";
-    assert_eq!(command.raw, expect);
-    assert!(command.dir.is_empty());
-    assert!(command.show);
+    assert_eq!(instruction, expect);
 }

@@ -13,12 +13,12 @@ const MACHINE: &str = "machine";
 const COMPOSE: &str = "compose";
 
 #[derive(Debug)]
-pub struct Generator {
-    config: Config,
+pub struct Generator<'a> {
+    config: &'a Config,
 }
 
-impl Generator {
-    pub fn new(config: Config) -> Generator {
+impl<'a> Generator<'a> {
+    pub fn new(config: &'a Config) -> Generator {
         return Self { config };
     }
 

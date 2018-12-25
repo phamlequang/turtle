@@ -147,4 +147,3 @@ fn compose_service(name: &str, docker: &Docker) -> Vec<String> {
 
     return lines;
 }
-
