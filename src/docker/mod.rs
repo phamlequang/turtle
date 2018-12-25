@@ -18,7 +18,7 @@ pub fn create_machine(machine: &DockerMachine) -> Command {
          {}",
         machine.cpu_count, machine.disk_size, machine.memory, machine.name
     );
-    return Command::new(&raw, "", true);
+    return Command::basic(&raw);
 }
 
 pub fn update_certificates(machine: &DockerMachine) -> Command {
@@ -26,22 +26,34 @@ pub fn update_certificates(machine: &DockerMachine) -> Command {
         "docker-machine regenerate-certs --force --client-certs {}",
         machine.name
     );
-    return Command::new(&raw, "", true);
+    return Command::basic(&raw);
 }
 
 pub fn load_environments(machine: &DockerMachine) -> Command {
     let raw = format!("eval \"$(docker-machine env {})\"", machine.name);
-    return Command::new(&raw, "", true);
+    return Command::basic(&raw);
 }
 
 pub fn machine_command(action: &str, machine: &DockerMachine) -> Command {
     let raw = format!("docker-machine {} {}", action, machine.name);
-    return Command::new(&raw, "", true);
+    return Command::basic(&raw);
 }
 
 pub fn compose_command(action: &str, project_name: &str) -> Command {
     let raw = format!("docker-compose -p {} {}", project_name, action);
-    return Command::new(&raw, "", true);
+    return Command::basic(&raw);
+}
+
+pub fn docker_command(action: &str) -> Command {
+    let raw = format!("docker {}", action);
+    return Command::basic(&raw);
+}
+
+pub fn list_containers() -> Command {
+    let action = "ps -a --format \"table \
+                  {{.Names}}\t{{.Image}}\t{{.Size}}\t\
+                  {{.CreatedAt}}\t{{.Status}}\"";
+    return docker_command(action);
 }
 
 pub fn generate_compose_file(file_path: &str, config: &Config) -> io::Result<()> {

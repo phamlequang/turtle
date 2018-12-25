@@ -26,6 +26,10 @@ impl Command {
         };
     }
 
+    pub fn basic(raw: &str) -> Self {
+        return Self::new(&raw, "", false);
+    }
+
     pub fn echo(message: &str) -> Self {
         let raw = format!("echo \"{}\"", message);
         return Self::new(&raw, "", false);

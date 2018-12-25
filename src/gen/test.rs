@@ -90,3 +90,16 @@ fn test_generate_instruction_machine_update_certificates() {
 
     assert_eq!(instruction, expect);
 }
+
+#[test]
+fn test_generate_instruction_docker_ps() {
+    let config = Config::default();
+
+    let generator = Generator::new(&config);
+    let instruction = generator.generate_instruction("docker ps");
+
+    let args = vec!["ps".to_owned()];
+    let expect = Instruction::docker(args);
+
+    assert_eq!(instruction, expect);
+}
