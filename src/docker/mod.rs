@@ -29,6 +29,11 @@ pub fn update_certificates(machine: &DockerMachine) -> Command {
     return Command::new(&raw, "", true);
 }
 
+pub fn load_environments(machine: &DockerMachine) -> Command {
+    let raw = format!("eval \"$(docker-machine env {})\"", machine.name);
+    return Command::new(&raw, "", true);
+}
+
 pub fn machine_command(action: &str, machine: &DockerMachine) -> Command {
     let raw = format!("docker-machine {} {}", action, machine.name);
     return Command::new(&raw, "", true);

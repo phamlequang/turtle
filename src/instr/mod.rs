@@ -91,6 +91,13 @@ impl Instruction {
                     let command = docker::update_certificates(machine);
                     return Self::new(vec![command], false);
                 }
+                "start" => {
+                    let commands = vec![
+                        docker::machine_command("start", machine),
+                        docker::load_environments(&machine),
+                    ];
+                    return Self::new(commands, false);
+                }
                 _ => {
                     let raw = args.join(" ");
                     let command = docker::machine_command(&raw, machine);

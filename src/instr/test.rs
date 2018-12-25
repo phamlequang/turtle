@@ -15,7 +15,7 @@ fn test_terminate() {
     let commands = &instruction.commands;
     assert_eq!(commands.len(), 1);
 
-    let expect = Command::new("echo \"goodbye!\"", "", false);
+    let expect = Command::echo("goodbye!");
     assert_eq!(&commands[0], &expect);
 }
 
@@ -42,16 +42,11 @@ fn test_clone_repository() {
     let commands = &instruction.commands;
     assert_eq!(commands.len(), 2);
 
-    let expect = Command::new(
-        "git clone -b master \
-         git@gitlab.com:phamlequang/flowers.git \
-         /Users/phamlequang/projects/flowers",
-        "",
-        true,
-    );
+    let repository = config.search_repository("flowers").unwrap();
+    let expect = git::clone_repository(repository);
     assert_eq!(&commands[0], &expect);
 
-    let expect = Command::new("echo \"--> unknown repository [ tree ]\"", "", false);
+    let expect = Command::echo("--> unknown repository [ tree ]");
     assert_eq!(&commands[1], &expect);
 }
 
@@ -79,17 +74,7 @@ fn test_docker_machine_create() {
     let commands = &instruction.commands;
     assert_eq!(commands.len(), 1);
 
-    let expect = Command::new(
-        "docker-machine create \
-         --driver virtualbox \
-         --virtualbox-host-dns-resolver \
-         --virtualbox-cpu-count 2 \
-         --virtualbox-disk-size 16384 \
-         --virtualbox-memory 4096 \
-         turtle",
-        "",
-        true,
-    );
+    let expect = docker::create_machine(&config.docker_machine);
     assert_eq!(&commands[0], &expect);
 }
 
@@ -104,7 +89,7 @@ fn test_docker_machine_remove() {
     let commands = &instruction.commands;
     assert_eq!(commands.len(), 1);
 
-    let expect = Command::new("docker-machine rm turtle", "", true);
+    let expect = docker::machine_command("rm", &config.docker_machine);
     assert_eq!(&commands[0], &expect);
 }
 
@@ -119,10 +104,25 @@ fn test_docker_machine_update_certificates() {
     let commands = &instruction.commands;
     assert_eq!(commands.len(), 1);
 
-    let expect = Command::new(
-        "docker-machine regenerate-certs --force --client-certs turtle",
-        "",
-        true,
-    );
+    let expect = docker::update_certificates(&config.docker_machine);
     assert_eq!(&commands[0], &expect);
+}
+
+#[test]
+fn test_docker_machine_start() {
+    let config = Config::default();
+    let machine = &config.docker_machine;
+
+    let args = vec!["start".to_owned()];
+    let instruction = Instruction::docker_machine(args, &config);
+    assert!(!instruction.should_terminate);
+
+    let commands = &instruction.commands;
+    assert_eq!(commands.len(), 2);
+
+    let expect = docker::machine_command("start", machine);
+    assert_eq!(&commands[0], &expect);
+
+    let expect = docker::load_environments(&machine);
+    assert_eq!(&commands[1], &expect);
 }
