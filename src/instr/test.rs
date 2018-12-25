@@ -90,7 +90,7 @@ fn test_docker_machine_create() {
         "",
         true,
     );
-    assert_eq!(&commands[1], &expect);
+    assert_eq!(&commands[0], &expect);
 }
 
 #[test]
