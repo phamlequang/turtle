@@ -27,8 +27,8 @@ impl<'a> Generator<'a> {
     }
 
     pub fn generate_docker_compose_file(&self, file_path: &str) {
-        if let Err(e) = docker::generate_compose_file(file_path, &self.config) {
-            println!("--> failed to generate docker-compose file: {}", e);
+        if let Err(err) = docker::generate_compose_file(file_path, &self.config) {
+            println!("--> failed to generate docker-compose file: {}", err);
         }
     }
 

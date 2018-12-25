@@ -99,14 +99,14 @@ impl Config {
     pub fn load(file_path: &str) -> Result<Self, io::Error> {
         match fs::read_to_string(file_path) {
             Ok(toml_text) => return Self::parse(&toml_text),
-            Err(e) => return Err(e),
+            Err(err) => return Err(err),
         }
     }
 
     pub fn parse(toml_text: &str) -> Result<Self, io::Error> {
         match toml::from_str(&toml_text) {
             Ok(config) => return Ok(config),
-            Err(e) => return Err(io::Error::new(io::ErrorKind::InvalidData, e)),
+            Err(err) => return Err(io::Error::new(io::ErrorKind::InvalidData, err)),
         }
     }
 

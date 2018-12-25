@@ -5,10 +5,10 @@ use super::cmd::Command;
 use super::instr::Instruction;
 
 use std::env;
-use std::io;
-use std::io::Write;
 use std::path::Path;
 use subprocess;
+
+use rustyline::Editor;
 
 // Return current directory if success, or empty string if failure
 pub fn current_directory() -> String {
@@ -27,11 +27,11 @@ pub fn change_directory(dir: &str) -> bool {
     }
 
     let path = Path::new(dir);
-    if let Err(e) = env::set_current_dir(path) {
+    if let Err(err) = env::set_current_dir(path) {
         println!(
             "--> cannot change directory to [ {} ]: {}",
             path.display(),
-            e
+            err
         );
         return false;
     }
@@ -63,8 +63,8 @@ pub fn run_command(command: &Command) -> bool {
             }
             println!("--> failed with exit status = {:?}\n", status);
         }
-        Err(e) => {
-            println!("--> execute error: {}\n", e);
+        Err(err) => {
+            println!("--> execute error: {}\n", err);
         }
     }
 
@@ -83,14 +83,14 @@ pub fn run_instruction(instruction: &Instruction) -> bool {
 }
 
 // Prompt current directory and read a new line from stdin
-pub fn prompt() -> String {
-    print!("{} ~ ", current_directory());
-    io::stdout().flush().unwrap();
+pub fn prompt(editor: &mut Editor<()>) -> String {
+    let message = format!("{} ~ ", current_directory());
 
-    let mut line = String::new();
-    if let Err(e) = io::stdin().read_line(&mut line) {
-        println!("failed to read line: {}", e);
+    match editor.readline(&message) {
+        Ok(line) => {
+            editor.add_history_entry(line.as_ref());
+            return line;
+        }
+        Err(_) => return String::new(),
     }
-
-    return line;
 }

@@ -6,6 +6,9 @@ mod git;
 mod instr;
 mod shell;
 
+use ctrlc;
+use rustyline::Editor;
+
 const CONFIG_FILE: &str = "turtle.toml";
 const COMPOSE_FILE: &str = "docker-compose.yml";
 
@@ -16,10 +19,13 @@ pub fn run() {
     let generator = gen::Generator::new(&config);
     generator.generate_docker_compose_file(COMPOSE_FILE);
 
+    ctrlc::set_handler(|| ()).expect("error setting ctrl-c handler");
+
+    let mut editor = Editor::<()>::new();
     let mut stop = false;
 
     while !stop {
-        let line = shell::prompt();
+        let line = shell::prompt(&mut editor);
 
         let instruction = generator.generate_instruction(&line);
         shell::run_instruction(&instruction);
