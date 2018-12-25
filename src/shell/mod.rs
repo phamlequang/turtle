@@ -8,8 +8,6 @@ use std::env;
 use std::path::Path;
 use subprocess;
 
-use rustyline::Editor;
-
 // Return current directory if success, or empty string if failure
 pub fn current_directory() -> String {
     if let Ok(path) = env::current_dir() {
@@ -80,17 +78,4 @@ pub fn run_instruction(instruction: &Instruction) -> bool {
         }
     }
     return true;
-}
-
-// Prompt current directory and read a new line from stdin
-pub fn prompt(editor: &mut Editor<()>) -> String {
-    let message = format!("{} ~ ", current_directory());
-
-    match editor.readline(&message) {
-        Ok(line) => {
-            editor.add_history_entry(line.as_ref());
-            return line;
-        }
-        Err(_) => return String::new(),
-    }
 }
