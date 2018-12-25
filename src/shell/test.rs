@@ -23,7 +23,8 @@ fn test_run_command() {
 
 #[test]
 fn test_run_instruction() {
-    let instruction = Instruction::other("ls -la");
+    let command = Command::basic("ls -la");
+    let instruction = Instruction::basic(vec![command]);
     let success = run_instruction(&instruction);
     assert!(success);
 }

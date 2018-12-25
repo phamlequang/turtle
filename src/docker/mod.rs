@@ -44,6 +44,11 @@ pub fn compose_command(action: &str, project_name: &str) -> Command {
     return Command::basic(&raw);
 }
 
+pub fn service_logs(service_name: &str, project_name: &str) -> Command {
+    let action = format!("logs -f --tail=100 {}", service_name);
+    return compose_command(&action, project_name);
+}
+
 pub fn docker_command(action: &str) -> Command {
     let raw = format!("docker {}", action);
     return Command::basic(&raw);
