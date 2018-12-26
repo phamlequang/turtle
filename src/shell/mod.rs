@@ -5,8 +5,8 @@ use super::cmd::Command;
 use super::instr::Instruction;
 
 use std::env;
-use std::path::Path;
-use subprocess;
+use std::path::{Path, MAIN_SEPARATOR};
+use subprocess::{Exec, Redirection::Pipe};
 
 // Return current directory if success, or empty string if failure
 pub fn current_directory() -> String {
@@ -16,6 +16,49 @@ pub fn current_directory() -> String {
         }
     }
     return "".to_owned();
+}
+
+pub fn current_directory_shortened(max_len: usize) -> String {
+    let dir = current_directory();
+    if dir.len() <= max_len {
+        return dir;
+    }
+
+    let parts = dir.split(MAIN_SEPARATOR);
+    let mut dir = String::new();
+
+    for p in parts.rev() {
+        let len = dir.len();
+        if len == 0 {
+            dir = p.to_owned();
+            continue;
+        }
+
+        if len + p.len() >= max_len {
+            return dir;
+        }
+        dir = format!("{}{}{}", p, MAIN_SEPARATOR, dir)
+    }
+
+    return dir;
+}
+
+// Return current git branch of current directory if it is a git repository,
+// or empty string if it isn't
+pub fn current_git_branch() -> String {
+    let exec = Exec::shell("git branch").stdout(Pipe).stderr(Pipe);
+
+    if let Ok(data) = exec.capture() {
+        if data.success() {
+            for branch in data.stdout_str().lines() {
+                if branch.starts_with("*") {
+                    return branch.to_owned();
+                }
+            }
+        }
+    }
+
+    return String::new();
 }
 
 // Change to a specific directory, return true if success

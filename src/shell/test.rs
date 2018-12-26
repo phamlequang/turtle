@@ -1,7 +1,7 @@
 use super::*;
 
 #[test]
-fn test_change_directory() {
+fn test_change_and_current_directory() {
     let dir = current_directory();
     assert!(!dir.is_empty());
     assert!(dir.ends_with("turtle"));
@@ -9,8 +9,11 @@ fn test_change_directory() {
     let success = change_directory("src");
     assert!(success);
 
-    let dir = current_directory();
-    assert!(!dir.is_empty());
+    let max_len = 32;
+    let dir = current_directory_shortened(max_len);
+    let len = dir.len();
+    assert!(len >= 1);
+    assert!(len <= max_len);
     assert!(dir.ends_with("src"));
 }
 
