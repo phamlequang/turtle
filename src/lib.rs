@@ -11,6 +11,7 @@ use ctrlc;
 
 const CONFIG_FILE: &str = "turtle.toml";
 const COMPOSE_FILE: &str = "docker-compose.yml";
+const HISTORY_FILE: &str = ".history";
 
 // Run turtle shell
 pub fn run() {
@@ -22,8 +23,11 @@ pub fn run() {
     ctrlc::set_handler(|| ()).expect("error setting ctrl-c handler");
 
     let mut prompt = prompt::Prompt::new();
-    let mut stop = false;
 
+    prompt.load_history(HISTORY_FILE);
+    prompt.clear_screen();
+
+    let mut stop = false;
     while !stop {
         let line = prompt.read_line();
 
@@ -32,4 +36,6 @@ pub fn run() {
 
         stop = instruction.should_terminate;
     }
+
+    prompt.save_history(HISTORY_FILE);
 }
