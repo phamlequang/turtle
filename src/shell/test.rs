@@ -6,7 +6,7 @@ fn test_current_directory_shortened() {
     let dir = current_directory_shortened(max_len);
 
     let len = dir.len();
-    println!("len = {}", len);
+    println!("dir = {}, len = {}", dir, len);
     assert!(len >= 1);
     assert!(len <= max_len);
     assert!(dir.ends_with("turtle"));
