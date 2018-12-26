@@ -6,6 +6,7 @@ use rustyline::error::ReadlineError;
 use rustyline::highlight::Highlighter;
 use rustyline::hint::Hinter;
 use rustyline::{Cmd, CompletionType, Config, EditMode, Editor, Helper, KeyPress};
+use termion::{color, style};
 
 pub struct Prompt {
     editor: Editor<PromptHelper>,
@@ -34,7 +35,13 @@ impl Prompt {
 
     // Prompt current directory and read a new line from stdin
     pub fn read_line(&mut self) -> String {
-        let message = format!("{} ~ ", shell::current_directory());
+        let message = format!(
+            "{}{}{} ~ {}",
+            color::Fg(color::Blue),
+            style::Bold,
+            shell::current_directory(),
+            style::Reset
+        );
 
         match self.editor.readline(&message) {
             Ok(line) => {
