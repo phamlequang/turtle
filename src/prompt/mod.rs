@@ -8,6 +8,8 @@ use rustyline::hint::Hinter;
 use rustyline::{Cmd, CompletionType, Config, EditMode, Editor, Helper, KeyPress};
 use termion::{color, style};
 
+const CURRENT_DIR_MAX_LENGTH: usize = 20;
+
 pub struct Prompt {
     editor: Editor<PromptHelper>,
 }
@@ -50,13 +52,7 @@ impl Prompt {
 
     // Prompt current directory and read a new line from stdin
     pub fn read_line(&mut self) -> String {
-        let message = format!(
-            "{}{}{} ~ {}",
-            color::Fg(color::Blue),
-            style::Bold,
-            shell::current_directory(),
-            style::Reset
-        );
+        let message = self.message();
 
         match self.editor.readline(&message) {
             Ok(line) => {
@@ -65,6 +61,32 @@ impl Prompt {
             }
             Err(_) => return String::new(),
         }
+    }
+
+    pub fn message(&self) -> String {
+        let dir = shell::current_directory_shortened(CURRENT_DIR_MAX_LENGTH);
+        let branch = shell::current_git_branch();
+
+        let color_dir = format!("{}➜ {}", color::Fg(color::Cyan), dir);
+        if branch.is_empty() {
+            return format!(
+                "{}{} {} ~ {}",
+                style::Bold,
+                color_dir,
+                color::Fg(color::Blue),
+                style::Reset,
+            );
+        }
+
+        let color_branch = format!("{}{}", color::Fg(color::Green), branch);
+        return format!(
+            "{}{} {}{} ~ {}",
+            style::Bold,
+            color_dir,
+            color_branch,
+            color::Fg(color::Blue),
+            style::Reset,
+        );
     }
 }
 
