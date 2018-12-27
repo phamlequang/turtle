@@ -4,9 +4,12 @@ mod test;
 use super::cmd::Command;
 use super::instr::Instruction;
 
+use dirs;
 use std::env;
 use std::path::{Path, MAIN_SEPARATOR};
 use subprocess::{Exec, Redirection::Pipe};
+
+const TILDE: &str = "~";
 
 // Return current directory if success, or empty string if failure
 pub fn current_directory() -> String {
@@ -63,11 +66,13 @@ pub fn current_git_branch() -> String {
 
 // Change to a specific directory, return true if success
 pub fn change_directory(dir: &str) -> bool {
+    let dir = normalize_path(dir);
+
     if dir.is_empty() {
         return true;
     }
 
-    let path = Path::new(dir);
+    let path = Path::new(&dir);
     if let Err(err) = env::set_current_dir(path) {
         println!(
             "--> cannot change directory to [ {} ]: {}",
@@ -78,6 +83,23 @@ pub fn change_directory(dir: &str) -> bool {
     }
 
     return true;
+}
+
+pub fn normalize_path(path: &str) -> String {
+    let path = path.trim();
+    if path.starts_with(TILDE) {
+        return format!("{}{}", home_dir(), path.trim_start_matches(TILDE));
+    }
+    return path.to_owned();
+}
+
+pub fn home_dir() -> String {
+    if let Some(pb) = dirs::home_dir() {
+        if let Some(dir) = pb.to_str() {
+            return dir.to_owned();
+        }
+    }
+    return String::new();
 }
 
 // Execute command as a child process and wait for it to finish, return true if success
