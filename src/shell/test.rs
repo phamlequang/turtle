@@ -1,6 +1,19 @@
 use super::*;
 
 #[test]
+fn test_home_dir() {
+    let home = home_dir();
+    assert!(!home.is_empty());
+}
+
+#[test]
+fn test_normalize_path() {
+    let path = "~/Desktop/test.txt";
+    let expect = format!("{}/Desktop/test.txt", home_dir());
+    assert_eq!(normalize_path(path), expect);
+}
+
+#[test]
 fn test_change_and_current_directory() {
     let dir = current_directory();
     assert!(!dir.is_empty());
