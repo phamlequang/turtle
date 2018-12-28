@@ -18,7 +18,7 @@ pub fn create_machine(machine: &DockerMachine) -> Command {
          {}",
         machine.cpu_count, machine.disk_size, machine.memory, machine.name
     );
-    return Command::basic(&raw);
+    return Command::basic_show(&raw);
 }
 
 pub fn update_certificates(machine: &DockerMachine) -> Command {
@@ -26,22 +26,22 @@ pub fn update_certificates(machine: &DockerMachine) -> Command {
         "docker-machine regenerate-certs --force --client-certs {}",
         machine.name
     );
-    return Command::basic(&raw);
+    return Command::basic_show(&raw);
 }
 
 pub fn load_environments(machine: &DockerMachine) -> Command {
     let raw = format!("eval \"$(docker-machine env {})\"", machine.name);
-    return Command::basic(&raw);
+    return Command::basic_show(&raw);
 }
 
 pub fn machine_command(action: &str, machine: &DockerMachine) -> Command {
     let raw = format!("docker-machine {} {}", action, machine.name);
-    return Command::basic(&raw);
+    return Command::basic_show(&raw);
 }
 
 pub fn compose_command(action: &str, project_name: &str) -> Command {
     let raw = format!("docker-compose -p {} {}", project_name, action);
-    return Command::basic(&raw);
+    return Command::basic_show(&raw);
 }
 
 pub fn service_logs(service_name: &str, project_name: &str) -> Command {
@@ -51,7 +51,7 @@ pub fn service_logs(service_name: &str, project_name: &str) -> Command {
 
 pub fn docker_command(action: &str) -> Command {
     let raw = format!("docker {}", action);
-    return Command::basic(&raw);
+    return Command::basic_hide(&raw);
 }
 
 pub fn list_containers() -> Command {

@@ -32,14 +32,18 @@ fn test_change_and_current_directory() {
 
 #[test]
 fn test_run_command() {
-    let command = Command::echo("hello world");
+    let foo = || -> bool {
+        println!("hello world!");
+        return true;
+    };
+    let command = Command::new("pwd", "", true, Some(foo));
     let success = run_command(&command);
     assert!(success);
 }
 
 #[test]
 fn test_run_instruction() {
-    let command = Command::basic("ls -la");
+    let command = Command::basic_show("ls -la");
     let instruction = Instruction::basic(vec![command]);
     let success = run_instruction(&instruction);
     assert!(success);

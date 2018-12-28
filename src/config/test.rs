@@ -45,7 +45,7 @@ fn test_search_repository_found() {
     assert!(found.is_some());
 
     let repository = found.unwrap();
-    assert_eq!(repository.name, name)
+    assert_eq!(repository.name, name);
 }
 
 #[test]
@@ -54,5 +54,26 @@ fn test_search_repository_not_found() {
     let name = "unknown";
 
     let found = config.search_repository(name);
+    assert!(found.is_none());
+}
+
+#[test]
+fn test_search_group_found() {
+    let config = Config::default();
+    let name = "forest";
+
+    let found = config.search_group(name);
+    assert!(found.is_some());
+
+    let group = found.unwrap();
+    assert_eq!(group.name, name)
+}
+
+#[test]
+fn test_search_group_not_found() {
+    let config = Config::default();
+    let name = "unknown";
+
+    let found = config.search_group(name);
     assert!(found.is_none());
 }

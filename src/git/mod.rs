@@ -9,5 +9,5 @@ pub fn clone_repository(repository: &Repository) -> Command {
         "git clone -b {} {} {}",
         repository.branch, repository.remote, repository.local
     );
-    return Command::new(&raw, "", true);
+    return Command::basic_show(&raw);
 }

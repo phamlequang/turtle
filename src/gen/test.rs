@@ -23,7 +23,7 @@ fn test_generate_instruction_other() {
     let raw = "ls -la";
     let instruction = generator.generate_instruction(raw);
 
-    let command = Command::basic(raw);
+    let command = Command::basic_hide(raw);
     let expect = Instruction::basic(vec![command]);
 
     assert_eq!(instruction, expect);
@@ -51,7 +51,7 @@ fn test_generate_instruction_change_directory() {
     let generator = Generator::new(&config);
 
     let instruction = generator.generate_instruction("cd ..");
-    let command = Command::new("", "..", false);
+    let command = Command::new("", "..", false, None);
 
     let expect = Instruction::basic(vec![command]);
     assert_eq!(instruction, expect);

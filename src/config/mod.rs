@@ -120,4 +120,15 @@ impl Config {
         }
         return None;
     }
+
+    pub fn search_group(&self, name: &str) -> Option<&Group> {
+        if let Some(groups) = &self.groups {
+            for group in groups {
+                if group.name == name {
+                    return Some(group);
+                }
+            }
+        }
+        return None;
+    }
 }

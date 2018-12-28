@@ -108,26 +108,26 @@ pub fn run_command(command: &Command) -> bool {
     let raw = &command.raw;
 
     if !ok || raw.is_empty() {
-        println!();
         return true;
     }
 
     if command.show {
-        println!("\n$ {}", raw);
+        println!("$ {}", raw);
     }
-    println!();
 
     let result = subprocess::Exec::shell(raw).join();
     match result {
         Ok(status) => {
             if status.success() {
-                println!();
+                if let Some(exec) = command.exec {
+                    return exec();
+                }
                 return true;
             }
-            println!("--> failed with exit status = {:?}\n", status);
+            println!("--> failed with exit status = {:?}", status);
         }
         Err(err) => {
-            println!("--> execute error: {}\n", err);
+            println!("--> execute error: {}", err);
         }
     }
 

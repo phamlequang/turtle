@@ -15,6 +15,7 @@ const MACHINE: &str = "machine";
 const COMPOSE: &str = "compose";
 const DOCKER: &str = "docker";
 const LOGS: &str = "logs";
+const USE: &str = "use";
 
 #[derive(Debug)]
 pub struct Generator<'a> {
@@ -47,6 +48,7 @@ impl<'a> Generator<'a> {
                 COMPOSE => return self.docker_compose(args),
                 DOCKER => return self.docker(args),
                 LOGS => return self.service_logs(args),
+                USE => return self.use_groups(args),
                 _ => return self.other(raw),
             }
         }
@@ -60,7 +62,7 @@ impl<'a> Generator<'a> {
 
     fn change_directory(&self, args: Vec<String>) -> Instruction {
         if let Some(dir) = args.first() {
-            let command = Command::new("", &dir, false);
+            let command = Command::new("", &dir, false, None);
             return Instruction::new(vec![command], false);
         }
         return Instruction::skip();
@@ -146,8 +148,24 @@ impl<'a> Generator<'a> {
         return Instruction::skip();
     }
 
+    fn use_groups(&self, args: Vec<String>) -> Instruction {
+        if args.len() == 0 {
+            return Instruction::skip();
+        }
+
+        for name in args {
+            if let None = self.config.search_group(&name) {
+                let message = format!("--> unknown group {}", name);
+                return Instruction::echo(&message);
+            }
+        }
+
+        // to do: generate and save docker compose file
+        return Instruction::skip();
+    }
+
     fn other(&self, raw: &str) -> Instruction {
-        let command = Command::new(raw, "", false);
+        let command = Command::basic_hide(raw);
         return Instruction::basic(vec![command]);
     }
 }
