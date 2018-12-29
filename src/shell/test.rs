@@ -32,13 +32,15 @@ fn test_change_and_current_directory() {
 
 #[test]
 fn test_run_command() {
-    let foo = || -> bool {
-        println!("hello world!");
-        return true;
+    let exec = |name: String| -> (String, bool) {
+        let s = format!("hello {}", name);
+        return (s, true);
     };
-    let command = Command::new("pwd", "", true, Some(foo));
-    let success = run_command(&command);
+
+    let command = Command::new("echo julia", "", true, Some(Box::new(exec)));
+    let (output, success) = run_command(&command, "julia".to_owned());
     assert!(success);
+    assert_eq!(output, "hello julia\n");
 }
 
 #[test]

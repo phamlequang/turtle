@@ -2,24 +2,24 @@
 mod test;
 
 use std::cmp::PartialEq;
+use std::fmt;
 
-type ExecFn = fn() -> bool;
+type ExecFn = Box<dyn Fn(String) -> (String, bool)>;
 
-#[derive(Debug)]
 pub struct Command {
     pub raw: String,
     pub dir: String,
     pub show: bool,
-    pub exec: Option<ExecFn>,
+    pub then: Option<ExecFn>,
 }
 
 impl Command {
-    pub fn new(raw: &str, dir: &str, show: bool, exec: Option<ExecFn>) -> Self {
+    pub fn new(raw: &str, dir: &str, show: bool, then: Option<ExecFn>) -> Self {
         return Self {
             raw: raw.to_owned(),
             dir: dir.to_owned(),
             show: show,
-            exec: exec,
+            then: then,
         };
     }
 
@@ -43,19 +43,20 @@ impl PartialEq for Command {
         if self.raw != other.raw || self.dir != other.dir || self.show != other.show {
             return false;
         }
-        match self.exec {
-            Some(exec1) => {
-                if let Some(exec2) = other.exec {
-                    return exec1 as usize == exec2 as usize;
-                }
-                return false;
-            }
-            None => {
-                if let None = other.exec {
-                    return true;
-                }
-                return false;
-            }
-        }
+        return self.then.is_some() == other.then.is_some();
+    }
+}
+
+impl fmt::Debug for Command {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let exec = match self.then {
+            Some(_) => "Some(closure)",
+            None => "None",
+        };
+        return write!(
+            f,
+            "Command {{ raw: {}, dir: {}, show: {}, exec: {} }}",
+            self.raw, self.dir, self.show, exec,
+        );
     }
 }

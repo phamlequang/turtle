@@ -1,24 +1,25 @@
 use super::*;
 
-fn foo() -> bool {
-    println!("test command with exec");
-    return true;
-}
-
 #[test]
 fn test_new_command() {
     let raw = "pwd";
     let dir = "/tmp";
     let show = true;
-
-    let command = Command::new(raw, dir, show, Some(foo));
-    let expect = Command {
-        raw: raw.to_owned(),
-        dir: dir.to_owned(),
-        show: show,
-        exec: Some(foo),
+    let exec = |name: String| -> (String, bool) {
+        let out = format!("bonjour {}!", name);
+        return (out, true);
     };
-    assert_eq!(command, expect);
+
+    let command = Command::new(raw, dir, show, Some(Box::new(exec)));
+    assert_eq!(command.raw, raw);
+    assert_eq!(command.dir, dir);
+    assert_eq!(command.show, show);
+    assert!(command.then.is_some());
+
+    let then = &command.then.unwrap();
+    let (out, ok) = then("rust".to_owned());
+    assert!(ok);
+    assert_eq!(out, "bonjour rust!");
 }
 
 #[test]
