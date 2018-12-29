@@ -64,7 +64,7 @@ fn test_generate_instruction_machine_create() {
     let mut generator = Generator::new(&mut config);
     let instruction = generator.generate_instruction("machine create");
 
-    let machine = &config.docker_machine.unwrap();
+    let machine = &config.machine.unwrap();
     let command = docker::create_machine(machine);
     let expect = Instruction::basic(vec![command]);
 
@@ -78,7 +78,7 @@ fn test_generate_instruction_machine_remove() {
     let mut generator = Generator::new(&mut config);
     let instruction = generator.generate_instruction("machine rm");
 
-    let machine = &config.docker_machine.unwrap();
+    let machine = &config.machine.unwrap();
     let command = docker::machine_command("rm", machine);
     let expect = Instruction::basic(vec![command]);
 
@@ -92,7 +92,7 @@ fn test_generate_instruction_machine_update_certificates() {
     let mut generator = Generator::new(&mut config);
     let instruction = generator.generate_instruction("machine upcerts");
 
-    let machine = &config.docker_machine.unwrap();
+    let machine = &config.machine.unwrap();
     let command = docker::update_certificates(machine);
     let expect = Instruction::basic(vec![command]);
 
@@ -106,7 +106,7 @@ fn test_generate_instruction_machine_load_environment() {
     let mut generator = Generator::new(&mut config);
     let instruction = generator.generate_instruction("machine load");
 
-    let machine = &config.docker_machine.unwrap();
+    let machine = &config.machine.unwrap();
     let command = docker::load_environments(machine);
     let expect = Instruction::basic(vec![command]);
 
@@ -146,7 +146,7 @@ fn test_generate_instruction_docker_service_logs() {
     let mut generator = Generator::new(&mut config);
     let instruction = generator.generate_instruction("logs camellia");
 
-    let machine = &config.docker_machine.unwrap();
+    let machine = &config.machine.unwrap();
     let command = docker::service_logs("camellia", &machine.name);
     let expect = Instruction::basic(vec![command]);
 
@@ -171,7 +171,7 @@ fn test_generate_instruction_use_groups_success() {
     let mut generator = Generator::new(&mut config);
     let _ = generator.generate_instruction("use flowers");
 
-    let use_groups = config.workspace.use_groups.unwrap();
+    let using = config.using.unwrap();
     let expect = vec!["flowers"];
-    assert_eq!(use_groups, expect)
+    assert_eq!(using, expect)
 }

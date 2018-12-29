@@ -5,9 +5,9 @@ use std::fs;
 use std::io;
 
 use super::cmd::Command;
-use super::config::{Config, Docker, DockerMachine};
+use super::config::{Config, Docker, Machine};
 
-pub fn create_machine(machine: &DockerMachine) -> Command {
+pub fn create_machine(machine: &Machine) -> Command {
     let raw = format!(
         "docker-machine create \
          --driver virtualbox \
@@ -21,7 +21,7 @@ pub fn create_machine(machine: &DockerMachine) -> Command {
     return Command::basic_show(&raw);
 }
 
-pub fn update_certificates(machine: &DockerMachine) -> Command {
+pub fn update_certificates(machine: &Machine) -> Command {
     let raw = format!(
         "docker-machine regenerate-certs --force --client-certs {}",
         machine.name
@@ -29,12 +29,12 @@ pub fn update_certificates(machine: &DockerMachine) -> Command {
     return Command::basic_show(&raw);
 }
 
-pub fn load_environments(machine: &DockerMachine) -> Command {
+pub fn load_environments(machine: &Machine) -> Command {
     let raw = format!("eval \"$(docker-machine env {})\"", machine.name);
     return Command::basic_show(&raw);
 }
 
-pub fn machine_command(action: &str, machine: &DockerMachine) -> Command {
+pub fn machine_command(action: &str, machine: &Machine) -> Command {
     let raw = format!("docker-machine {} {}", action, machine.name);
     return Command::basic_show(&raw);
 }
@@ -74,7 +74,7 @@ pub fn generate_compose_text(config: &Config) -> String {
 pub fn generate_compose_lines(config: &Config) -> Vec<String> {
     let mut lines: Vec<String> = Vec::new();
 
-    match &config.docker_machine {
+    match &config.machine {
         Some(machine) => {
             lines.push("version: '3'".to_owned());
 

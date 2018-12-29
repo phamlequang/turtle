@@ -2,7 +2,7 @@ use super::*;
 
 #[test]
 fn test_create_machine() {
-    let machine = DockerMachine::default();
+    let machine = Machine::default();
 
     let command = create_machine(&machine);
     let expect = Command::basic_show(
@@ -20,7 +20,7 @@ fn test_create_machine() {
 
 #[test]
 fn test_update_certificates() {
-    let machine = DockerMachine::default();
+    let machine = Machine::default();
 
     let command = update_certificates(&machine);
     let expect = Command::basic_show(
@@ -33,7 +33,7 @@ fn test_update_certificates() {
 
 #[test]
 fn test_load_environments() {
-    let machine = DockerMachine::default();
+    let machine = Machine::default();
 
     let command = load_environments(&machine);
     let expect = Command::basic_show("eval \"$(docker-machine env turtle)\"");
@@ -42,7 +42,7 @@ fn test_load_environments() {
 
 #[test]
 fn test_machine_command() {
-    let machine = DockerMachine::default();
+    let machine = Machine::default();
 
     let command = machine_command("restart", &machine);
     let expect = Command::basic_show("docker-machine restart turtle");

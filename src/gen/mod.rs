@@ -44,7 +44,7 @@ impl<'a> Generator<'a> {
                 QUIT | EXIT => return self.terminate(),
                 CD => return self.change_directory(args),
                 CLONE => return self.clone_repositories(args),
-                MACHINE => return self.docker_machine(args),
+                MACHINE => return self.machine(args),
                 COMPOSE => return self.docker_compose(args),
                 DOCKER => return self.docker(args),
                 LOGS => return self.service_logs(args),
@@ -86,8 +86,8 @@ impl<'a> Generator<'a> {
         return Instruction::basic(commands);
     }
 
-    fn docker_machine(&self, args: Vec<String>) -> Instruction {
-        match &self.config.docker_machine {
+    fn machine(&self, args: Vec<String>) -> Instruction {
+        match &self.config.machine {
             Some(machine) => {
                 if let Some(action) = args.first() {
                     match action.as_ref() {
@@ -134,7 +134,7 @@ impl<'a> Generator<'a> {
     }
 
     fn docker_compose(&self, args: Vec<String>) -> Instruction {
-        match &self.config.docker_machine {
+        match &self.config.machine {
             Some(machine) => {
                 if !args.is_empty() {
                     let project_name = &machine.name;
@@ -149,7 +149,7 @@ impl<'a> Generator<'a> {
     }
 
     fn service_logs(&self, args: Vec<String>) -> Instruction {
-        match &self.config.docker_machine {
+        match &self.config.machine {
             Some(machine) => {
                 if let Some(service_name) = args.first() {
                     let project_name = &machine.name;
@@ -174,7 +174,7 @@ impl<'a> Generator<'a> {
             }
         }
 
-        self.config.workspace.use_groups = Some(args.clone());
+        self.config.use_groups(args);
 
         // to do: generate and save docker compose file
         return Instruction::skip();

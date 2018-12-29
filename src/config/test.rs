@@ -22,7 +22,7 @@ fn test_load_config_not_found() {
 #[test]
 fn test_parse_config_invalid() {
     let toml_text = r#"
-    [docker_machine]
+    [machine]
     name = "turtle"
 
     [[dependencies]]

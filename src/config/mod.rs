@@ -6,7 +6,7 @@ use std::fs;
 use std::io;
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct DockerMachine {
+pub struct Machine {
     pub name: String,
     pub cpu_count: u32,
     pub disk_size: u32,
@@ -14,10 +14,10 @@ pub struct DockerMachine {
     pub volumes: Option<Vec<String>>,
 }
 
-impl DockerMachine {
+impl Machine {
     #[cfg(test)]
     pub fn default() -> Self {
-        DockerMachine {
+        Self {
             name: String::from("turtle"),
             cpu_count: 2,
             disk_size: 16384,
@@ -73,35 +73,23 @@ pub struct Group {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct WorkSpace {
-    pub use_groups: Option<Vec<String>>,
-}
-
-impl WorkSpace {
-    #[cfg(test)]
-    pub fn empty() -> Self {
-        WorkSpace { use_groups: None }
-    }
-}
-
-#[derive(Serialize, Deserialize, Debug)]
 pub struct Config {
-    pub docker_machine: Option<DockerMachine>,
+    pub machine: Option<Machine>,
     pub dependencies: Option<Vec<Dependency>>,
     pub repositories: Option<Vec<Repository>>,
     pub groups: Option<Vec<Group>>,
-    pub workspace: WorkSpace,
+    pub using: Option<Vec<String>>,
 }
 
 impl Config {
     #[cfg(test)]
     pub fn empty() -> Self {
         Self {
-            docker_machine: None,
+            machine: None,
             dependencies: None,
             repositories: None,
             groups: None,
-            workspace: WorkSpace::empty(),
+            using: None,
         }
     }
 
@@ -144,5 +132,9 @@ impl Config {
             }
         }
         return None;
+    }
+
+    pub fn use_groups(&mut self, group_names: Vec<String>) {
+        self.using = Some(group_names);
     }
 }

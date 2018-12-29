@@ -1,4 +1,6 @@
-[docker_machine]
+using = ["forest"]
+
+[machine]
 name = "turtle"
 cpu_count = 2
 disk_size = 16384
@@ -58,6 +60,3 @@ repositories = ["flowers"]
 [[groups]]
 name = "flowers"
 repositories = ["flowers"]
-
-[workspace]
-use_groups = ["forest"]
