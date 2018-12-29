@@ -77,3 +77,13 @@ fn test_search_group_not_found() {
     let found = config.search_group(name);
     assert!(found.is_none());
 }
+
+#[test]
+fn test_using_dependencies() {
+    // to do
+}
+
+#[test]
+fn test_using_repositories() {
+    // to do
+}

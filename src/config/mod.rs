@@ -2,6 +2,8 @@
 mod test;
 
 use serde_derive::{Deserialize, Serialize};
+
+use std::collections::HashSet;
 use std::fs;
 use std::io;
 
@@ -136,5 +138,41 @@ impl Config {
 
     pub fn use_groups(&mut self, group_names: Vec<String>) {
         self.using = Some(group_names);
+    }
+
+    pub fn using_dependencies(&self) -> HashSet<String> {
+        let mut result = HashSet::new();
+
+        if let Some(using) = &self.using {
+            for name in using {
+                if let Some(group) = self.search_group(name) {
+                    if let Some(deps) = &group.dependencies {
+                        for dep in deps {
+                            result.insert(dep.clone());
+                        }
+                    }
+                }
+            }
+        }
+
+        return result;
+    }
+
+    pub fn using_repositories(&self) -> HashSet<String> {
+        let mut result = HashSet::new();
+
+        if let Some(using) = &self.using {
+            for name in using {
+                if let Some(group) = self.search_group(name) {
+                    if let Some(repos) = &group.repositories {
+                        for repo in repos {
+                            result.insert(repo.clone());
+                        }
+                    }
+                }
+            }
+        }
+
+        return result;
     }
 }

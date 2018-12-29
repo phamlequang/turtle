@@ -88,8 +88,14 @@ pub fn generate_compose_lines(config: &Config) -> Vec<String> {
 
             lines.push("services:".to_owned());
 
+            let using_dependencies = config.using_dependencies();
+            let using_repositories = config.using_repositories();
+
             if let Some(dependencies) = &config.dependencies {
                 for dependency in dependencies {
+                    if !using_dependencies.contains(&dependency.name) {
+                        continue;
+                    }
                     let more = compose_service(&dependency.name, &dependency.docker);
                     lines.extend(more);
                 }
@@ -97,6 +103,9 @@ pub fn generate_compose_lines(config: &Config) -> Vec<String> {
 
             if let Some(respositories) = &config.repositories {
                 for repository in respositories {
+                    if !using_repositories.contains(&repository.name) {
+                        continue;
+                    }
                     if let Some(services) = &repository.services {
                         for service in services {
                             let more = compose_service(&service.name, &service.docker);
