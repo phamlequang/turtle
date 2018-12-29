@@ -73,21 +73,28 @@ pub struct Group {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
+pub struct WorkSpace {
+    pub use_groups: Option<Vec<String>>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Config {
-    pub docker_machine: DockerMachine,
+    pub docker_machine: Option<DockerMachine>,
     pub dependencies: Option<Vec<Dependency>>,
     pub repositories: Option<Vec<Repository>>,
     pub groups: Option<Vec<Group>>,
+    pub workspace: Option<WorkSpace>,
 }
 
 impl Config {
     #[cfg(test)]
     pub fn new() -> Self {
         Self {
-            docker_machine: DockerMachine::default(),
+            docker_machine: None,
             dependencies: None,
             repositories: None,
             groups: None,
+            workspace: None,
         }
     }
 

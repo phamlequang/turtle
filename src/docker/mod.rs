@@ -63,45 +63,56 @@ pub fn list_containers() -> Command {
 
 pub fn generate_compose_file(file_path: &str, config: &Config) -> io::Result<()> {
     let contents = generate_compose_text(config);
+
     return fs::write(file_path, contents);
 }
 
 pub fn generate_compose_text(config: &Config) -> String {
+    let lines = generate_compose_lines(config);
+    return lines.join("\n");
+}
+
+pub fn generate_compose_lines(config: &Config) -> Vec<String> {
     let mut lines: Vec<String> = Vec::new();
 
-    lines.push("version: '3'".to_owned());
+    match &config.docker_machine {
+        Some(machine) => {
+            lines.push("version: '3'".to_owned());
 
-    if let Some(volumes) = &config.docker_machine.volumes {
-        lines.push(format!("volumes:"));
-        for v in volumes {
-            lines.push(format!("  {}:", v));
-            lines.push(format!("    external: {}", false));
-        }
-    }
+            if let Some(volumes) = &machine.volumes {
+                lines.push(format!("volumes:"));
+                for v in volumes {
+                    lines.push(format!("  {}:", v));
+                    lines.push(format!("    external: {}", false));
+                }
+            }
 
-    lines.push("services:".to_owned());
+            lines.push("services:".to_owned());
 
-    if let Some(dependencies) = &config.dependencies {
-        for dependency in dependencies {
-            let more = compose_service(&dependency.name, &dependency.docker);
-            lines.extend(more);
-        }
-    }
-
-    if let Some(respositories) = &config.repositories {
-        for repository in respositories {
-            if let Some(services) = &repository.services {
-                for service in services {
-                    let more = compose_service(&service.name, &service.docker);
+            if let Some(dependencies) = &config.dependencies {
+                for dependency in dependencies {
+                    let more = compose_service(&dependency.name, &dependency.docker);
                     lines.extend(more);
                 }
             }
+
+            if let Some(respositories) = &config.repositories {
+                for repository in respositories {
+                    if let Some(services) = &repository.services {
+                        for service in services {
+                            let more = compose_service(&service.name, &service.docker);
+                            lines.extend(more);
+                        }
+                    }
+                }
+            }
+
+            lines.push(format!(""));
+
+            return lines;
         }
+        None => return lines,
     }
-
-    lines.push(format!(""));
-
-    return lines.join("\n");
 }
 
 fn compose_service(name: &str, docker: &Docker) -> Vec<String> {

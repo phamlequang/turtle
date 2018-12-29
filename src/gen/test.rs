@@ -64,7 +64,8 @@ fn test_generate_instruction_machine_create() {
     let generator = Generator::new(&config);
     let instruction = generator.generate_instruction("machine create");
 
-    let command = docker::create_machine(&config.docker_machine);
+    let machine = &config.docker_machine.unwrap();
+    let command = docker::create_machine(machine);
     let expect = Instruction::basic(vec![command]);
 
     assert_eq!(instruction, expect);
@@ -77,7 +78,8 @@ fn test_generate_instruction_machine_remove() {
     let generator = Generator::new(&config);
     let instruction = generator.generate_instruction("machine rm");
 
-    let command = docker::machine_command("rm", &config.docker_machine);
+    let machine = &config.docker_machine.unwrap();
+    let command = docker::machine_command("rm", machine);
     let expect = Instruction::basic(vec![command]);
 
     assert_eq!(instruction, expect);
@@ -90,7 +92,8 @@ fn test_generate_instruction_machine_update_certificates() {
     let generator = Generator::new(&config);
     let instruction = generator.generate_instruction("machine upcerts");
 
-    let command = docker::update_certificates(&config.docker_machine);
+    let machine = &config.docker_machine.unwrap();
+    let command = docker::update_certificates(machine);
     let expect = Instruction::basic(vec![command]);
 
     assert_eq!(instruction, expect);
@@ -103,7 +106,8 @@ fn test_generate_instruction_machine_load_environment() {
     let generator = Generator::new(&config);
     let instruction = generator.generate_instruction("machine load");
 
-    let command = docker::load_environments(&config.docker_machine);
+    let machine = &config.docker_machine.unwrap();
+    let command = docker::load_environments(machine);
     let expect = Instruction::basic(vec![command]);
 
     assert_eq!(instruction, expect);
@@ -142,7 +146,8 @@ fn test_generate_instruction_docker_service_logs() {
     let generator = Generator::new(&config);
     let instruction = generator.generate_instruction("logs camellia");
 
-    let command = docker::service_logs("camellia", &config.docker_machine.name);
+    let machine = &config.docker_machine.unwrap();
+    let command = docker::service_logs("camellia", &machine.name);
     let expect = Instruction::basic(vec![command]);
 
     assert_eq!(instruction, expect);

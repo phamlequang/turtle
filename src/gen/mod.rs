@@ -87,27 +87,31 @@ impl<'a> Generator<'a> {
     }
 
     fn docker_machine(&self, args: Vec<String>) -> Instruction {
-        if let Some(action) = args.first() {
-            let machine = &self.config.docker_machine;
-            match action.as_ref() {
-                "create" => {
-                    let command = docker::create_machine(machine);
-                    return Instruction::basic(vec![command]);
-                }
-                "upcerts" => {
-                    let command = docker::update_certificates(machine);
-                    return Instruction::basic(vec![command]);
-                }
-                "load" => {
-                    let command = docker::load_environments(&machine);
-                    return Instruction::basic(vec![command]);
-                }
-                _ => {
-                    let raw = args.join(" ");
-                    let command = docker::machine_command(&raw, machine);
-                    return Instruction::basic(vec![command]);
+        match &self.config.docker_machine {
+            Some(machine) => {
+                if let Some(action) = args.first() {
+                    match action.as_ref() {
+                        "create" => {
+                            let command = docker::create_machine(machine);
+                            return Instruction::basic(vec![command]);
+                        }
+                        "upcerts" => {
+                            let command = docker::update_certificates(machine);
+                            return Instruction::basic(vec![command]);
+                        }
+                        "load" => {
+                            let command = docker::load_environments(&machine);
+                            return Instruction::basic(vec![command]);
+                        }
+                        _ => {
+                            let raw = args.join(" ");
+                            let command = docker::machine_command(&raw, machine);
+                            return Instruction::basic(vec![command]);
+                        }
+                    }
                 }
             }
+            None => return Instruction::echo("docker machine config is not found"),
         }
         return Instruction::skip();
     }
@@ -130,22 +134,32 @@ impl<'a> Generator<'a> {
     }
 
     fn docker_compose(&self, args: Vec<String>) -> Instruction {
-        if !args.is_empty() {
-            let project_name = &self.config.docker_machine.name;
-            let action = args.join(" ");
-            let command = docker::compose_command(&action, &project_name);
-            return Instruction::basic(vec![command]);
+        match &self.config.docker_machine {
+            Some(machine) => {
+                if !args.is_empty() {
+                    let project_name = &machine.name;
+                    let action = args.join(" ");
+                    let command = docker::compose_command(&action, &project_name);
+                    return Instruction::basic(vec![command]);
+                }
+                return Instruction::skip();
+            }
+            None => return Instruction::echo("docker machine config is not found"),
         }
-        return Instruction::skip();
     }
 
     fn service_logs(&self, args: Vec<String>) -> Instruction {
-        if let Some(service_name) = args.first() {
-            let project_name = &self.config.docker_machine.name;
-            let command = docker::service_logs(service_name, project_name);
-            return Instruction::basic(vec![command]);
+        match &self.config.docker_machine {
+            Some(machine) => {
+                if let Some(service_name) = args.first() {
+                    let project_name = &machine.name;
+                    let command = docker::service_logs(service_name, project_name);
+                    return Instruction::basic(vec![command]);
+                }
+                return Instruction::skip();
+            }
+            None => return Instruction::echo("docker machine config is not found"),
         }
-        return Instruction::skip();
     }
 
     fn use_groups(&self, args: Vec<String>) -> Instruction {
