@@ -5,7 +5,7 @@ fn test_new_command() {
     let raw = "pwd";
     let dir = "/tmp";
     let show = true;
-    let exec = |name: String| -> (String, bool) {
+    let exec = |name: &str| -> (String, bool) {
         let out = format!("bonjour {}!", name);
         return (out, true);
     };
@@ -17,7 +17,7 @@ fn test_new_command() {
     assert!(command.then.is_some());
 
     let then = &command.then.unwrap();
-    let (out, ok) = then("rust".to_owned());
+    let (out, ok) = then("rust");
     assert!(ok);
     assert_eq!(out, "bonjour rust!");
 }

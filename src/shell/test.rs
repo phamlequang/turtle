@@ -32,7 +32,7 @@ fn test_change_and_current_directory() {
 
 #[test]
 fn test_run_command() {
-    let exec = |name: String| -> (String, bool) {
+    let exec = |name: &str| -> (String, bool) {
         let s = format!("hello {}", name);
         return (s, true);
     };

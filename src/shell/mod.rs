@@ -134,7 +134,7 @@ pub fn run_command(command: &Command, mut input: String) -> (String, bool) {
     }
 
     if let Some(then) = &command.then {
-        return then(input);
+        return then(&input);
     }
     return (input, true);
 }

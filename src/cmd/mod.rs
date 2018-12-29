@@ -4,7 +4,7 @@ mod test;
 use std::cmp::PartialEq;
 use std::fmt;
 
-type ExecFn = Box<dyn Fn(String) -> (String, bool)>;
+type ExecFn = Box<dyn Fn(&str) -> (String, bool)>;
 
 pub struct Command {
     pub raw: String,
