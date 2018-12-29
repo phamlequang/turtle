@@ -77,24 +77,31 @@ pub struct WorkSpace {
     pub use_groups: Option<Vec<String>>,
 }
 
+impl WorkSpace {
+    #[cfg(test)]
+    pub fn empty() -> Self {
+        WorkSpace { use_groups: None }
+    }
+}
+
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Config {
     pub docker_machine: Option<DockerMachine>,
     pub dependencies: Option<Vec<Dependency>>,
     pub repositories: Option<Vec<Repository>>,
     pub groups: Option<Vec<Group>>,
-    pub workspace: Option<WorkSpace>,
+    pub workspace: WorkSpace,
 }
 
 impl Config {
     #[cfg(test)]
-    pub fn new() -> Self {
+    pub fn empty() -> Self {
         Self {
             docker_machine: None,
             dependencies: None,
             repositories: None,
             groups: None,
-            workspace: None,
+            workspace: WorkSpace::empty(),
         }
     }
 

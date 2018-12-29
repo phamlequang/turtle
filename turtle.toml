@@ -55,5 +55,9 @@ name = "forest"
 dependencies = ["postgres"]
 repositories = ["flowers"]
 
+[[groups]]
+name = "flowers"
+repositories = ["flowers"]
+
 [workspace]
 use_groups = ["forest"]

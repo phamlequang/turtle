@@ -19,11 +19,11 @@ const USE: &str = "use";
 
 #[derive(Debug)]
 pub struct Generator<'a> {
-    config: &'a Config,
+    config: &'a mut Config,
 }
 
 impl<'a> Generator<'a> {
-    pub fn new(config: &'a Config) -> Generator {
+    pub fn new(config: &'a mut Config) -> Generator {
         return Self { config };
     }
 
@@ -34,7 +34,7 @@ impl<'a> Generator<'a> {
     }
 
     // Takes a raw instruction string, returns a list of instructions to execute
-    pub fn generate_instruction(&self, raw: &str) -> Instruction {
+    pub fn generate_instruction(&mut self, raw: &str) -> Instruction {
         let mut tokens = raw.trim().split_whitespace();
 
         if let Some(program) = tokens.next() {
@@ -162,17 +162,19 @@ impl<'a> Generator<'a> {
         }
     }
 
-    fn use_groups(&self, args: Vec<String>) -> Instruction {
+    fn use_groups(&mut self, args: Vec<String>) -> Instruction {
         if args.len() == 0 {
             return Instruction::skip();
         }
 
-        for name in args {
+        for name in &args {
             if let None = self.config.search_group(&name) {
                 let message = format!("--> unknown group {}", name);
                 return Instruction::echo(&message);
             }
         }
+
+        self.config.workspace.use_groups = Some(args.clone());
 
         // to do: generate and save docker compose file
         return Instruction::skip();
