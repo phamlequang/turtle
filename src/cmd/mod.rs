@@ -24,11 +24,11 @@ impl Command {
     }
 
     pub fn basic_hide(raw: &str) -> Self {
-        return Self::new(&raw, "", false, None);
+        return Self::new(raw, "", false, None);
     }
 
     pub fn basic_show(raw: &str) -> Self {
-        return Self::new(&raw, "", true, None);
+        return Self::new(raw, "", true, None);
     }
 
     pub fn echo(message: &str) -> Self {

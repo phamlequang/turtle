@@ -63,7 +63,6 @@ pub fn list_containers() -> Command {
 
 pub fn generate_compose_file(file_path: &str, config: &Config) -> io::Result<()> {
     let contents = generate_compose_text(config);
-
     return fs::write(file_path, contents);
 }
 
