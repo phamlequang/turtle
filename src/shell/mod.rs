@@ -9,6 +9,7 @@ use dirs;
 use std::env;
 use std::path::{Path, MAIN_SEPARATOR};
 use subprocess::{ExitStatus, PopenError, Redirection::Pipe};
+use termion::{color, color::Red};
 
 const TILDE: &str = "~";
 
@@ -71,7 +72,8 @@ pub fn change_directory(dir: &str) -> bool {
     let path = Path::new(&dir);
     if let Err(err) = env::set_current_dir(path) {
         println!(
-            "--> cannot change directory to [ {} ]: {}",
+            "{}--> cannot change directory to [ {} ]: {}",
+            color::Fg(Red),
             path.display(),
             err
         );
@@ -149,12 +151,16 @@ pub fn run_command(command: &Command) -> (bool, String) {
 
         if !command.silent {
             if let Some(err) = exec_error {
-                println!("--> execute error: {}", err);
+                println!("{}--> execute error: {}", color::Fg(Red), err);
                 return (false, String::new());
             }
 
             if !exit_status.success() {
-                println!("--> failed with exit status = {:?}\n", exit_status);
+                println!(
+                    "{}--> failed with exit status = {:?}\n",
+                    color::Fg(Red),
+                    exit_status
+                );
                 return (false, String::new());
             }
         }
