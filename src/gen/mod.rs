@@ -62,7 +62,7 @@ impl<'a> Generator<'a> {
 
     fn change_directory(&self, args: Vec<String>) -> Instruction {
         if let Some(dir) = args.first() {
-            let command = Command::new("", &dir, false, None);
+            let command = Command::new("", &dir, false, false, None);
             return Instruction::new(vec![command], false);
         }
         return Instruction::skip();

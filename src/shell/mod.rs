@@ -102,14 +102,17 @@ pub fn home_dir() -> String {
     return String::new();
 }
 
-// Execute command as a child process and wait for it to finish, return true if success
-pub fn run_command(command: &Command, mut input: String) -> (String, bool) {
+// Execute command as a child process and wait for it to finish,
+// return true and output string if success
+pub fn run_command(command: &Command) -> (bool, String) {
     let ok = change_directory(&command.dir);
     if !ok {
-        return ("".to_owned(), true);
+        return (false, String::new());
     }
 
     let raw = &command.raw;
+    let mut stdout = String::new();
+
     if !raw.is_empty() {
         if command.show {
             println!("$ {}", raw);
@@ -119,35 +122,35 @@ pub fn run_command(command: &Command, mut input: String) -> (String, bool) {
         match exec.capture() {
             Ok(data) => {
                 if data.success() {
-                    input = data.stdout_str();
+                    stdout = data.stdout_str();
                 } else {
                     let stderr = data.stderr_str();
                     println!("--> failed with stderr = {:?}", stderr);
-                    return ("".to_owned(), false);
+                    return (false, String::new());;
                 }
             }
             Err(err) => {
                 println!("--> execute error: {}", err);
-                return ("".to_owned(), false);
+                return (false, String::new());
             }
         }
     }
 
     if let Some(then) = &command.then {
-        return then(&input);
+        return then(&stdout);
     }
-    return (input, true);
+
+    return (true, stdout);
 }
 
-// Executes all commands sequentially, stop immediately in case of failure, return true if success
+// Executes all commands sequentially, stop immediately in case of failure,
+// return true if success
 pub fn run_instruction(instruction: &Instruction) -> bool {
-    let mut input = String::new();
     for cmd in &instruction.commands {
-        let (output, success) = run_command(cmd, input);
+        let (success, _) = run_command(cmd);
         if !success {
             return false;
         }
-        input = output;
     }
     return true;
 }

@@ -4,31 +4,33 @@ mod test;
 use std::cmp::PartialEq;
 use std::fmt;
 
-type ExecFn = Box<dyn Fn(&str) -> (String, bool)>;
+type ExecFn = Box<dyn Fn(&str) -> (bool, String)>;
 
 pub struct Command {
     pub raw: String,
     pub dir: String,
     pub show: bool,
+    pub pipe: bool,
     pub then: Option<ExecFn>,
 }
 
 impl Command {
-    pub fn new(raw: &str, dir: &str, show: bool, then: Option<ExecFn>) -> Self {
+    pub fn new(raw: &str, dir: &str, show: bool, pipe: bool, then: Option<ExecFn>) -> Self {
         return Self {
             raw: raw.to_owned(),
             dir: dir.to_owned(),
             show: show,
+            pipe: pipe,
             then: then,
         };
     }
 
     pub fn basic_hide(raw: &str) -> Self {
-        return Self::new(raw, "", false, None);
+        return Self::new(raw, "", false, false, None);
     }
 
     pub fn basic_show(raw: &str) -> Self {
-        return Self::new(raw, "", true, None);
+        return Self::new(raw, "", true, false, None);
     }
 
     pub fn echo(message: &str) -> Self {
@@ -40,7 +42,11 @@ impl Command {
 impl PartialEq for Command {
     // Check if 2 commands are identical or not
     fn eq(&self, other: &Self) -> bool {
-        if self.raw != other.raw || self.dir != other.dir || self.show != other.show {
+        if self.raw != other.raw
+            || self.dir != other.dir
+            || self.show != other.show
+            || self.pipe != other.pipe
+        {
             return false;
         }
         return self.then.is_some() == other.then.is_some();
@@ -55,8 +61,8 @@ impl fmt::Debug for Command {
         };
         return write!(
             f,
-            "Command {{ raw: {}, dir: {}, show: {}, exec: {} }}",
-            self.raw, self.dir, self.show, exec,
+            "Command {{ raw: \"{}\", dir: \"{}\", show: {}, pipe: {}, exec: {} }}",
+            self.raw, self.dir, self.show, self.pipe, exec,
         );
     }
 }

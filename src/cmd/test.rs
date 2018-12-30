@@ -5,21 +5,23 @@ fn test_new_command() {
     let raw = "pwd";
     let dir = "/tmp";
     let show = true;
-    let exec = |name: &str| -> (String, bool) {
-        let out = format!("bonjour {}!", name);
-        return (out, true);
+    let pipe = true;
+    let exec = |name: &str| -> (bool, String) {
+        let output = format!("bonjour {}!", name);
+        return (true, output);
     };
 
-    let command = Command::new(raw, dir, show, Some(Box::new(exec)));
+    let command = Command::new(raw, dir, show, pipe, Some(Box::new(exec)));
     assert_eq!(command.raw, raw);
     assert_eq!(command.dir, dir);
     assert_eq!(command.show, show);
+    assert_eq!(command.pipe, pipe);
     assert!(command.then.is_some());
 
     let then = &command.then.unwrap();
-    let (out, ok) = then("rust");
-    assert!(ok);
-    assert_eq!(out, "bonjour rust!");
+    let (success, output) = then("rust");
+    assert!(success);
+    assert_eq!(output, "bonjour rust!");
 }
 
 #[test]
@@ -29,7 +31,9 @@ fn test_basic_command() {
 
     assert_eq!(command.raw, raw);
     assert_eq!(command.dir, "");
-    assert_eq!(command.show, false);
+    assert!(!command.show);
+    assert!(!command.pipe);
+    assert!(command.then.is_none());
 }
 
 #[test]
@@ -40,4 +44,6 @@ fn test_echo_command() {
     assert_eq!(command.raw, expect);
     assert!(command.dir.is_empty());
     assert!(!command.show);
+    assert!(!command.pipe);
+    assert!(command.then.is_none());
 }
