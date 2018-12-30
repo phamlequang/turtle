@@ -9,7 +9,7 @@ use dirs;
 use std::env;
 use std::path::{Path, MAIN_SEPARATOR};
 use subprocess::{ExitStatus, PopenError, Redirection::Pipe};
-use termion::{color, color::Red};
+use termion::{color, color::Magenta, color::Red, style};
 
 const TILDE: &str = "~";
 
@@ -72,10 +72,11 @@ pub fn change_directory(dir: &str) -> bool {
     let path = Path::new(&dir);
     if let Err(err) = env::set_current_dir(path) {
         println!(
-            "{}--> cannot change directory to [ {} ]: {}",
+            "{}--> cannot change directory to [ {} ]: {}{}",
             color::Fg(Red),
             path.display(),
-            err
+            err,
+            style::Reset,
         );
         return false;
     }
@@ -113,7 +114,7 @@ pub fn run_command(command: &Command) -> (bool, String) {
 
     if !raw.is_empty() {
         if command.show {
-            println!("$ {}", raw);
+            println!("{}$ {}{}", color::Fg(Magenta), raw, style::Reset);
         }
 
         let mut exec_error: Option<PopenError> = None;
@@ -151,15 +152,21 @@ pub fn run_command(command: &Command) -> (bool, String) {
 
         if !command.silent {
             if let Some(err) = exec_error {
-                println!("{}--> execute error: {}", color::Fg(Red), err);
+                println!(
+                    "{}--> execute error: {}{}",
+                    color::Fg(Red),
+                    err,
+                    style::Reset
+                );
                 return (false, String::new());
             }
 
             if !exit_status.success() {
                 println!(
-                    "{}--> failed with exit status = {:?}\n",
+                    "{}--> failed with exit status = {:?}{}",
                     color::Fg(Red),
-                    exit_status
+                    exit_status,
+                    style::Reset,
                 );
                 return (false, String::new());
             }

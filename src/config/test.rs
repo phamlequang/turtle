@@ -83,8 +83,9 @@ fn test_using_dependencies() {
     let mut config = Config::default();
 
     let using_dependencies = config.using_dependencies();
-    assert_eq!(using_dependencies.len(), 1);
+    assert_eq!(using_dependencies.len(), 2);
     assert!(using_dependencies.contains("postgres"));
+    assert!(using_dependencies.contains("redis"));
 
     config.use_groups(vec!["rep".to_owned()]);
     let using_dependencies = config.using_dependencies();
@@ -102,4 +103,17 @@ fn test_using_repositories() {
     config.use_groups(vec!["dep".to_owned()]);
     let using_repositories = config.using_repositories();
     assert!(using_repositories.is_empty());
+}
+
+#[test]
+fn test_match_dependencies_and_services() {
+    let config = Config::default();
+
+    let args = vec!["dep".to_owned(), "camellia".to_owned()];
+    let result = config.match_dependencies_and_services(args);
+    assert_eq!(result.len(), 3);
+
+    assert!(result.contains("camellia"));
+    assert!(result.contains("postgres"));
+    assert!(result.contains("redis"));
 }

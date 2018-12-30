@@ -153,7 +153,12 @@ impl<'a> Generator<'a> {
     }
 
     fn restart_services(&self, args: Vec<String>) -> Instruction {
-        let command = docker::restart_services(args, &self.config.project);
+        let result = self.config.match_dependencies_and_services(args);
+
+        let mut services: Vec<String> = result.into_iter().collect();
+        services.sort();
+
+        let command = docker::restart_services(services, &self.config.project);
         return Instruction::basic(vec![command]);
     }
 

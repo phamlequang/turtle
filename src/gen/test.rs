@@ -176,7 +176,28 @@ fn test_generate_instruction_restart_services() {
     let commands = &instruction.commands;
     assert_eq!(commands.len(), 1);
 
-    let service_names = vec!["postgres".to_owned(), "lotus".to_owned()];
+    let service_names = vec!["lotus".to_owned(), "postgres".to_owned()];
+    let expect = docker::restart_services(service_names, &config.project);
+    assert_eq!(&commands[0], &expect);
+}
+
+#[test]
+fn test_generate_instruction_restart_all_services() {
+    let mut config = Config::default();
+    let mut generator = Generator::new(&mut config);
+
+    let instruction = generator.generate_instruction("restart all");
+    assert!(!instruction.should_terminate);
+
+    let commands = &instruction.commands;
+    assert_eq!(commands.len(), 1);
+
+    let service_names = vec![
+        "camellia".to_owned(),
+        "lotus".to_owned(),
+        "postgres".to_owned(),
+        "redis".to_owned(),
+    ];
     let expect = docker::restart_services(service_names, &config.project);
     assert_eq!(&commands[0], &expect);
 }

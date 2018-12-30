@@ -6,6 +6,7 @@ use serde_derive::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::fs;
 use std::io;
+use std::iter::FromIterator;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Machine {
@@ -150,7 +151,7 @@ impl Config {
                 if let Some(group) = self.search_group(name) {
                     if let Some(deps) = &group.dependencies {
                         for dep in deps {
-                            result.insert(dep.clone());
+                            result.insert(dep.to_owned());
                         }
                     }
                 }
@@ -168,7 +169,47 @@ impl Config {
                 if let Some(group) = self.search_group(name) {
                     if let Some(repos) = &group.repositories {
                         for repo in repos {
-                            result.insert(repo.clone());
+                            result.insert(repo.to_owned());
+                        }
+                    }
+                }
+            }
+        }
+
+        return result;
+    }
+
+    pub fn match_dependencies_and_services(&self, args: Vec<String>) -> HashSet<String> {
+        let filters: HashSet<String> = HashSet::from_iter(args);
+
+        let mut result = HashSet::new();
+
+        if let Some(groups) = &self.groups {
+            for group in groups {
+                let accept_group = filters.contains(&group.name);
+
+                if let Some(dep_names) = &group.dependencies {
+                    for dep_name in dep_names {
+                        let accept_dep = filters.contains(dep_name);
+                        if accept_group || accept_dep {
+                            result.insert(dep_name.to_owned());
+                        }
+                    }
+                }
+
+                if let Some(repo_names) = &group.repositories {
+                    for repo_name in repo_names {
+                        let accept_repo = filters.contains(repo_name);
+                        if let Some(repository) = self.search_repository(repo_name) {
+                            if let Some(services) = &repository.services {
+                                for service in services {
+                                    let service_name = service.name.to_owned();
+                                    let accept_service = filters.contains(&service_name);
+                                    if accept_group || accept_repo || accept_service {
+                                        result.insert(service_name);
+                                    }
+                                }
+                            }
                         }
                     }
                 }
