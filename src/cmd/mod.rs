@@ -54,6 +54,7 @@ impl PartialEq for Command {
         if self.raw != other.raw
             || self.dir != other.dir
             || self.show != other.show
+            || self.silent != other.silent
             || self.pipe != other.pipe
         {
             return false;
@@ -70,8 +71,8 @@ impl fmt::Debug for Command {
         };
         return write!(
             f,
-            "Command {{ raw: \"{}\", dir: \"{}\", show: {}, pipe: {}, exec: {} }}",
-            self.raw, self.dir, self.show, self.pipe, exec,
+            "Command {{ raw: \"{}\", dir: \"{}\", show: {}, silent: {}, pipe: {}, exec: {} }}",
+            self.raw, self.dir, self.show, self.silent, self.pipe, exec,
         );
     }
 }

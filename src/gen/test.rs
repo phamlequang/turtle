@@ -140,17 +140,45 @@ fn test_generate_instruction_docker_list_images() {
 }
 
 #[test]
+fn test_generate_instruction_docker_compose() {
+    let mut config = Config::default();
+
+    let mut generator = Generator::new(&mut config);
+    let instruction = generator.generate_instruction("compose up -d");
+
+    let command = docker::compose_command("up -d", &config.project);
+    let expect = Instruction::basic(vec![command]);
+
+    assert_eq!(instruction, expect);
+}
+
+#[test]
 fn test_generate_instruction_docker_service_logs() {
     let mut config = Config::default();
 
     let mut generator = Generator::new(&mut config);
     let instruction = generator.generate_instruction("logs camellia");
 
-    let machine = &config.machine.unwrap();
-    let command = docker::service_logs("camellia", &machine.name);
+    let command = docker::service_logs("camellia", &config.project);
     let expect = Instruction::basic(vec![command]);
 
     assert_eq!(instruction, expect);
+}
+
+#[test]
+fn test_generate_instruction_restart_services() {
+    let mut config = Config::default();
+    let mut generator = Generator::new(&mut config);
+
+    let instruction = generator.generate_instruction("restart postgres lotus");
+    assert!(!instruction.should_terminate);
+
+    let commands = &instruction.commands;
+    assert_eq!(commands.len(), 1);
+
+    let service_names = vec!["postgres".to_owned(), "lotus".to_owned()];
+    let expect = docker::restart_services(service_names, &config.project);
+    assert_eq!(&commands[0], &expect);
 }
 
 #[test]
@@ -174,4 +202,6 @@ fn test_generate_instruction_use_groups_success() {
     let using = config.using.unwrap();
     let expect = vec!["rep"];
     assert_eq!(using, expect)
+
+    // to do: check the generated instruction
 }

@@ -49,6 +49,11 @@ pub fn service_logs(service_name: &str, project_name: &str) -> Command {
     return compose_command(&action, project_name);
 }
 
+pub fn restart_services(service_names: Vec<String>, project_name: &str) -> Command {
+    let action = format!("restart {}", service_names.join(" "));
+    return compose_command(&action, project_name);
+}
+
 pub fn docker_command(action: &str) -> Command {
     let raw = format!("docker {}", action);
     return Command::basic_hide(&raw);

@@ -16,6 +16,7 @@ const COMPOSE: &str = "compose";
 const DOCKER: &str = "docker";
 const LOGS: &str = "logs";
 const USE: &str = "use";
+const RESTART: &str = "restart";
 
 #[derive(Debug)]
 pub struct Generator<'a> {
@@ -49,6 +50,7 @@ impl<'a> Generator<'a> {
                 DOCKER => return self.docker(args),
                 LOGS => return self.service_logs(args),
                 USE => return self.use_groups(args),
+                RESTART => return self.restart_services(args),
                 _ => return self.other(raw),
             }
         }
@@ -134,32 +136,25 @@ impl<'a> Generator<'a> {
     }
 
     fn docker_compose(&self, args: Vec<String>) -> Instruction {
-        match &self.config.machine {
-            Some(machine) => {
-                if !args.is_empty() {
-                    let project_name = &machine.name;
-                    let action = args.join(" ");
-                    let command = docker::compose_command(&action, &project_name);
-                    return Instruction::basic(vec![command]);
-                }
-                return Instruction::skip();
-            }
-            None => return Instruction::echo("docker machine config is not found"),
+        if args.is_empty() {
+            return Instruction::skip();
         }
+        let action = args.join(" ");
+        let command = docker::compose_command(&action, &self.config.project);
+        return Instruction::basic(vec![command]);
     }
 
     fn service_logs(&self, args: Vec<String>) -> Instruction {
-        match &self.config.machine {
-            Some(machine) => {
-                if let Some(service_name) = args.first() {
-                    let project_name = &machine.name;
-                    let command = docker::service_logs(service_name, project_name);
-                    return Instruction::basic(vec![command]);
-                }
-                return Instruction::skip();
-            }
-            None => return Instruction::echo("docker machine config is not found"),
+        if let Some(service_name) = args.first() {
+            let command = docker::service_logs(service_name, &self.config.project);
+            return Instruction::basic(vec![command]);
         }
+        return Instruction::skip();
+    }
+
+    fn restart_services(&self, args: Vec<String>) -> Instruction {
+        let command = docker::restart_services(args, &self.config.project);
+        return Instruction::basic(vec![command]);
     }
 
     fn use_groups(&mut self, args: Vec<String>) -> Instruction {
