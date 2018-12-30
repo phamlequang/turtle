@@ -52,18 +52,26 @@ fn test_machine_command() {
 
 #[test]
 fn test_compose_command() {
-    let command = compose_command("up -d", "turtle");
-    let expect = Command::basic_show("docker-compose -p turtle up -d");
+    let command = compose_command("up -d", "forest");
+    let expect = Command::basic_show("docker-compose -p forest up -d");
     assert_eq!(command, expect);
 }
 
 #[test]
 fn test_service_logs() {
-    let command = service_logs("lotus", "turtle");
+    let command = service_logs("lotus", "forest");
     let expect = Command::basic_show(
-        "docker-compose -p turtle \
+        "docker-compose -p forest \
          logs -f --tail=100 lotus",
     );
+    assert_eq!(command, expect);
+}
+
+#[test]
+fn test_restart_services() {
+    let service_names = vec!["lotus".to_owned(), "camellia".to_owned()];
+    let command = restart_services(service_names, "forest");
+    let expect = Command::basic_show("docker-compose -p forest restart lotus camellia");
     assert_eq!(command, expect);
 }
 

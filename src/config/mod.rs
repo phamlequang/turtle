@@ -76,22 +76,24 @@ pub struct Group {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Config {
+    pub project: String,
+    pub using: Option<Vec<String>>,
     pub machine: Option<Machine>,
     pub dependencies: Option<Vec<Dependency>>,
     pub repositories: Option<Vec<Repository>>,
     pub groups: Option<Vec<Group>>,
-    pub using: Option<Vec<String>>,
 }
 
 impl Config {
     #[cfg(test)]
     pub fn empty() -> Self {
         Self {
+            project: String::new(),
+            using: None,
             machine: None,
             dependencies: None,
             repositories: None,
             groups: None,
-            using: None,
         }
     }
 
