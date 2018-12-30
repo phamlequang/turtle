@@ -7,7 +7,7 @@ use super::instr::Instruction;
 use dirs;
 use std::env;
 use std::path::{Path, MAIN_SEPARATOR};
-use subprocess::{Exec, Redirection::Pipe};
+use subprocess::{Exec, ExitStatus, PopenError, Redirection::Pipe};
 
 const TILDE: &str = "~";
 
@@ -118,21 +118,45 @@ pub fn run_command(command: &Command) -> (bool, String) {
             println!("$ {}", raw);
         }
 
-        let exec = subprocess::Exec::shell(raw).stdout(Pipe).stderr(Pipe);
-        match exec.capture() {
-            Ok(data) => {
-                if data.success() {
-                    stdout = data.stdout_str();
-                } else {
-                    let stderr = data.stderr_str();
-                    println!("--> failed with stderr = {:?}", stderr);
-                    return (false, String::new());;
+        let mut exec_error: Option<PopenError> = None;
+        let mut exit_status = ExitStatus::Exited(0);
+
+        if command.pipe {
+            let exec = subprocess::Exec::shell(raw).stdout(Pipe).stderr(Pipe);
+
+            match exec.capture() {
+                Ok(data) => {
+                    if data.success() {
+                        stdout = data.stdout_str();
+                    } else {
+                        exit_status = data.exit_status;
+                        println!("{}", data.stderr_str());
+                    }
+                }
+                Err(err) => {
+                    exec_error = Some(err);
                 }
             }
-            Err(err) => {
-                println!("--> execute error: {}", err);
-                return (false, String::new());
+        } else {
+            let result = subprocess::Exec::shell(raw).join();
+            match result {
+                Ok(status) => {
+                    exit_status = status;
+                }
+                Err(err) => {
+                    exec_error = Some(err);
+                }
             }
+        }
+
+        if let Some(err) = exec_error {
+            println!("--> execute error: {}", err);
+            return (false, String::new());
+        }
+
+        if !exit_status.success() {
+            println!("--> failed with exit status = {:?}\n", exit_status);
+            return (false, String::new());
         }
     }
 
