@@ -20,3 +20,19 @@ fn test_clone_repository() {
     assert!(command.dir.is_empty());
     assert!(command.show);
 }
+
+#[test]
+fn test_current_branch() {
+    let command = current_branch();
+
+    assert_eq!(command.raw, "git branch");
+    assert!(command.dir.is_empty());
+    assert!(!command.show);
+    assert!(command.pipe);
+    assert!(command.then.is_some());
+
+    let exec = command.then.unwrap();
+    let (success, branch) = exec("master\n* feature\n");
+    assert!(success);
+    assert_eq!(branch, "* feature");
+}

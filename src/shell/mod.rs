@@ -2,12 +2,13 @@
 mod test;
 
 use super::cmd::Command;
+use super::git;
 use super::instr::Instruction;
 
 use dirs;
 use std::env;
 use std::path::{Path, MAIN_SEPARATOR};
-use subprocess::{Exec, ExitStatus, PopenError, Redirection::Pipe};
+use subprocess::{ExitStatus, PopenError, Redirection::Pipe};
 
 const TILDE: &str = "~";
 
@@ -49,16 +50,11 @@ pub fn current_directory_shortened(max_len: usize) -> String {
 // Return current git branch of current directory if it is a git repository,
 // or empty string if it isn't
 pub fn current_git_branch() -> String {
-    let exec = Exec::shell("git branch").stdout(Pipe).stderr(Pipe);
+    let command = git::current_branch();
 
-    if let Ok(data) = exec.capture() {
-        if data.success() {
-            for branch in data.stdout_str().lines() {
-                if branch.starts_with("*") {
-                    return branch.to_owned();
-                }
-            }
-        }
+    let (success, branch) = run_command(&command);
+    if success {
+        return branch;
     }
 
     return String::new();
@@ -130,7 +126,9 @@ pub fn run_command(command: &Command) -> (bool, String) {
                         stdout = data.stdout_str();
                     } else {
                         exit_status = data.exit_status;
-                        println!("{}", data.stderr_str());
+                        if !command.silent {
+                            println!("{}", data.stderr_str());
+                        }
                     }
                 }
                 Err(err) => {
@@ -149,14 +147,16 @@ pub fn run_command(command: &Command) -> (bool, String) {
             }
         }
 
-        if let Some(err) = exec_error {
-            println!("--> execute error: {}", err);
-            return (false, String::new());
-        }
+        if !command.silent {
+            if let Some(err) = exec_error {
+                println!("--> execute error: {}", err);
+                return (false, String::new());
+            }
 
-        if !exit_status.success() {
-            println!("--> failed with exit status = {:?}\n", exit_status);
-            return (false, String::new());
+            if !exit_status.success() {
+                println!("--> failed with exit status = {:?}\n", exit_status);
+                return (false, String::new());
+            }
         }
     }
 

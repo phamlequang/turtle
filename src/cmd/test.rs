@@ -5,16 +5,18 @@ fn test_new_command() {
     let raw = "pwd";
     let dir = "/tmp";
     let show = true;
+    let silent = false;
     let pipe = true;
     let exec = |name: &str| -> (bool, String) {
         let output = format!("bonjour {}!", name);
         return (true, output);
     };
 
-    let command = Command::new(raw, dir, show, pipe, Some(Box::new(exec)));
+    let command = Command::new(raw, dir, show, silent, pipe, Some(Box::new(exec)));
     assert_eq!(command.raw, raw);
     assert_eq!(command.dir, dir);
     assert_eq!(command.show, show);
+    assert_eq!(command.silent, silent);
     assert_eq!(command.pipe, pipe);
     assert!(command.then.is_some());
 

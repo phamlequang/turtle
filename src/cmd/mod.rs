@@ -10,27 +10,36 @@ pub struct Command {
     pub raw: String,
     pub dir: String,
     pub show: bool,
+    pub silent: bool,
     pub pipe: bool,
     pub then: Option<ExecFn>,
 }
 
 impl Command {
-    pub fn new(raw: &str, dir: &str, show: bool, pipe: bool, then: Option<ExecFn>) -> Self {
+    pub fn new(
+        raw: &str,
+        dir: &str,
+        show: bool,
+        silent: bool,
+        pipe: bool,
+        then: Option<ExecFn>,
+    ) -> Self {
         return Self {
             raw: raw.to_owned(),
             dir: dir.to_owned(),
             show: show,
+            silent: silent,
             pipe: pipe,
             then: then,
         };
     }
 
     pub fn basic_hide(raw: &str) -> Self {
-        return Self::new(raw, "", false, false, None);
+        return Self::new(raw, "", false, false, false, None);
     }
 
     pub fn basic_show(raw: &str) -> Self {
-        return Self::new(raw, "", true, false, None);
+        return Self::new(raw, "", true, false, false, None);
     }
 
     pub fn echo(message: &str) -> Self {

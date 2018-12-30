@@ -51,7 +51,7 @@ fn test_generate_instruction_change_directory() {
     let mut generator = Generator::new(&mut config);
 
     let instruction = generator.generate_instruction("cd ..");
-    let command = Command::new("", "..", false, false, None);
+    let command = Command::new("", "..", false, false, false, None);
 
     let expect = Instruction::basic(vec![command]);
     assert_eq!(instruction, expect);
