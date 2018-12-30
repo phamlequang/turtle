@@ -169,9 +169,9 @@ fn test_generate_instruction_use_groups_success() {
     let mut config = Config::default();
 
     let mut generator = Generator::new(&mut config);
-    let _ = generator.generate_instruction("use flowers");
+    let _ = generator.generate_instruction("use rep");
 
     let using = config.using.unwrap();
-    let expect = vec!["flowers"];
+    let expect = vec!["rep"];
     assert_eq!(using, expect)
 }

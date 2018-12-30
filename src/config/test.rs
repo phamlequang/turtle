@@ -60,7 +60,7 @@ fn test_search_repository_not_found() {
 #[test]
 fn test_search_group_found() {
     let config = Config::default();
-    let name = "forest";
+    let name = "all";
 
     let found = config.search_group(name);
     assert!(found.is_some());
@@ -80,10 +80,26 @@ fn test_search_group_not_found() {
 
 #[test]
 fn test_using_dependencies() {
-    // to do
+    let mut config = Config::default();
+
+    let using_dependencies = config.using_dependencies();
+    assert_eq!(using_dependencies.len(), 1);
+    assert!(using_dependencies.contains("postgres"));
+
+    config.use_groups(vec!["rep".to_owned()]);
+    let using_dependencies = config.using_dependencies();
+    assert!(using_dependencies.is_empty());
 }
 
 #[test]
 fn test_using_repositories() {
-    // to do
+    let mut config = Config::default();
+
+    let using_repositories = config.using_repositories();
+    assert_eq!(using_repositories.len(), 1);
+    assert!(using_repositories.contains("flowers"));
+
+    config.use_groups(vec!["dep".to_owned()]);
+    let using_repositories = config.using_repositories();
+    assert!(using_repositories.is_empty());
 }
