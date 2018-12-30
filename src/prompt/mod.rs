@@ -1,3 +1,6 @@
+#[cfg(test)]
+mod test;
+
 use super::shell;
 
 use rustyline::completion::{Completer, FilenameCompleter, Pair};

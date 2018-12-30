@@ -2,11 +2,13 @@
 mod test;
 
 use serde_derive::{Deserialize, Serialize};
+
+use std::collections::HashSet;
 use std::fs;
 use std::io;
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct DockerMachine {
+pub struct Machine {
     pub name: String,
     pub cpu_count: u32,
     pub disk_size: u32,
@@ -14,10 +16,10 @@ pub struct DockerMachine {
     pub volumes: Option<Vec<String>>,
 }
 
-impl DockerMachine {
+impl Machine {
     #[cfg(test)]
     pub fn default() -> Self {
-        DockerMachine {
+        Self {
             name: String::from("turtle"),
             cpu_count: 2,
             disk_size: 16384,
@@ -74,20 +76,22 @@ pub struct Group {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Config {
-    pub docker_machine: DockerMachine,
+    pub machine: Option<Machine>,
     pub dependencies: Option<Vec<Dependency>>,
     pub repositories: Option<Vec<Repository>>,
     pub groups: Option<Vec<Group>>,
+    pub using: Option<Vec<String>>,
 }
 
 impl Config {
     #[cfg(test)]
-    pub fn new() -> Self {
+    pub fn empty() -> Self {
         Self {
-            docker_machine: DockerMachine::default(),
+            machine: None,
             dependencies: None,
             repositories: None,
             groups: None,
+            using: None,
         }
     }
 
@@ -119,5 +123,56 @@ impl Config {
             }
         }
         return None;
+    }
+
+    pub fn search_group(&self, name: &str) -> Option<&Group> {
+        if let Some(groups) = &self.groups {
+            for group in groups {
+                if group.name == name {
+                    return Some(group);
+                }
+            }
+        }
+        return None;
+    }
+
+    pub fn use_groups(&mut self, group_names: Vec<String>) {
+        self.using = Some(group_names);
+    }
+
+    pub fn using_dependencies(&self) -> HashSet<String> {
+        let mut result = HashSet::new();
+
+        if let Some(using) = &self.using {
+            for name in using {
+                if let Some(group) = self.search_group(name) {
+                    if let Some(deps) = &group.dependencies {
+                        for dep in deps {
+                            result.insert(dep.clone());
+                        }
+                    }
+                }
+            }
+        }
+
+        return result;
+    }
+
+    pub fn using_repositories(&self) -> HashSet<String> {
+        let mut result = HashSet::new();
+
+        if let Some(using) = &self.using {
+            for name in using {
+                if let Some(group) = self.search_group(name) {
+                    if let Some(repos) = &group.repositories {
+                        for repo in repos {
+                            result.insert(repo.clone());
+                        }
+                    }
+                }
+            }
+        }
+
+        return result;
     }
 }

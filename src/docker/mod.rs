@@ -5,9 +5,9 @@ use std::fs;
 use std::io;
 
 use super::cmd::Command;
-use super::config::{Config, Docker, DockerMachine};
+use super::config::{Config, Docker, Machine};
 
-pub fn create_machine(machine: &DockerMachine) -> Command {
+pub fn create_machine(machine: &Machine) -> Command {
     let raw = format!(
         "docker-machine create \
          --driver virtualbox \
@@ -18,30 +18,30 @@ pub fn create_machine(machine: &DockerMachine) -> Command {
          {}",
         machine.cpu_count, machine.disk_size, machine.memory, machine.name
     );
-    return Command::basic(&raw);
+    return Command::basic_show(&raw);
 }
 
-pub fn update_certificates(machine: &DockerMachine) -> Command {
+pub fn update_certificates(machine: &Machine) -> Command {
     let raw = format!(
         "docker-machine regenerate-certs --force --client-certs {}",
         machine.name
     );
-    return Command::basic(&raw);
+    return Command::basic_show(&raw);
 }
 
-pub fn load_environments(machine: &DockerMachine) -> Command {
+pub fn load_environments(machine: &Machine) -> Command {
     let raw = format!("eval \"$(docker-machine env {})\"", machine.name);
-    return Command::basic(&raw);
+    return Command::basic_show(&raw);
 }
 
-pub fn machine_command(action: &str, machine: &DockerMachine) -> Command {
+pub fn machine_command(action: &str, machine: &Machine) -> Command {
     let raw = format!("docker-machine {} {}", action, machine.name);
-    return Command::basic(&raw);
+    return Command::basic_show(&raw);
 }
 
 pub fn compose_command(action: &str, project_name: &str) -> Command {
     let raw = format!("docker-compose -p {} {}", project_name, action);
-    return Command::basic(&raw);
+    return Command::basic_show(&raw);
 }
 
 pub fn service_logs(service_name: &str, project_name: &str) -> Command {
@@ -51,7 +51,7 @@ pub fn service_logs(service_name: &str, project_name: &str) -> Command {
 
 pub fn docker_command(action: &str) -> Command {
     let raw = format!("docker {}", action);
-    return Command::basic(&raw);
+    return Command::basic_hide(&raw);
 }
 
 pub fn list_containers() -> Command {
@@ -67,41 +67,60 @@ pub fn generate_compose_file(file_path: &str, config: &Config) -> io::Result<()>
 }
 
 pub fn generate_compose_text(config: &Config) -> String {
+    let lines = generate_compose_lines(config);
+    return lines.join("\n");
+}
+
+pub fn generate_compose_lines(config: &Config) -> Vec<String> {
     let mut lines: Vec<String> = Vec::new();
 
-    lines.push("version: '3'".to_owned());
+    match &config.machine {
+        Some(machine) => {
+            lines.push("version: '3'".to_owned());
 
-    if let Some(volumes) = &config.docker_machine.volumes {
-        lines.push(format!("volumes:"));
-        for v in volumes {
-            lines.push(format!("  {}:", v));
-            lines.push(format!("    external: {}", false));
-        }
-    }
+            if let Some(volumes) = &machine.volumes {
+                lines.push(format!("volumes:"));
+                for v in volumes {
+                    lines.push(format!("  {}:", v));
+                    lines.push(format!("    external: {}", false));
+                }
+            }
 
-    lines.push("services:".to_owned());
+            lines.push("services:".to_owned());
 
-    if let Some(dependencies) = &config.dependencies {
-        for dependency in dependencies {
-            let more = compose_service(&dependency.name, &dependency.docker);
-            lines.extend(more);
-        }
-    }
+            let using_dependencies = config.using_dependencies();
+            let using_repositories = config.using_repositories();
 
-    if let Some(respositories) = &config.repositories {
-        for repository in respositories {
-            if let Some(services) = &repository.services {
-                for service in services {
-                    let more = compose_service(&service.name, &service.docker);
+            if let Some(dependencies) = &config.dependencies {
+                for dependency in dependencies {
+                    if !using_dependencies.contains(&dependency.name) {
+                        continue;
+                    }
+                    let more = compose_service(&dependency.name, &dependency.docker);
                     lines.extend(more);
                 }
             }
+
+            if let Some(respositories) = &config.repositories {
+                for repository in respositories {
+                    if !using_repositories.contains(&repository.name) {
+                        continue;
+                    }
+                    if let Some(services) = &repository.services {
+                        for service in services {
+                            let more = compose_service(&service.name, &service.docker);
+                            lines.extend(more);
+                        }
+                    }
+                }
+            }
+
+            lines.push(format!(""));
+
+            return lines;
         }
+        None => return lines,
     }
-
-    lines.push(format!(""));
-
-    return lines.join("\n");
 }
 
 fn compose_service(name: &str, docker: &Docker) -> Vec<String> {

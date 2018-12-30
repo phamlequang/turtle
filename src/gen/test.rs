@@ -3,8 +3,8 @@ use crate::config::Config;
 
 #[test]
 fn test_generate_instruction_terminate() {
-    let config = Config::new();
-    let generator = Generator::new(&config);
+    let mut config = Config::empty();
+    let mut generator = Generator::new(&mut config);
 
     let expect = Instruction::terminate();
 
@@ -17,13 +17,13 @@ fn test_generate_instruction_terminate() {
 
 #[test]
 fn test_generate_instruction_other() {
-    let config = Config::new();
-    let generator = Generator::new(&config);
+    let mut config = Config::empty();
+    let mut generator = Generator::new(&mut config);
 
     let raw = "ls -la";
     let instruction = generator.generate_instruction(raw);
 
-    let command = Command::basic(raw);
+    let command = Command::basic_hide(raw);
     let expect = Instruction::basic(vec![command]);
 
     assert_eq!(instruction, expect);
@@ -31,8 +31,8 @@ fn test_generate_instruction_other() {
 
 #[test]
 fn test_generate_instruction_clone() {
-    let config = Config::default();
-    let generator = Generator::new(&config);
+    let mut config = Config::default();
+    let mut generator = Generator::new(&mut config);
 
     let raw = "clone flowers tree";
     let instruction = generator.generate_instruction(raw);
@@ -47,11 +47,11 @@ fn test_generate_instruction_clone() {
 
 #[test]
 fn test_generate_instruction_change_directory() {
-    let config = Config::new();
-    let generator = Generator::new(&config);
+    let mut config = Config::empty();
+    let mut generator = Generator::new(&mut config);
 
     let instruction = generator.generate_instruction("cd ..");
-    let command = Command::new("", "..", false);
+    let command = Command::new("", "..", false, false, false, None);
 
     let expect = Instruction::basic(vec![command]);
     assert_eq!(instruction, expect);
@@ -59,12 +59,13 @@ fn test_generate_instruction_change_directory() {
 
 #[test]
 fn test_generate_instruction_machine_create() {
-    let config = Config::default();
+    let mut config = Config::default();
 
-    let generator = Generator::new(&config);
+    let mut generator = Generator::new(&mut config);
     let instruction = generator.generate_instruction("machine create");
 
-    let command = docker::create_machine(&config.docker_machine);
+    let machine = &config.machine.unwrap();
+    let command = docker::create_machine(machine);
     let expect = Instruction::basic(vec![command]);
 
     assert_eq!(instruction, expect);
@@ -72,12 +73,13 @@ fn test_generate_instruction_machine_create() {
 
 #[test]
 fn test_generate_instruction_machine_remove() {
-    let config = Config::default();
+    let mut config = Config::default();
 
-    let generator = Generator::new(&config);
+    let mut generator = Generator::new(&mut config);
     let instruction = generator.generate_instruction("machine rm");
 
-    let command = docker::machine_command("rm", &config.docker_machine);
+    let machine = &config.machine.unwrap();
+    let command = docker::machine_command("rm", machine);
     let expect = Instruction::basic(vec![command]);
 
     assert_eq!(instruction, expect);
@@ -85,12 +87,13 @@ fn test_generate_instruction_machine_remove() {
 
 #[test]
 fn test_generate_instruction_machine_update_certificates() {
-    let config = Config::default();
+    let mut config = Config::default();
 
-    let generator = Generator::new(&config);
+    let mut generator = Generator::new(&mut config);
     let instruction = generator.generate_instruction("machine upcerts");
 
-    let command = docker::update_certificates(&config.docker_machine);
+    let machine = &config.machine.unwrap();
+    let command = docker::update_certificates(machine);
     let expect = Instruction::basic(vec![command]);
 
     assert_eq!(instruction, expect);
@@ -98,12 +101,13 @@ fn test_generate_instruction_machine_update_certificates() {
 
 #[test]
 fn test_generate_instruction_machine_load_environment() {
-    let config = Config::default();
+    let mut config = Config::default();
 
-    let generator = Generator::new(&config);
+    let mut generator = Generator::new(&mut config);
     let instruction = generator.generate_instruction("machine load");
 
-    let command = docker::load_environments(&config.docker_machine);
+    let machine = &config.machine.unwrap();
+    let command = docker::load_environments(machine);
     let expect = Instruction::basic(vec![command]);
 
     assert_eq!(instruction, expect);
@@ -111,9 +115,9 @@ fn test_generate_instruction_machine_load_environment() {
 
 #[test]
 fn test_generate_instruction_docker_list_containers() {
-    let config = Config::default();
+    let mut config = Config::default();
 
-    let generator = Generator::new(&config);
+    let mut generator = Generator::new(&mut config);
     let instruction = generator.generate_instruction("docker ps");
 
     let command = docker::list_containers();
@@ -124,9 +128,9 @@ fn test_generate_instruction_docker_list_containers() {
 
 #[test]
 fn test_generate_instruction_docker_list_images() {
-    let config = Config::default();
+    let mut config = Config::default();
 
-    let generator = Generator::new(&config);
+    let mut generator = Generator::new(&mut config);
     let instruction = generator.generate_instruction("docker images");
 
     let command = docker::docker_command("images");
@@ -137,13 +141,37 @@ fn test_generate_instruction_docker_list_images() {
 
 #[test]
 fn test_generate_instruction_docker_service_logs() {
-    let config = Config::default();
+    let mut config = Config::default();
 
-    let generator = Generator::new(&config);
+    let mut generator = Generator::new(&mut config);
     let instruction = generator.generate_instruction("logs camellia");
 
-    let command = docker::service_logs("camellia", &config.docker_machine.name);
+    let machine = &config.machine.unwrap();
+    let command = docker::service_logs("camellia", &machine.name);
     let expect = Instruction::basic(vec![command]);
 
     assert_eq!(instruction, expect);
+}
+
+#[test]
+fn test_generate_instruction_use_groups_not_found() {
+    let mut config = Config::default();
+
+    let mut generator = Generator::new(&mut config);
+    let instruction = generator.generate_instruction("use abcd");
+
+    let expect = Instruction::echo("--> unknown group abcd");
+    assert_eq!(instruction, expect);
+}
+
+#[test]
+fn test_generate_instruction_use_groups_success() {
+    let mut config = Config::default();
+
+    let mut generator = Generator::new(&mut config);
+    let _ = generator.generate_instruction("use rep");
+
+    let using = config.using.unwrap();
+    let expect = vec!["rep"];
+    assert_eq!(using, expect)
 }

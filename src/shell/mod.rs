@@ -2,12 +2,14 @@
 mod test;
 
 use super::cmd::Command;
+use super::git;
 use super::instr::Instruction;
 
 use dirs;
 use std::env;
 use std::path::{Path, MAIN_SEPARATOR};
-use subprocess::{Exec, Redirection::Pipe};
+use subprocess::{ExitStatus, PopenError, Redirection::Pipe};
+use termion::{color, color::Red};
 
 const TILDE: &str = "~";
 
@@ -49,16 +51,11 @@ pub fn current_directory_shortened(max_len: usize) -> String {
 // Return current git branch of current directory if it is a git repository,
 // or empty string if it isn't
 pub fn current_git_branch() -> String {
-    let exec = Exec::shell("git branch").stdout(Pipe).stderr(Pipe);
+    let command = git::current_branch();
 
-    if let Ok(data) = exec.capture() {
-        if data.success() {
-            for branch in data.stdout_str().lines() {
-                if branch.starts_with("*") {
-                    return branch.to_owned();
-                }
-            }
-        }
+    let (success, branch) = run_command(&command);
+    if success {
+        return branch;
     }
 
     return String::new();
@@ -75,7 +72,8 @@ pub fn change_directory(dir: &str) -> bool {
     let path = Path::new(&dir);
     if let Err(err) = env::set_current_dir(path) {
         println!(
-            "--> cannot change directory to [ {} ]: {}",
+            "{}--> cannot change directory to [ {} ]: {}",
+            color::Fg(Red),
             path.display(),
             err
         );
@@ -102,42 +100,84 @@ pub fn home_dir() -> String {
     return String::new();
 }
 
-// Execute command as a child process and wait for it to finish, return true if success
-pub fn run_command(command: &Command) -> bool {
+// Execute command as a child process and wait for it to finish,
+// return true and output string if success
+pub fn run_command(command: &Command) -> (bool, String) {
     let ok = change_directory(&command.dir);
+    if !ok {
+        return (false, String::new());
+    }
+
     let raw = &command.raw;
+    let mut stdout = String::new();
 
-    if !ok || raw.is_empty() {
-        println!();
-        return true;
-    }
+    if !raw.is_empty() {
+        if command.show {
+            println!("$ {}", raw);
+        }
 
-    if command.show {
-        println!("\n$ {}", raw);
-    }
-    println!();
+        let mut exec_error: Option<PopenError> = None;
+        let mut exit_status = ExitStatus::Exited(0);
 
-    let result = subprocess::Exec::shell(raw).join();
-    match result {
-        Ok(status) => {
-            if status.success() {
-                println!();
-                return true;
+        if command.pipe {
+            let exec = subprocess::Exec::shell(raw).stdout(Pipe).stderr(Pipe);
+
+            match exec.capture() {
+                Ok(data) => {
+                    if data.success() {
+                        stdout = data.stdout_str();
+                    } else {
+                        exit_status = data.exit_status;
+                        if !command.silent {
+                            println!("{}", data.stderr_str());
+                        }
+                    }
+                }
+                Err(err) => {
+                    exec_error = Some(err);
+                }
             }
-            println!("--> failed with exit status = {:?}\n", status);
+        } else {
+            let result = subprocess::Exec::shell(raw).join();
+            match result {
+                Ok(status) => {
+                    exit_status = status;
+                }
+                Err(err) => {
+                    exec_error = Some(err);
+                }
+            }
         }
-        Err(err) => {
-            println!("--> execute error: {}\n", err);
+
+        if !command.silent {
+            if let Some(err) = exec_error {
+                println!("{}--> execute error: {}", color::Fg(Red), err);
+                return (false, String::new());
+            }
+
+            if !exit_status.success() {
+                println!(
+                    "{}--> failed with exit status = {:?}\n",
+                    color::Fg(Red),
+                    exit_status
+                );
+                return (false, String::new());
+            }
         }
     }
 
-    return false;
+    if let Some(then) = &command.then {
+        return then(&stdout);
+    }
+
+    return (true, stdout);
 }
 
-// Executes all commands sequentially, stop immediately in case of failure, return true if success
+// Executes all commands sequentially, stop immediately in case of failure,
+// return true if success
 pub fn run_instruction(instruction: &Instruction) -> bool {
     for cmd in &instruction.commands {
-        let success = run_command(cmd);
+        let (success, _) = run_command(cmd);
         if !success {
             return false;
         }

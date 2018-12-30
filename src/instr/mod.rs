@@ -31,6 +31,11 @@ impl Instruction {
         let command = Command::echo("goodbye!");
         return Self::new(vec![command], true);
     }
+
+    pub fn echo(message: &str) -> Self {
+        let command = Command::echo(message);
+        return Self::basic(vec![command]);
+    }
 }
 
 impl PartialEq for Instruction {

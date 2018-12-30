@@ -15,9 +15,9 @@ const HISTORY_FILE: &str = ".history";
 
 // Run turtle shell
 pub fn run() {
-    let config = config::Config::load(CONFIG_FILE).unwrap();
+    let mut config = config::Config::load(CONFIG_FILE).unwrap();
 
-    let generator = gen::Generator::new(&config);
+    let mut generator = gen::Generator::new(&mut config);
     generator.generate_docker_compose_file(COMPOSE_FILE);
 
     ctrlc::set_handler(|| ()).expect("error setting ctrl-c handler");

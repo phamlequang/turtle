@@ -22,7 +22,7 @@ fn test_load_config_not_found() {
 #[test]
 fn test_parse_config_invalid() {
     let toml_text = r#"
-    [docker_machine]
+    [machine]
     name = "turtle"
 
     [[dependencies]]
@@ -45,7 +45,7 @@ fn test_search_repository_found() {
     assert!(found.is_some());
 
     let repository = found.unwrap();
-    assert_eq!(repository.name, name)
+    assert_eq!(repository.name, name);
 }
 
 #[test]
@@ -55,4 +55,51 @@ fn test_search_repository_not_found() {
 
     let found = config.search_repository(name);
     assert!(found.is_none());
+}
+
+#[test]
+fn test_search_group_found() {
+    let config = Config::default();
+    let name = "all";
+
+    let found = config.search_group(name);
+    assert!(found.is_some());
+
+    let group = found.unwrap();
+    assert_eq!(group.name, name)
+}
+
+#[test]
+fn test_search_group_not_found() {
+    let config = Config::default();
+    let name = "unknown";
+
+    let found = config.search_group(name);
+    assert!(found.is_none());
+}
+
+#[test]
+fn test_using_dependencies() {
+    let mut config = Config::default();
+
+    let using_dependencies = config.using_dependencies();
+    assert_eq!(using_dependencies.len(), 1);
+    assert!(using_dependencies.contains("postgres"));
+
+    config.use_groups(vec!["rep".to_owned()]);
+    let using_dependencies = config.using_dependencies();
+    assert!(using_dependencies.is_empty());
+}
+
+#[test]
+fn test_using_repositories() {
+    let mut config = Config::default();
+
+    let using_repositories = config.using_repositories();
+    assert_eq!(using_repositories.len(), 1);
+    assert!(using_repositories.contains("flowers"));
+
+    config.use_groups(vec!["dep".to_owned()]);
+    let using_repositories = config.using_repositories();
+    assert!(using_repositories.is_empty());
 }

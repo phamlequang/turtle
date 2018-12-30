@@ -1,4 +1,6 @@
-[docker_machine]
+using = ["all"]
+
+[machine]
 name = "turtle"
 cpu_count = 2
 disk_size = 16384
@@ -51,6 +53,14 @@ branch = "master"
         command = "cargo run"
 
 [[groups]]
-name = "forest"
+name = "all"
 dependencies = ["postgres"]
 repositories = ["flowers"]
+
+[[groups]]
+name = "rep"
+repositories = ["flowers"]
+
+[[groups]]
+name = "dep"
+dependencies = ["postgres"]
