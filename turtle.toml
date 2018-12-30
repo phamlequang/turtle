@@ -6,7 +6,7 @@ name = "turtle"
 cpu_count = 2
 disk_size = 16384
 memory = 4096
-volumes = ["postgres_data"]
+volumes = ["postgres_data", "redis_data"]
 
 [[dependencies]]
 name = "postgres"
@@ -16,6 +16,14 @@ name = "postgres"
     ports = ["5432:5432"]
     environment = ["POSTGRES_PASSWORD=secret"]
     volumes = ["postgres_data:/var/lib/postgresql/data"]
+
+[[dependencies]]
+name = "redis"
+
+    [dependencies.docker]
+    image = "redis:latest"
+    ports = ["6379:6379"]
+    volumes = ["redis_data:/data"]
 
 [[repositories]]
 name = "flowers"
@@ -35,7 +43,7 @@ branch = "master"
         working_dir = "/app"
         volumes = ["/Users/phamlequang/projects/flowers/camellia:/app"]
         env_file = ["/Users/phamlequang/projects/flowers/camellia/.env"]
-        depends_on = ["postgres"]
+        depends_on = ["postgres", "redis"]
         command = "cargo run"
 
     [[repositories.services]]
@@ -55,7 +63,7 @@ branch = "master"
 
 [[groups]]
 name = "all"
-dependencies = ["postgres"]
+dependencies = ["postgres", "redis"]
 repositories = ["flowers"]
 
 [[groups]]
@@ -64,4 +72,4 @@ repositories = ["flowers"]
 
 [[groups]]
 name = "dep"
-dependencies = ["postgres"]
+dependencies = ["postgres", "redis"]
