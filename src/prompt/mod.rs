@@ -9,7 +9,7 @@ use rustyline::error::ReadlineError;
 use rustyline::highlight::Highlighter;
 use rustyline::hint::Hinter;
 use rustyline::{Cmd, CompletionType, Config, EditMode, Editor, Helper, KeyPress};
-use termion::{color, color::Blue, color::Cyan, color::Green, style};
+use termion::{color, color::Cyan, color::Green, color::Yellow, style};
 
 const CURRENT_DIR_MAX_LENGTH: usize = 20;
 
@@ -71,14 +71,14 @@ impl Prompt {
         let branch = shell::current_git_branch();
 
         let dir = format!("{}{}➜ {}", style::Bold, color::Fg(Cyan), dir);
-        let prompt = format!("{} ~ {}", color::Fg(Blue), style::Reset);
+        let prompt = format!("{} ~ {}", color::Fg(Yellow), style::Reset);
 
         if branch.is_empty() {
-            return format!("{} {}", dir, prompt);
+            return format!("{}{}", dir, prompt);
         }
 
-        let branch = format!("{}{}", color::Fg(Green), branch);
-        return format!("{} {}{}", dir, branch, prompt);
+        let branch = format!("{} {}", color::Fg(Green), branch);
+        return format!("{}{}{}", dir, branch, prompt);
     }
 }
 
