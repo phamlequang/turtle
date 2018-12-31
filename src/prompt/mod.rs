@@ -2,6 +2,7 @@
 mod test;
 
 use super::shell;
+use super::util;
 
 use rustyline::completion::{Completer, FilenameCompleter, Pair};
 use rustyline::config::OutputStreamType;
@@ -67,7 +68,7 @@ impl Prompt {
     }
 
     pub fn message(&self) -> String {
-        let dir = shell::current_directory_shortened(CURRENT_DIR_MAX_LENGTH);
+        let dir = util::current_directory_shortened(CURRENT_DIR_MAX_LENGTH);
         let branch = shell::current_git_branch();
 
         let dir = format!("{}{}➜ {}", style::Bold, color::Fg(Cyan), dir);

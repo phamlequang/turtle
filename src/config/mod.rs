@@ -17,19 +17,6 @@ pub struct Machine {
     pub volumes: Option<Vec<String>>,
 }
 
-impl Machine {
-    #[cfg(test)]
-    pub fn default() -> Self {
-        Self {
-            name: String::from("turtle"),
-            cpu_count: 2,
-            disk_size: 16384,
-            memory: 4096,
-            volumes: None,
-        }
-    }
-}
-
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Docker {
     pub image: String,
@@ -87,20 +74,8 @@ pub struct Config {
 
 impl Config {
     #[cfg(test)]
-    pub fn empty() -> Self {
-        Self {
-            project: String::new(),
-            using: None,
-            machine: None,
-            dependencies: None,
-            repositories: None,
-            groups: None,
-        }
-    }
-
-    #[cfg(test)]
-    pub fn default() -> Self {
-        return Self::load("turtle.toml").unwrap();
+    pub fn sample() -> Self {
+        return Self::load("config.toml").unwrap();
     }
 
     pub fn load(file_path: &str) -> Result<Self, io::Error> {

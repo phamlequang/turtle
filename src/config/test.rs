@@ -1,9 +1,13 @@
 use super::*;
 use std::io::ErrorKind;
 
+fn sample_config() -> Config {
+    Config::sample()
+}
+
 #[test]
 fn test_load_config_ok() {
-    let result = Config::load("turtle.toml");
+    let result = Config::load("config.toml");
     assert!(result.is_ok());
 
     let config = result.unwrap();
@@ -38,7 +42,7 @@ fn test_parse_config_invalid() {
 
 #[test]
 fn test_search_repository_found() {
-    let config = Config::default();
+    let config = sample_config();
     let name = "flowers";
 
     let found = config.search_repository(name);
@@ -50,7 +54,7 @@ fn test_search_repository_found() {
 
 #[test]
 fn test_search_repository_not_found() {
-    let config = Config::default();
+    let config = sample_config();
     let name = "unknown";
 
     let found = config.search_repository(name);
@@ -59,7 +63,7 @@ fn test_search_repository_not_found() {
 
 #[test]
 fn test_search_group_found() {
-    let config = Config::default();
+    let config = sample_config();
     let name = "all";
 
     let found = config.search_group(name);
@@ -71,7 +75,7 @@ fn test_search_group_found() {
 
 #[test]
 fn test_search_group_not_found() {
-    let config = Config::default();
+    let config = sample_config();
     let name = "unknown";
 
     let found = config.search_group(name);
@@ -80,7 +84,7 @@ fn test_search_group_not_found() {
 
 #[test]
 fn test_using_dependencies() {
-    let mut config = Config::default();
+    let mut config = sample_config();
 
     let using_dependencies = config.using_dependencies();
     assert_eq!(using_dependencies.len(), 2);
@@ -94,7 +98,7 @@ fn test_using_dependencies() {
 
 #[test]
 fn test_using_repositories() {
-    let mut config = Config::default();
+    let mut config = sample_config();
 
     let using_repositories = config.using_repositories();
     assert_eq!(using_repositories.len(), 1);
@@ -107,7 +111,7 @@ fn test_using_repositories() {
 
 #[test]
 fn test_match_dependencies_and_services() {
-    let config = Config::default();
+    let config = sample_config();
 
     let args = vec!["dep".to_owned(), "camellia".to_owned()];
     let result = config.match_dependencies_and_services(args);

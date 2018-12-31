@@ -39,19 +39,19 @@ pub fn machine_command(action: &str, machine: &Machine) -> Command {
     return Command::basic_show(&raw);
 }
 
-pub fn compose_command(action: &str, project_name: &str) -> Command {
-    let raw = format!("docker-compose -p {} {}", project_name, action);
+pub fn compose_command(action: &str, project: &str, file: &str) -> Command {
+    let raw = format!("docker-compose -p {} -f {} {}", project, file, action);
     return Command::basic_show(&raw);
 }
 
-pub fn service_logs(service_name: &str, project_name: &str) -> Command {
+pub fn service_logs(service_name: &str, project: &str, file: &str) -> Command {
     let action = format!("logs -f --tail=100 {}", service_name);
-    return compose_command(&action, project_name);
+    return compose_command(&action, project, file);
 }
 
-pub fn restart_services(service_names: Vec<String>, project_name: &str) -> Command {
+pub fn restart_services(service_names: Vec<String>, project: &str, file: &str) -> Command {
     let action = format!("restart {}", service_names.join(" "));
-    return compose_command(&action, project_name);
+    return compose_command(&action, project, file);
 }
 
 pub fn docker_command(action: &str) -> Command {

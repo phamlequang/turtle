@@ -6,6 +6,7 @@ use super::config::Config;
 use super::docker;
 use super::git;
 use super::instr::Instruction;
+use super::util;
 
 const QUIT: &str = "quit";
 const EXIT: &str = "exit";
@@ -19,19 +20,30 @@ const USE: &str = "use";
 const RESTART: &str = "restart";
 
 #[derive(Debug)]
-pub struct Generator<'a> {
-    config: &'a mut Config,
+pub struct Generator {
+    config: Config,
+    config_file: String,
+    compose_file: String,
 }
 
-impl<'a> Generator<'a> {
-    pub fn new(config: &'a mut Config) -> Generator {
-        return Self { config };
-    }
+impl Generator {
+    pub fn new(config_dir: &str) -> Generator {
+        let config_file = util::config_file(&config_dir);
+        let compose_file = util::compose_file(&config_dir);
+        let config: Config;
 
-    pub fn generate_docker_compose_file(&self, file_path: &str) {
-        if let Err(err) = docker::generate_compose_file(file_path, &self.config) {
-            println!("--> failed to generate docker-compose file: {}", err);
+        match Config::load(&config_file) {
+            Ok(cfg) => config = cfg,
+            Err(err) => {
+                panic!("-> cannot load config file {}: {}", config_file, err);
+            }
         }
+
+        return Self {
+            config,
+            config_file,
+            compose_file,
+        };
     }
 
     // Takes a raw instruction string, returns a list of instructions to execute
@@ -140,13 +152,14 @@ impl<'a> Generator<'a> {
             return Instruction::skip();
         }
         let action = args.join(" ");
-        let command = docker::compose_command(&action, &self.config.project);
+        let command = docker::compose_command(&action, &self.config.project, &self.compose_file);
         return Instruction::basic(vec![command]);
     }
 
     fn service_logs(&self, args: Vec<String>) -> Instruction {
         if let Some(service_name) = args.first() {
-            let command = docker::service_logs(service_name, &self.config.project);
+            let command =
+                docker::service_logs(service_name, &self.config.project, &self.compose_file);
             return Instruction::basic(vec![command]);
         }
         return Instruction::skip();
@@ -158,7 +171,7 @@ impl<'a> Generator<'a> {
         let mut services: Vec<String> = result.into_iter().collect();
         services.sort();
 
-        let command = docker::restart_services(services, &self.config.project);
+        let command = docker::restart_services(services, &self.config.project, &self.compose_file);
         return Instruction::basic(vec![command]);
     }
 
@@ -175,9 +188,19 @@ impl<'a> Generator<'a> {
         }
 
         self.config.use_groups(args);
+        if let Err(err) = docker::generate_compose_file(&self.compose_file, &self.config) {
+            let message = format!(
+                "--> cannot generate compose file {}: {}",
+                &self.compose_file, err
+            );
+            return Instruction::echo(&message);
+        }
 
-        // to do: generate and save docker compose file
-        return Instruction::skip();
+        let message = format!(
+            "--> successfully generated new compose file {}",
+            &self.compose_file
+        );
+        return Instruction::echo(&message);
     }
 
     fn other(&self, raw: &str) -> Instruction {

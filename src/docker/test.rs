@@ -1,8 +1,18 @@
 use super::*;
 
+fn sample_machine() -> Machine {
+    Machine {
+        name: String::from("turtle"),
+        cpu_count: 2,
+        disk_size: 16384,
+        memory: 4096,
+        volumes: None,
+    }
+}
+
 #[test]
 fn test_create_machine() {
-    let machine = Machine::default();
+    let machine = sample_machine();
 
     let command = create_machine(&machine);
     let expect = Command::basic_show(
@@ -20,7 +30,7 @@ fn test_create_machine() {
 
 #[test]
 fn test_update_certificates() {
-    let machine = Machine::default();
+    let machine = sample_machine();
 
     let command = update_certificates(&machine);
     let expect = Command::basic_show(
@@ -33,7 +43,7 @@ fn test_update_certificates() {
 
 #[test]
 fn test_load_environments() {
-    let machine = Machine::default();
+    let machine = sample_machine();
 
     let command = load_environments(&machine);
     let expect = Command::basic_show("eval \"$(docker-machine env turtle)\"");
@@ -42,7 +52,7 @@ fn test_load_environments() {
 
 #[test]
 fn test_machine_command() {
-    let machine = Machine::default();
+    let machine = sample_machine();
 
     let command = machine_command("restart", &machine);
     let expect = Command::basic_show("docker-machine restart turtle");
@@ -52,16 +62,16 @@ fn test_machine_command() {
 
 #[test]
 fn test_compose_command() {
-    let command = compose_command("up -d", "forest");
-    let expect = Command::basic_show("docker-compose -p forest up -d");
+    let command = compose_command("up -d", "forest", "compose.yml");
+    let expect = Command::basic_show("docker-compose -p forest -f compose.yml up -d");
     assert_eq!(command, expect);
 }
 
 #[test]
 fn test_service_logs() {
-    let command = service_logs("lotus", "forest");
+    let command = service_logs("lotus", "forest", "compose.yml");
     let expect = Command::basic_show(
-        "docker-compose -p forest \
+        "docker-compose -p forest -f compose.yml \
          logs -f --tail=100 lotus",
     );
     assert_eq!(command, expect);
@@ -70,8 +80,11 @@ fn test_service_logs() {
 #[test]
 fn test_restart_services() {
     let service_names = vec!["lotus".to_owned(), "camellia".to_owned()];
-    let command = restart_services(service_names, "forest");
-    let expect = Command::basic_show("docker-compose -p forest restart lotus camellia");
+    let command = restart_services(service_names, "forest", "compose.yml");
+    let expect = Command::basic_show(
+        "docker-compose -p forest -f compose.yml \
+         restart lotus camellia",
+    );
     assert_eq!(command, expect);
 }
 
@@ -94,7 +107,7 @@ fn test_list_containers() {
 
 #[test]
 fn test_generate_compose_text() {
-    let config = Config::default();
+    let config = Config::sample();
     let result = generate_compose_text(&config);
     let expect = fs::read_to_string("docker-compose.yml").unwrap();
     assert_eq!(result, expect);
