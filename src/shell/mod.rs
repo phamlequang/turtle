@@ -87,18 +87,26 @@ pub fn change_directory(dir: &str) -> bool {
 pub fn normalize_path(path: &str) -> String {
     let path = path.trim();
     if path.starts_with(TILDE) {
-        return format!("{}{}", home_dir(), path.trim_start_matches(TILDE));
+        return format!("{}{}", home_directory(), path.trim_start_matches(TILDE));
     }
     return path.to_owned();
 }
 
-pub fn home_dir() -> String {
+pub fn home_directory() -> String {
     if let Some(pb) = dirs::home_dir() {
         if let Some(dir) = pb.to_str() {
             return dir.to_owned();
         }
     }
     return String::new();
+}
+
+pub fn config_directory() -> String {
+    let mut dir = home_directory();
+    if dir.len() == 0 {
+        dir = String::from("/tmp")
+    }
+    return format!("{}/.turtle", dir);
 }
 
 // Execute command as a child process and wait for it to finish,

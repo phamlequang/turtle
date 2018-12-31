@@ -1,15 +1,22 @@
 use super::*;
 
 #[test]
-fn test_home_dir() {
-    let home = home_dir();
+fn test_home_directory() {
+    let home = home_directory();
     assert!(!home.is_empty());
+}
+
+#[test]
+fn test_config_directory() {
+    let directory = config_directory();
+    let expect = format!("{}/.turtle", home_directory());
+    assert_eq!(directory, expect);
 }
 
 #[test]
 fn test_normalize_path() {
     let path = "~/Desktop/test.txt";
-    let expect = format!("{}/Desktop/test.txt", home_dir());
+    let expect = format!("{}/Desktop/test.txt", home_directory());
     assert_eq!(normalize_path(path), expect);
 }
 
