@@ -107,6 +107,16 @@ fn test_status_services() {
 }
 
 #[test]
+fn test_compose_exec() {
+    let command = compose_exec("postgres", "psql -d test -U admin", "forest", "compose.yml");
+    let expect = Command::basic_show(
+        "docker-compose -p forest -f compose.yml \
+         exec postgres psql -d test -U admin",
+    );
+    assert_eq!(command, expect);
+}
+
+#[test]
 fn test_docker_command() {
     let command = docker_command("images");
     let expect = Command::basic_hide("docker images");

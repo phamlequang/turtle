@@ -233,6 +233,36 @@ fn test_generate_instruction_restart_services() {
 }
 
 #[test]
+fn test_generate_instruction_open_service_bash_shell() {
+    let config = sample_config();
+    let mut generator = Generator::new(CONFIG_DIR);
+
+    let instruction = generator.generate_instruction("bash lotus");
+    assert!(!instruction.should_terminate);
+
+    let commands = &instruction.commands;
+    assert_eq!(commands.len(), 1);
+
+    let expect = docker::compose_exec("lotus", "bash", &config.project, &generator.compose_file);
+    assert_eq!(&commands[0], &expect);
+}
+
+#[test]
+fn test_generate_instruction_open_service_sh_shell() {
+    let config = sample_config();
+    let mut generator = Generator::new(CONFIG_DIR);
+
+    let instruction = generator.generate_instruction("sh redis");
+    assert!(!instruction.should_terminate);
+
+    let commands = &instruction.commands;
+    assert_eq!(commands.len(), 1);
+
+    let expect = docker::compose_exec("redis", "/bin/sh", &config.project, &generator.compose_file);
+    assert_eq!(&commands[0], &expect);
+}
+
+#[test]
 fn test_generate_instruction_restart_all_services() {
     let config = sample_config();
     let mut generator = Generator::new(CONFIG_DIR);

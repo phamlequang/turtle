@@ -67,6 +67,11 @@ pub fn status_services(project: &str, compose_file: &str) -> Command {
     return compose_command(&action, project, compose_file);
 }
 
+pub fn compose_exec(service: &str, cmd: &str, project: &str, compose_file: &str) -> Command {
+    let action = format!("exec {} {}", service, cmd);
+    return compose_command(&action, project, compose_file);
+}
+
 pub fn docker_command(action: &str) -> Command {
     let raw = format!("docker {}", action);
     return Command::basic_hide(&raw);

@@ -21,6 +21,8 @@ const START: &str = "start";
 const STOP: &str = "stop";
 const RESTART: &str = "restart";
 const STATUS: &str = "status";
+const BASH: &str = "bash";
+const SH: &str = "sh";
 
 #[derive(Debug)]
 pub struct Generator {
@@ -69,6 +71,7 @@ impl Generator {
                 STOP => return self.stop_services(args),
                 RESTART => return self.restart_services(args),
                 STATUS => return self.status_services(),
+                BASH | SH => return self.open_service_shell(&program, args),
                 _ => return self.other(raw),
             }
         }
@@ -202,6 +205,28 @@ impl Generator {
     fn status_services(&self) -> Instruction {
         let command = docker::status_services(&self.config.project, &self.compose_file);
         return Instruction::basic(vec![command]);
+    }
+
+    fn open_service_shell(&self, shell_type: &str, args: Vec<String>) -> Instruction {
+        match shell_type {
+            BASH | SH => {
+                if let Some(service) = args.first() {
+                    let cmd = if shell_type == SH { "/bin/sh" } else { BASH };
+                    let command = docker::compose_exec(
+                        service,
+                        cmd,
+                        &self.config.project,
+                        &self.compose_file,
+                    );
+                    return Instruction::basic(vec![command]);
+                }
+                return Instruction::echo("service name should be provided");
+            }
+            _ => {
+                let message = format!("unknown shell type {}", shell_type);
+                return Instruction::echo(&message);
+            }
+        }
     }
 
     fn use_groups(&mut self, args: Vec<String>) -> Instruction {
