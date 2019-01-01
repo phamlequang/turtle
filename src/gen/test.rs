@@ -3,9 +3,14 @@ use super::*;
 use std::fs;
 
 const CONFIG_DIR: &str = "etc";
+const CONFIG_FILE: &str = "etc/config.toml";
+const TEST_CONFIG_DIR: &str = "etc/test";
+const TEST_CONFIG_FILE: &str = "etc/test/config.toml";
+const TEST_COMPOSE_FILE: &str = "etc/test/compose.yml";
+const TEST_EXPECT_FILE: &str = "etc/expect.yml";
 
 fn sample_config() -> Config {
-    return Config::load("etc/config.toml").unwrap();
+    return Config::load(CONFIG_FILE).unwrap();
 }
 
 #[test]
@@ -213,29 +218,26 @@ fn test_generate_instruction_use_groups_not_found() {
 
 #[test]
 fn test_generate_instruction_use_groups_success() {
-    let result = fs::create_dir_all("etc/test");
+    let result = fs::create_dir_all(TEST_CONFIG_DIR);
     assert!(result.is_ok());
 
-    let result = fs::copy("etc/config.toml", "etc/test/config.toml");
+    let result = fs::copy(CONFIG_FILE, TEST_CONFIG_FILE);
     assert!(result.is_ok());
 
-    let mut generator = Generator::new("etc/test");
+    let mut generator = Generator::new(TEST_CONFIG_DIR);
     let instruction = generator.generate_instruction("use dep");
 
     let message = format!(
-        "--> successfully generated new compose file {}",
-        &generator.compose_file
+        "--> successfully generated new compose file {} and save config file {}",
+        TEST_COMPOSE_FILE, TEST_CONFIG_FILE,
     );
     let expect = Instruction::echo(&message);
     assert_eq!(instruction, expect);
 
-    let output_file = "etc/test/compose.yml";
-    let expect_file = "etc/expect.yml";
-
-    let content = fs::read_to_string(output_file).unwrap();
-    let expect = fs::read_to_string(expect_file).unwrap();
+    let content = fs::read_to_string(TEST_COMPOSE_FILE).unwrap();
+    let expect = fs::read_to_string(TEST_EXPECT_FILE).unwrap();
 
     assert_eq!(content, expect);
-    let result = fs::remove_dir_all("etc/test");
+    let result = fs::remove_dir_all(TEST_CONFIG_DIR);
     assert!(result.is_ok());
 }

@@ -1,16 +1,18 @@
 use super::*;
 use std::io::ErrorKind;
 
+const CONFIG_FILE: &str = "etc/config.toml";
+
 fn sample_config() -> Config {
-    return Config::load("etc/config.toml").unwrap();
+    return Config::load(CONFIG_FILE).unwrap();
 }
 
 #[test]
 fn test_load_config_ok() {
-    let result = Config::load("etc/config.toml");
+    let result = Config::load(CONFIG_FILE);
     assert!(result.is_ok());
-
     let config = result.unwrap();
+
     assert!(!config.project.is_empty());
     assert!(config.using.is_some());
     assert!(config.machine.is_some());
@@ -41,6 +43,43 @@ fn test_parse_config_invalid() {
     let result = Config::parse(toml_text);
     assert!(result.is_err());
     assert_eq!(result.unwrap_err().kind(), ErrorKind::InvalidData);
+}
+
+#[test]
+fn test_save_config() {
+    let config = sample_config();
+    let result = config.to_toml();
+    let expect_text = result.unwrap();
+
+    let new_file = "etc/new.config.toml";
+    let result = config.save(new_file);
+    assert!(result.is_ok());
+
+    let result = fs::read_to_string(new_file);
+    assert!(result.is_ok());
+    let output_text = result.unwrap();
+
+    assert_eq!(output_text, expect_text);
+
+    let result = fs::remove_file(new_file);
+    assert!(result.is_ok());
+}
+
+#[test]
+fn test_to_toml() {
+    let result = fs::read_to_string(CONFIG_FILE);
+    assert!(result.is_ok());
+    let toml_text = result.unwrap();
+
+    let result = Config::parse(&toml_text);
+    assert!(result.is_ok());
+    let config = result.unwrap();
+
+    let result = config.to_toml();
+    assert!(result.is_ok());
+    let output_text = result.unwrap();
+
+    assert_eq!(output_text, toml_text);
 }
 
 #[test]

@@ -87,6 +87,20 @@ impl Config {
         }
     }
 
+    pub fn save(&self, file_path: &str) -> io::Result<()> {
+        match self.to_toml() {
+            Ok(toml_text) => return fs::write(file_path, toml_text),
+            Err(err) => return Err(io::Error::new(io::ErrorKind::InvalidData, err)),
+        }
+    }
+
+    pub fn to_toml(&self) -> Result<String, io::Error> {
+        match toml::to_string(&self) {
+            Ok(toml_text) => Ok(toml_text),
+            Err(err) => return Err(io::Error::new(io::ErrorKind::InvalidData, err)),
+        }
+    }
+
     pub fn search_repository(&self, name: &str) -> Option<&Repository> {
         if let Some(repositories) = &self.repositories {
             for repository in repositories {

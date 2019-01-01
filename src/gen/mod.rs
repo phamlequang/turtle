@@ -197,9 +197,14 @@ impl Generator {
             return Instruction::echo(&message);
         }
 
+        if let Err(err) = self.config.save(&self.config_file) {
+            let message = format!("--> cannot save config file {}: {}", &self.config_file, err);
+            return Instruction::echo(&message);
+        }
+
         let message = format!(
-            "--> successfully generated new compose file {}",
-            &self.compose_file
+            "--> successfully generated new compose file {} and save config file {}",
+            &self.compose_file, &self.config_file,
         );
         return Instruction::echo(&message);
     }
