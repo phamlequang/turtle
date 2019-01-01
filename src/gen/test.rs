@@ -236,8 +236,13 @@ fn test_generate_instruction_use_groups_success() {
 
     let content = fs::read_to_string(TEST_COMPOSE_FILE).unwrap();
     let expect = fs::read_to_string(TEST_EXPECT_FILE).unwrap();
-
     assert_eq!(content, expect);
+
+    let using = generator.config.using;
+    assert!(using.is_some());
+    let using_groups = using.unwrap();
+    assert_eq!(using_groups, vec![String::from("dep")]);
+
     let result = fs::remove_dir_all(TEST_CONFIG_DIR);
     assert!(result.is_ok());
 }
