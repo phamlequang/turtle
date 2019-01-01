@@ -79,8 +79,8 @@ fn test_service_logs() {
 
 #[test]
 fn test_restart_services() {
-    let service_names = vec!["lotus".to_owned(), "camellia".to_owned()];
-    let command = restart_services(service_names, "forest", "compose.yml");
+    let service_names = ["lotus", "camellia"];
+    let command = restart_services(&service_names, "forest", "compose.yml");
     let expect = Command::basic_show(
         "docker-compose -p forest -f compose.yml \
          restart lotus camellia",
@@ -90,8 +90,8 @@ fn test_restart_services() {
 
 #[test]
 fn test_stop_services() {
-    let service_names = vec!["lotus".to_owned(), "camellia".to_owned()];
-    let command = stop_services(service_names, "forest", "compose.yml");
+    let service_names = ["lotus", "camellia"];
+    let command = stop_services(&service_names, "forest", "compose.yml");
     let expect = Command::basic_show(
         "docker-compose -p forest -f compose.yml \
          stop lotus camellia",

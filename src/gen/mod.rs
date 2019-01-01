@@ -186,19 +186,19 @@ impl Generator {
         }
 
         let matches = self.config.match_dependencies_and_services(args);
-        let mut services: Vec<String> = matches.into_iter().collect();
+        let mut services: Vec<_> = matches.iter().map(String::as_ref).collect();
         services.sort();
 
-        let command = docker::stop_services(services, &self.config.project, &self.compose_file);
+        let command = docker::stop_services(&services, &self.config.project, &self.compose_file);
         return Instruction::basic(vec![command]);
     }
 
     fn restart_services(&self, args: Vec<String>) -> Instruction {
         let matches = self.config.match_dependencies_and_services(args);
-        let mut services: Vec<String> = matches.into_iter().collect();
+        let mut services: Vec<_> = matches.iter().map(String::as_ref).collect();
         services.sort();
 
-        let command = docker::restart_services(services, &self.config.project, &self.compose_file);
+        let command = docker::restart_services(&services, &self.config.project, &self.compose_file);
         return Instruction::basic(vec![command]);
     }
 

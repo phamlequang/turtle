@@ -52,12 +52,12 @@ pub fn service_logs(service_name: &str, project: &str, compose_file: &str) -> Co
     return compose_command(&action, project, compose_file);
 }
 
-pub fn restart_services(service_names: Vec<String>, project: &str, compose_file: &str) -> Command {
-    let action = format!("restart {}", service_names.join(" "));
+pub fn restart_services(services: &[&str], project: &str, compose_file: &str) -> Command {
+    let action = format!("restart {}", services.join(" "));
     return compose_command(&action, project, compose_file);
 }
 
-pub fn stop_services(service_names: Vec<String>, project: &str, compose_file: &str) -> Command {
+pub fn stop_services(service_names: &[&str], project: &str, compose_file: &str) -> Command {
     let action = format!("stop {}", service_names.join(" "));
     return compose_command(&action, project, compose_file);
 }

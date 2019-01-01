@@ -196,8 +196,8 @@ fn test_generate_instruction_stop_services() {
     let commands = &instruction.commands;
     assert_eq!(commands.len(), 1);
 
-    let service_names = vec!["camellia".to_owned(), "redis".to_owned()];
-    let expect = docker::stop_services(service_names, &config.project, &generator.compose_file);
+    let service_names = ["camellia", "redis"];
+    let expect = docker::stop_services(&service_names, &config.project, &generator.compose_file);
     assert_eq!(&commands[0], &expect);
 }
 
@@ -227,8 +227,8 @@ fn test_generate_instruction_restart_services() {
     let commands = &instruction.commands;
     assert_eq!(commands.len(), 1);
 
-    let service_names = vec!["lotus".to_owned(), "postgres".to_owned()];
-    let expect = docker::restart_services(service_names, &config.project, &generator.compose_file);
+    let service_names = ["lotus", "postgres"];
+    let expect = docker::restart_services(&service_names, &config.project, &generator.compose_file);
     assert_eq!(&commands[0], &expect);
 }
 
@@ -273,13 +273,8 @@ fn test_generate_instruction_restart_all_services() {
     let commands = &instruction.commands;
     assert_eq!(commands.len(), 1);
 
-    let service_names = vec![
-        "camellia".to_owned(),
-        "lotus".to_owned(),
-        "postgres".to_owned(),
-        "redis".to_owned(),
-    ];
-    let expect = docker::restart_services(service_names, &config.project, &generator.compose_file);
+    let service_names = ["camellia", "lotus", "postgres", "redis"];
+    let expect = docker::restart_services(&service_names, &config.project, &generator.compose_file);
     assert_eq!(&commands[0], &expect);
 }
 
