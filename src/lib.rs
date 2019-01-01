@@ -1,3 +1,6 @@
+#[cfg(test)]
+mod test;
+
 mod cmd;
 mod config;
 mod docker;

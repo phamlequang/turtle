@@ -1,4 +1,5 @@
 use super::*;
+use crate::test;
 
 #[test]
 fn test_home_directory() {
@@ -35,10 +36,12 @@ fn test_history_file() {
 }
 
 #[test]
-fn test_change_and_current_directory() {
-    let dir = current_directory();
-    assert!(!dir.is_empty());
-    assert!(dir.ends_with("turtle"));
+fn test_change_and_current_directory_shortened() {
+    test::no_parallel();
+
+    let cur_dir = current_directory();
+    assert!(!cur_dir.is_empty());
+    assert!(cur_dir.ends_with("turtle"));
 
     let result = change_directory("src");
     assert!(result.is_ok());
@@ -49,6 +52,9 @@ fn test_change_and_current_directory() {
     assert!(len >= 1);
     assert!(len <= max_len);
     assert!(dir.ends_with("src"));
+
+    let result = change_directory(&cur_dir);
+    assert!(result.is_ok());
 }
 
 #[test]

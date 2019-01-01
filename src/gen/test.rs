@@ -1,9 +1,12 @@
 use super::*;
+use crate::test;
 
-const CONFIG_DIR: &str = ".";
+use std::fs;
+
+const CONFIG_DIR: &str = "etc/sample";
 
 fn sample_config() -> Config {
-    return Config::sample();
+    return Config::load("etc/sample/config.toml").unwrap();
 }
 
 #[test]
@@ -211,8 +214,10 @@ fn test_generate_instruction_use_groups_not_found() {
 
 #[test]
 fn test_generate_instruction_use_groups_success() {
-    let mut generator = Generator::new(CONFIG_DIR);
-    let instruction = generator.generate_instruction("use rep");
+    test::no_parallel();
+
+    let mut generator = Generator::new("etc/test");
+    let instruction = generator.generate_instruction("use dep");
 
     let message = format!(
         "--> successfully generated new compose file {}",
@@ -220,4 +225,13 @@ fn test_generate_instruction_use_groups_success() {
     );
     let expect = Instruction::echo(&message);
     assert_eq!(instruction, expect);
+
+    let output_file = "etc/test/docker-compose.yml";
+    let expect_file = "etc/test/expect.yml";
+
+    let content = fs::read_to_string(output_file).unwrap();
+    let expect = fs::read_to_string(expect_file).unwrap();
+
+    assert_eq!(content, expect);
+    fs::remove_file(output_file).unwrap();
 }

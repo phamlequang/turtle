@@ -2,15 +2,18 @@ use super::*;
 use std::io::ErrorKind;
 
 fn sample_config() -> Config {
-    Config::sample()
+    return Config::load("etc/sample/config.toml").unwrap();
 }
 
 #[test]
 fn test_load_config_ok() {
-    let result = Config::load("config.toml");
+    let result = Config::load("etc/sample/config.toml");
     assert!(result.is_ok());
 
     let config = result.unwrap();
+    assert!(!config.project.is_empty());
+    assert!(config.using.is_some());
+    assert!(config.machine.is_some());
     assert!(config.dependencies.is_some());
     assert!(config.repositories.is_some());
     assert!(config.groups.is_some());

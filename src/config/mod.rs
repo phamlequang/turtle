@@ -73,11 +73,6 @@ pub struct Config {
 }
 
 impl Config {
-    #[cfg(test)]
-    pub fn sample() -> Self {
-        return Self::load("config.toml").unwrap();
-    }
-
     pub fn load(file_path: &str) -> Result<Self, io::Error> {
         match fs::read_to_string(file_path) {
             Ok(toml_text) => return Self::parse(&toml_text),
