@@ -73,14 +73,12 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn load(file_path: &str) -> Result<Self, io::Error> {
-        match fs::read_to_string(file_path) {
-            Ok(toml_text) => return Self::parse(&toml_text),
-            Err(err) => return Err(err),
-        }
+    pub fn load(file_path: &str) -> io::Result<Self> {
+        let toml_text = fs::read_to_string(file_path)?;
+        return Self::parse(&toml_text);
     }
 
-    pub fn parse(toml_text: &str) -> Result<Self, io::Error> {
+    pub fn parse(toml_text: &str) -> io::Result<Self> {
         match toml::from_str(&toml_text) {
             Ok(config) => return Ok(config),
             Err(err) => return Err(io::Error::new(io::ErrorKind::InvalidData, err)),
@@ -88,13 +86,11 @@ impl Config {
     }
 
     pub fn save(&self, file_path: &str) -> io::Result<()> {
-        match self.to_toml() {
-            Ok(toml_text) => return fs::write(file_path, toml_text),
-            Err(err) => return Err(io::Error::new(io::ErrorKind::InvalidData, err)),
-        }
+        let toml_text = self.to_toml()?;
+        return fs::write(file_path, toml_text);
     }
 
-    pub fn to_toml(&self) -> Result<String, io::Error> {
+    pub fn to_toml(&self) -> io::Result<String> {
         match toml::to_string(&self) {
             Ok(toml_text) => Ok(toml_text),
             Err(err) => return Err(io::Error::new(io::ErrorKind::InvalidData, err)),
