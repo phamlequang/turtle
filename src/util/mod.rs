@@ -10,7 +10,7 @@ const TILDE: &str = "~";
 pub fn home_directory() -> String {
     if let Some(pb) = dirs::home_dir() {
         if let Some(dir) = pb.to_str() {
-            return dir.to_owned();
+            return String::from(dir);
         }
     }
     return String::new();
@@ -50,11 +50,11 @@ pub fn change_directory(dir: &str) -> io::Result<()> {
 // Return current directory if success, or empty string if failure
 pub fn current_directory() -> String {
     if let Ok(path) = env::current_dir() {
-        if let Some(s) = path.to_str() {
-            return s.to_owned();
+        if let Some(dir) = path.to_str() {
+            return String::from(dir);
         }
     }
-    return "".to_owned();
+    return String::new();
 }
 
 pub fn current_directory_shortened(max_len: usize) -> String {
@@ -69,17 +69,17 @@ pub fn shorten_directory(dir: &str, max_len: usize) -> String {
     let parts = dir.split(MAIN_SEPARATOR);
     let mut dir = String::new();
 
-    for p in parts.rev() {
+    for part in parts.rev() {
         let len = dir.len();
         if len == 0 {
-            dir = p.to_owned();
+            dir.push_str(part);
             continue;
         }
 
-        if len + p.len() >= max_len {
+        if len + part.len() >= max_len {
             return dir;
         }
-        dir = format!("{}{}{}", p, MAIN_SEPARATOR, dir)
+        dir = format!("{}{}{}", part, MAIN_SEPARATOR, dir)
     }
 
     return dir;
@@ -90,5 +90,5 @@ pub fn normalize_path(path: &str) -> String {
     if path.starts_with(TILDE) {
         return format!("{}{}", home_directory(), path.trim_start_matches(TILDE));
     }
-    return path.to_owned();
+    return String::from(path);
 }

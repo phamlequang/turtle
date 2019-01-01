@@ -25,8 +25,8 @@ impl Command {
         then: Option<ExecFn>,
     ) -> Self {
         return Self {
-            raw: raw.to_owned(),
-            dir: dir.to_owned(),
+            raw: String::from(raw),
+            dir: String::from(dir),
             show: show,
             silent: silent,
             pipe: pipe,

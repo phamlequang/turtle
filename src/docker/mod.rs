@@ -52,18 +52,23 @@ pub fn service_logs(service_name: &str, project: &str, compose_file: &str) -> Co
     return compose_command(&action, project, compose_file);
 }
 
-pub fn restart_services(service_names: Vec<String>, project: &str, compose_file: &str) -> Command {
-    let action = format!("restart {}", service_names.join(" "));
+pub fn restart_services(services: &[&str], project: &str, compose_file: &str) -> Command {
+    let action = format!("restart {}", services.join(" "));
     return compose_command(&action, project, compose_file);
 }
 
-pub fn stop_services(service_names: Vec<String>, project: &str, compose_file: &str) -> Command {
+pub fn stop_services(service_names: &[&str], project: &str, compose_file: &str) -> Command {
     let action = format!("stop {}", service_names.join(" "));
     return compose_command(&action, project, compose_file);
 }
 
 pub fn status_services(project: &str, compose_file: &str) -> Command {
     let action = "ps";
+    return compose_command(&action, project, compose_file);
+}
+
+pub fn compose_exec(service: &str, cmd: &str, project: &str, compose_file: &str) -> Command {
+    let action = format!("exec {} {}", service, cmd);
     return compose_command(&action, project, compose_file);
 }
 
@@ -94,7 +99,7 @@ pub fn generate_compose_lines(config: &Config) -> Vec<String> {
 
     match &config.machine {
         Some(machine) => {
-            lines.push("version: '3'".to_owned());
+            lines.push(String::from("version: '3'"));
 
             if let Some(volumes) = &machine.volumes {
                 lines.push(format!("volumes:"));
@@ -104,7 +109,7 @@ pub fn generate_compose_lines(config: &Config) -> Vec<String> {
                 }
             }
 
-            lines.push("services:".to_owned());
+            lines.push(String::from("services:"));
 
             let using_dependencies = config.using_dependencies();
             let using_repositories = config.using_repositories();

@@ -119,8 +119,9 @@ impl Config {
         return None;
     }
 
-    pub fn use_groups(&mut self, group_names: Vec<String>) {
-        self.using = Some(group_names);
+    pub fn use_groups(&mut self, group_names: &[&str]) {
+        let using: Vec<String> = group_names.iter().map(|s| String::from(*s)).collect();
+        self.using = Some(using);
     }
 
     pub fn using_dependencies(&self) -> HashSet<String> {
@@ -162,8 +163,9 @@ impl Config {
     // Return name of all dependencies and services that match the names in args
     // or having their group or repository names that match the names in args
     // Special case: return all if args is empty
-    pub fn match_dependencies_and_services(&self, args: Vec<String>) -> HashSet<String> {
-        let filters: HashSet<String> = HashSet::from_iter(args);
+    pub fn match_dependencies_and_services(&self, args: &[&str]) -> HashSet<String> {
+        let names: Vec<String> = args.iter().map(|s| String::from(*s)).collect();
+        let filters: HashSet<String> = HashSet::from_iter(names);
         let accept_all = filters.is_empty();
 
         let mut result = HashSet::new();
