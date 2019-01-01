@@ -18,6 +18,7 @@ const DOCKER: &str = "docker";
 const LOGS: &str = "logs";
 const USE: &str = "use";
 const RESTART: &str = "restart";
+const STATUS: &str = "status";
 
 #[derive(Debug)]
 pub struct Generator {
@@ -63,6 +64,7 @@ impl Generator {
                 LOGS => return self.service_logs(args),
                 USE => return self.use_groups(args),
                 RESTART => return self.restart_services(args),
+                STATUS => return self.status_services(),
                 _ => return self.other(raw),
             }
         }
@@ -172,6 +174,11 @@ impl Generator {
         services.sort();
 
         let command = docker::restart_services(services, &self.config.project, &self.compose_file);
+        return Instruction::basic(vec![command]);
+    }
+
+    fn status_services(&self) -> Instruction {
+        let command = docker::status_services(&self.config.project, &self.compose_file);
         return Instruction::basic(vec![command]);
     }
 

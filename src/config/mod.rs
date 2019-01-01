@@ -163,8 +163,12 @@ impl Config {
         return result;
     }
 
+    // Return name of all dependencies and services that match the names in args
+    // or having their group or repository names that match the names in args
+    // Special case: return all if args is empty
     pub fn match_dependencies_and_services(&self, args: Vec<String>) -> HashSet<String> {
         let filters: HashSet<String> = HashSet::from_iter(args);
+        let accept_all = filters.is_empty();
 
         let mut result = HashSet::new();
 
@@ -175,7 +179,7 @@ impl Config {
                 if let Some(dep_names) = &group.dependencies {
                     for dep_name in dep_names {
                         let accept_dep = filters.contains(dep_name);
-                        if accept_group || accept_dep {
+                        if accept_all || accept_group || accept_dep {
                             result.insert(dep_name.to_owned());
                         }
                     }
@@ -189,7 +193,7 @@ impl Config {
                                 for service in services {
                                     let service_name = service.name.to_owned();
                                     let accept_service = filters.contains(&service_name);
-                                    if accept_group || accept_repo || accept_service {
+                                    if accept_all || accept_group || accept_repo || accept_service {
                                         result.insert(service_name);
                                     }
                                 }
