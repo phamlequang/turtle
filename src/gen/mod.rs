@@ -18,6 +18,7 @@ const DOCKER: &str = "docker";
 const LOGS: &str = "logs";
 const USE: &str = "use";
 const START: &str = "start";
+const STOP: &str = "stop";
 const RESTART: &str = "restart";
 const STATUS: &str = "status";
 
@@ -65,6 +66,7 @@ impl Generator {
                 LOGS => return self.service_logs(args),
                 USE => return self.use_groups(args),
                 START => return self.start_services(),
+                STOP => return self.stop_services(args),
                 RESTART => return self.restart_services(args),
                 STATUS => return self.status_services(),
                 _ => return self.other(raw),
@@ -170,15 +172,27 @@ impl Generator {
     }
 
     fn start_services(&self) -> Instruction {
-        let action = "up -d";
-        let command = docker::compose_command(&action, &self.config.project, &self.compose_file);
+        let command = docker::compose_command("up -d", &self.config.project, &self.compose_file);
+        return Instruction::basic(vec![command]);
+    }
+
+    fn stop_services(&self, args: Vec<String>) -> Instruction {
+        if args.len() == 0 {
+            let command = docker::compose_command("down", &self.config.project, &self.compose_file);
+            return Instruction::basic(vec![command]);
+        }
+
+        let matches = self.config.match_dependencies_and_services(args);
+        let mut services: Vec<String> = matches.into_iter().collect();
+        services.sort();
+
+        let command = docker::stop_services(services, &self.config.project, &self.compose_file);
         return Instruction::basic(vec![command]);
     }
 
     fn restart_services(&self, args: Vec<String>) -> Instruction {
-        let result = self.config.match_dependencies_and_services(args);
-
-        let mut services: Vec<String> = result.into_iter().collect();
+        let matches = self.config.match_dependencies_and_services(args);
+        let mut services: Vec<String> = matches.into_iter().collect();
         services.sort();
 
         let command = docker::restart_services(services, &self.config.project, &self.compose_file);

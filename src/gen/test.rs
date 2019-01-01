@@ -186,6 +186,37 @@ fn test_generate_instruction_start_services() {
 }
 
 #[test]
+fn test_generate_instruction_stop_services() {
+    let config = sample_config();
+    let mut generator = Generator::new(CONFIG_DIR);
+
+    let instruction = generator.generate_instruction("stop redis camellia");
+    assert!(!instruction.should_terminate);
+
+    let commands = &instruction.commands;
+    assert_eq!(commands.len(), 1);
+
+    let service_names = vec!["camellia".to_owned(), "redis".to_owned()];
+    let expect = docker::stop_services(service_names, &config.project, &generator.compose_file);
+    assert_eq!(&commands[0], &expect);
+}
+
+#[test]
+fn test_generate_instruction_stop_all_services() {
+    let config = sample_config();
+    let mut generator = Generator::new(CONFIG_DIR);
+
+    let instruction = generator.generate_instruction("stop");
+    assert!(!instruction.should_terminate);
+
+    let commands = &instruction.commands;
+    assert_eq!(commands.len(), 1);
+
+    let expect = docker::compose_command("down", &config.project, &generator.compose_file);
+    assert_eq!(&commands[0], &expect);
+}
+
+#[test]
 fn test_generate_instruction_restart_services() {
     let config = sample_config();
     let mut generator = Generator::new(CONFIG_DIR);

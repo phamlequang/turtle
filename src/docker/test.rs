@@ -89,6 +89,17 @@ fn test_restart_services() {
 }
 
 #[test]
+fn test_stop_services() {
+    let service_names = vec!["lotus".to_owned(), "camellia".to_owned()];
+    let command = stop_services(service_names, "forest", "compose.yml");
+    let expect = Command::basic_show(
+        "docker-compose -p forest -f compose.yml \
+         stop lotus camellia",
+    );
+    assert_eq!(command, expect);
+}
+
+#[test]
 fn test_status_services() {
     let command = status_services("forest", "compose.yml");
     let expect = Command::basic_show("docker-compose -p forest -f compose.yml ps");
