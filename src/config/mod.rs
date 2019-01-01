@@ -17,19 +17,6 @@ pub struct Machine {
     pub volumes: Option<Vec<String>>,
 }
 
-impl Machine {
-    #[cfg(test)]
-    pub fn default() -> Self {
-        Self {
-            name: String::from("turtle"),
-            cpu_count: 2,
-            disk_size: 16384,
-            memory: 4096,
-            volumes: None,
-        }
-    }
-}
-
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Docker {
     pub image: String,
@@ -86,23 +73,6 @@ pub struct Config {
 }
 
 impl Config {
-    #[cfg(test)]
-    pub fn empty() -> Self {
-        Self {
-            project: String::new(),
-            using: None,
-            machine: None,
-            dependencies: None,
-            repositories: None,
-            groups: None,
-        }
-    }
-
-    #[cfg(test)]
-    pub fn default() -> Self {
-        return Self::load("turtle.toml").unwrap();
-    }
-
     pub fn load(file_path: &str) -> Result<Self, io::Error> {
         match fs::read_to_string(file_path) {
             Ok(toml_text) => return Self::parse(&toml_text),
@@ -113,6 +83,20 @@ impl Config {
     pub fn parse(toml_text: &str) -> Result<Self, io::Error> {
         match toml::from_str(&toml_text) {
             Ok(config) => return Ok(config),
+            Err(err) => return Err(io::Error::new(io::ErrorKind::InvalidData, err)),
+        }
+    }
+
+    pub fn save(&self, file_path: &str) -> io::Result<()> {
+        match self.to_toml() {
+            Ok(toml_text) => return fs::write(file_path, toml_text),
+            Err(err) => return Err(io::Error::new(io::ErrorKind::InvalidData, err)),
+        }
+    }
+
+    pub fn to_toml(&self) -> Result<String, io::Error> {
+        match toml::to_string(&self) {
+            Ok(toml_text) => Ok(toml_text),
             Err(err) => return Err(io::Error::new(io::ErrorKind::InvalidData, err)),
         }
     }

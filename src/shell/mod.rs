@@ -4,49 +4,11 @@ mod test;
 use super::cmd::Command;
 use super::git;
 use super::instr::Instruction;
+use super::util;
 
 use dirs;
-use std::env;
-use std::path::{Path, MAIN_SEPARATOR};
 use subprocess::{ExitStatus, PopenError, Redirection::Pipe};
 use termion::{color, color::Magenta, color::Red, style};
-
-const TILDE: &str = "~";
-
-// Return current directory if success, or empty string if failure
-pub fn current_directory() -> String {
-    if let Ok(path) = env::current_dir() {
-        if let Some(s) = path.to_str() {
-            return s.to_owned();
-        }
-    }
-    return "".to_owned();
-}
-
-pub fn current_directory_shortened(max_len: usize) -> String {
-    let dir = current_directory();
-    if dir.len() <= max_len {
-        return dir;
-    }
-
-    let parts = dir.split(MAIN_SEPARATOR);
-    let mut dir = String::new();
-
-    for p in parts.rev() {
-        let len = dir.len();
-        if len == 0 {
-            dir = p.to_owned();
-            continue;
-        }
-
-        if len + p.len() >= max_len {
-            return dir;
-        }
-        dir = format!("{}{}{}", p, MAIN_SEPARATOR, dir)
-    }
-
-    return dir;
-}
 
 // Return current git branch of current directory if it is a git repository,
 // or empty string if it isn't
@@ -61,51 +23,17 @@ pub fn current_git_branch() -> String {
     return String::new();
 }
 
-// Change to a specific directory, return true if success
-pub fn change_directory(dir: &str) -> bool {
-    let dir = normalize_path(dir);
-
-    if dir.is_empty() {
-        return true;
-    }
-
-    let path = Path::new(&dir);
-    if let Err(err) = env::set_current_dir(path) {
-        println!(
-            "{}--> cannot change directory to [ {} ]: {}{}",
-            color::Fg(Red),
-            path.display(),
-            err,
-            style::Reset,
-        );
-        return false;
-    }
-
-    return true;
-}
-
-pub fn normalize_path(path: &str) -> String {
-    let path = path.trim();
-    if path.starts_with(TILDE) {
-        return format!("{}{}", home_dir(), path.trim_start_matches(TILDE));
-    }
-    return path.to_owned();
-}
-
-pub fn home_dir() -> String {
-    if let Some(pb) = dirs::home_dir() {
-        if let Some(dir) = pb.to_str() {
-            return dir.to_owned();
-        }
-    }
-    return String::new();
-}
-
 // Execute command as a child process and wait for it to finish,
 // return true and output string if success
 pub fn run_command(command: &Command) -> (bool, String) {
-    let ok = change_directory(&command.dir);
-    if !ok {
+    if let Err(err) = util::change_directory(&command.dir) {
+        println!(
+            "{}--> cannot change directory to [ {} ]: {}{}",
+            color::Fg(Red),
+            &command.dir,
+            err,
+            style::Reset,
+        );
         return (false, String::new());
     }
 

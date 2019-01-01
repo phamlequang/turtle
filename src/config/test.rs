@@ -1,12 +1,19 @@
 use super::*;
 use std::io::ErrorKind;
 
+const CONFIG_FILE: &str = "etc/config.toml";
+
+fn sample_config() -> Config {
+    return Config::load(CONFIG_FILE).expect("failed to load config file");
+}
+
 #[test]
 fn test_load_config_ok() {
-    let result = Config::load("turtle.toml");
-    assert!(result.is_ok());
+    let config = sample_config();
 
-    let config = result.unwrap();
+    assert!(!config.project.is_empty());
+    assert!(config.using.is_some());
+    assert!(config.machine.is_some());
     assert!(config.dependencies.is_some());
     assert!(config.repositories.is_some());
     assert!(config.groups.is_some());
@@ -37,8 +44,32 @@ fn test_parse_config_invalid() {
 }
 
 #[test]
+fn test_save_config() {
+    let config = sample_config();
+    let expect_text = config.to_toml().expect("failed to convert to toml");
+
+    let new_file = "etc/new.config.toml";
+    let result = config.save(new_file);
+    assert!(result.is_ok());
+
+    let output_text = fs::read_to_string(new_file).expect("failed to read new file");
+    assert_eq!(output_text, expect_text);
+
+    fs::remove_file(new_file).expect("failed to remove new file");
+}
+
+#[test]
+fn test_to_toml() {
+    let toml_text = fs::read_to_string(CONFIG_FILE).expect("failed to read config file");
+    let config = Config::parse(&toml_text).expect("failed to parse toml to config");
+
+    let output_text = config.to_toml().expect("failed to convert config to toml");
+    assert_eq!(output_text, toml_text);
+}
+
+#[test]
 fn test_search_repository_found() {
-    let config = Config::default();
+    let config = sample_config();
     let name = "flowers";
 
     let found = config.search_repository(name);
@@ -50,7 +81,7 @@ fn test_search_repository_found() {
 
 #[test]
 fn test_search_repository_not_found() {
-    let config = Config::default();
+    let config = sample_config();
     let name = "unknown";
 
     let found = config.search_repository(name);
@@ -59,7 +90,7 @@ fn test_search_repository_not_found() {
 
 #[test]
 fn test_search_group_found() {
-    let config = Config::default();
+    let config = sample_config();
     let name = "all";
 
     let found = config.search_group(name);
@@ -71,7 +102,7 @@ fn test_search_group_found() {
 
 #[test]
 fn test_search_group_not_found() {
-    let config = Config::default();
+    let config = sample_config();
     let name = "unknown";
 
     let found = config.search_group(name);
@@ -80,7 +111,7 @@ fn test_search_group_not_found() {
 
 #[test]
 fn test_using_dependencies() {
-    let mut config = Config::default();
+    let mut config = sample_config();
 
     let using_dependencies = config.using_dependencies();
     assert_eq!(using_dependencies.len(), 2);
@@ -94,7 +125,7 @@ fn test_using_dependencies() {
 
 #[test]
 fn test_using_repositories() {
-    let mut config = Config::default();
+    let mut config = sample_config();
 
     let using_repositories = config.using_repositories();
     assert_eq!(using_repositories.len(), 1);
@@ -107,7 +138,7 @@ fn test_using_repositories() {
 
 #[test]
 fn test_match_dependencies_and_services() {
-    let config = Config::default();
+    let config = sample_config();
 
     let args = vec!["dep".to_owned(), "camellia".to_owned()];
     let result = config.match_dependencies_and_services(args);
