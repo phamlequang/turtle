@@ -40,7 +40,7 @@ impl Generator {
         match Config::load(&config_file) {
             Ok(cfg) => config = cfg,
             Err(err) => {
-                panic!("-> cannot load config file {}: {}", config_file, err);
+                panic!("--> cannot load config file [ {} ]: {}", config_file, err);
             }
         }
 
@@ -134,7 +134,7 @@ impl Generator {
                     }
                 }
             }
-            None => return Instruction::echo("docker machine config is not found"),
+            None => return Instruction::echo("--> docker machine config is not found"),
         }
         return Instruction::skip();
     }
@@ -220,10 +220,10 @@ impl Generator {
                     );
                     return Instruction::basic(vec![command]);
                 }
-                return Instruction::echo("service name should be provided");
+                return Instruction::echo("--> service name is not provided");
             }
             _ => {
-                let message = format!("unknown shell type {}", shell_type);
+                let message = format!("--> unknown shell type [ {} ]", shell_type);
                 return Instruction::echo(&message);
             }
         }
@@ -236,7 +236,7 @@ impl Generator {
 
         for name in args {
             if let None = self.config.search_group(&name) {
-                let message = format!("--> unknown group {}", name);
+                let message = format!("--> unknown group [ {} ]", name);
                 return Instruction::echo(&message);
             }
         }
@@ -245,19 +245,22 @@ impl Generator {
 
         if let Err(err) = docker::generate_compose_file(&self.compose_file, &self.config) {
             let message = format!(
-                "--> cannot generate compose file {}: {}",
+                "--> cannot generate compose file [ {} ]: {}",
                 &self.compose_file, err
             );
             return Instruction::echo(&message);
         }
 
         if let Err(err) = self.config.save(&self.config_file) {
-            let message = format!("--> cannot save config file {}: {}", &self.config_file, err);
+            let message = format!(
+                "--> cannot save config file [ {} ]: {}",
+                &self.config_file, err
+            );
             return Instruction::echo(&message);
         }
 
         let message = format!(
-            "--> successfully generated new compose file {} and save config file {}",
+            "--> successfully generated new compose file [ {} ] and save config file [ {} ]",
             &self.compose_file, &self.config_file,
         );
         return Instruction::echo(&message);

@@ -263,6 +263,20 @@ fn test_generate_instruction_open_service_sh_shell() {
 }
 
 #[test]
+fn test_generate_instruction_open_shell_no_service() {
+    let mut generator = Generator::new(CONFIG_DIR);
+
+    let instruction = generator.generate_instruction("sh");
+    assert!(!instruction.should_terminate);
+
+    let commands = &instruction.commands;
+    assert_eq!(commands.len(), 1);
+
+    let expect = Command::echo("--> service name is not provided");
+    assert_eq!(&commands[0], &expect);
+}
+
+#[test]
 fn test_generate_instruction_restart_all_services() {
     let config = sample_config();
     let mut generator = Generator::new(CONFIG_DIR);
@@ -298,7 +312,7 @@ fn test_generate_instruction_use_groups_not_found() {
     let mut generator = Generator::new(CONFIG_DIR);
     let instruction = generator.generate_instruction("use abcd");
 
-    let expect = Instruction::echo("--> unknown group abcd");
+    let expect = Instruction::echo("--> unknown group [ abcd ]");
     assert_eq!(instruction, expect);
 }
 
@@ -311,7 +325,7 @@ fn test_generate_instruction_use_groups_success() {
     let instruction = generator.generate_instruction("use dep");
 
     let message = format!(
-        "--> successfully generated new compose file {} and save config file {}",
+        "--> successfully generated new compose file [ {} ] and save config file [ {} ]",
         TEST_COMPOSE_FILE, TEST_CONFIG_FILE,
     );
     let expect = Instruction::echo(&message);
