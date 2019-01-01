@@ -118,7 +118,7 @@ fn test_using_dependencies() {
     assert!(using_dependencies.contains("postgres"));
     assert!(using_dependencies.contains("redis"));
 
-    config.use_groups(vec!["rep".to_owned()]);
+    config.use_groups(&["rep"]);
     let using_dependencies = config.using_dependencies();
     assert!(using_dependencies.is_empty());
 }
@@ -131,7 +131,7 @@ fn test_using_repositories() {
     assert_eq!(using_repositories.len(), 1);
     assert!(using_repositories.contains("flowers"));
 
-    config.use_groups(vec!["dep".to_owned()]);
+    config.use_groups(&["dep"]);
     let using_repositories = config.using_repositories();
     assert!(using_repositories.is_empty());
 }
@@ -140,8 +140,8 @@ fn test_using_repositories() {
 fn test_match_dependencies_and_services() {
     let config = sample_config();
 
-    let args = vec!["dep".to_owned(), "camellia".to_owned()];
-    let result = config.match_dependencies_and_services(args);
+    let args = ["dep", "camellia"];
+    let result = config.match_dependencies_and_services(&args);
     assert_eq!(result.len(), 3);
 
     assert!(result.contains("camellia"));
@@ -153,8 +153,7 @@ fn test_match_dependencies_and_services() {
 fn test_match_dependencies_and_services_all() {
     let config = sample_config();
 
-    let args = Vec::new();
-    let result = config.match_dependencies_and_services(args);
+    let result = config.match_dependencies_and_services(&[]);
     assert_eq!(result.len(), 4);
 
     assert!(result.contains("camellia"));

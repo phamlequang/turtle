@@ -99,7 +99,7 @@ pub fn generate_compose_lines(config: &Config) -> Vec<String> {
 
     match &config.machine {
         Some(machine) => {
-            lines.push("version: '3'".to_owned());
+            lines.push(String::from("version: '3'"));
 
             if let Some(volumes) = &machine.volumes {
                 lines.push(format!("volumes:"));
@@ -109,7 +109,7 @@ pub fn generate_compose_lines(config: &Config) -> Vec<String> {
                 }
             }
 
-            lines.push("services:".to_owned());
+            lines.push(String::from("services:"));
 
             let using_dependencies = config.using_dependencies();
             let using_repositories = config.using_repositories();

@@ -18,7 +18,7 @@ pub fn current_branch() -> Command {
     let exec = |stdout: &str| -> (bool, String) {
         for branch in stdout.lines() {
             if branch.starts_with("*") {
-                return (true, branch.to_owned());
+                return (true, String::from(branch));
             }
         }
         return (true, String::new());

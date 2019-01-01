@@ -4,10 +4,10 @@ use crate::config::Repository;
 #[test]
 fn test_clone_repository() {
     let repository = Repository {
-        name: "turtle".to_owned(),
-        remote: "git@gitlab.com:phamlequang/turtle.git".to_owned(),
-        local: "/Users/phamlequang/projects/turtle".to_owned(),
-        branch: "master".to_owned(),
+        name: String::from("turtle"),
+        remote: String::from("git@gitlab.com:phamlequang/turtle.git"),
+        local: String::from("/Users/phamlequang/projects/turtle"),
+        branch: String::from("master"),
         services: None,
     };
 
