@@ -17,6 +17,7 @@ const COMPOSE: &str = "compose";
 const DOCKER: &str = "docker";
 const LOGS: &str = "logs";
 const USE: &str = "use";
+const START: &str = "start";
 const RESTART: &str = "restart";
 const STATUS: &str = "status";
 
@@ -63,6 +64,7 @@ impl Generator {
                 DOCKER => return self.docker(args),
                 LOGS => return self.service_logs(args),
                 USE => return self.use_groups(args),
+                START => return self.start_services(),
                 RESTART => return self.restart_services(args),
                 STATUS => return self.status_services(),
                 _ => return self.other(raw),
@@ -165,6 +167,12 @@ impl Generator {
             return Instruction::basic(vec![command]);
         }
         return Instruction::skip();
+    }
+
+    fn start_services(&self) -> Instruction {
+        let action = "up -d";
+        let command = docker::compose_command(&action, &self.config.project, &self.compose_file);
+        return Instruction::basic(vec![command]);
     }
 
     fn restart_services(&self, args: Vec<String>) -> Instruction {

@@ -171,6 +171,21 @@ fn test_generate_instruction_docker_service_logs() {
 }
 
 #[test]
+fn test_generate_instruction_start_services() {
+    let config = sample_config();
+    let mut generator = Generator::new(CONFIG_DIR);
+
+    let instruction = generator.generate_instruction("start");
+    assert!(!instruction.should_terminate);
+
+    let commands = &instruction.commands;
+    assert_eq!(commands.len(), 1);
+
+    let expect = docker::compose_command("up -d", &config.project, &generator.compose_file);
+    assert_eq!(&commands[0], &expect);
+}
+
+#[test]
 fn test_generate_instruction_restart_services() {
     let config = sample_config();
     let mut generator = Generator::new(CONFIG_DIR);
