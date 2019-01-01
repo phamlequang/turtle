@@ -2,10 +2,10 @@ use super::*;
 
 use std::fs;
 
-const CONFIG_DIR: &str = "etc/sample";
+const CONFIG_DIR: &str = "etc";
 
 fn sample_config() -> Config {
-    return Config::load("etc/sample/config.toml").unwrap();
+    return Config::load("etc/config.toml").unwrap();
 }
 
 #[test]
@@ -213,6 +213,12 @@ fn test_generate_instruction_use_groups_not_found() {
 
 #[test]
 fn test_generate_instruction_use_groups_success() {
+    let result = fs::create_dir_all("etc/test");
+    assert!(result.is_ok());
+
+    let result = fs::copy("etc/config.toml", "etc/test/config.toml");
+    assert!(result.is_ok());
+
     let mut generator = Generator::new("etc/test");
     let instruction = generator.generate_instruction("use dep");
 
@@ -223,12 +229,13 @@ fn test_generate_instruction_use_groups_success() {
     let expect = Instruction::echo(&message);
     assert_eq!(instruction, expect);
 
-    let output_file = "etc/test/docker-compose.yml";
-    let expect_file = "etc/test/expect.yml";
+    let output_file = "etc/test/compose.yml";
+    let expect_file = "etc/expect.yml";
 
     let content = fs::read_to_string(output_file).unwrap();
     let expect = fs::read_to_string(expect_file).unwrap();
 
     assert_eq!(content, expect);
-    fs::remove_file(output_file).unwrap();
+    let result = fs::remove_dir_all("etc/test");
+    assert!(result.is_ok());
 }

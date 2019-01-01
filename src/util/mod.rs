@@ -29,7 +29,7 @@ pub fn config_file(dir: &str) -> String {
 }
 
 pub fn compose_file(dir: &str) -> String {
-    return format!("{}/docker-compose.yml", dir);
+    return format!("{}/compose.yml", dir);
 }
 
 pub fn history_file(dir: &str) -> String {

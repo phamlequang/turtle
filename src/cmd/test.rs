@@ -18,12 +18,13 @@ fn test_new_command() {
     assert_eq!(command.show, show);
     assert_eq!(command.silent, silent);
     assert_eq!(command.pipe, pipe);
-    assert!(command.then.is_some());
 
-    let then = &command.then.unwrap();
-    let (success, output) = then("rust");
-    assert!(success);
-    assert_eq!(output, "bonjour rust!");
+    assert!(command.then.is_some());
+    if let Some(then) = &command.then {
+        let (success, output) = then("rust");
+        assert!(success);
+        assert_eq!(output, "bonjour rust!");
+    }
 }
 
 #[test]

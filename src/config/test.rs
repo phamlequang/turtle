@@ -2,12 +2,12 @@ use super::*;
 use std::io::ErrorKind;
 
 fn sample_config() -> Config {
-    return Config::load("etc/sample/config.toml").unwrap();
+    return Config::load("etc/config.toml").unwrap();
 }
 
 #[test]
 fn test_load_config_ok() {
-    let result = Config::load("etc/sample/config.toml");
+    let result = Config::load("etc/config.toml");
     assert!(result.is_ok());
 
     let config = result.unwrap();

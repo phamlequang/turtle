@@ -23,7 +23,7 @@ fn test_config_file() {
 #[test]
 fn test_compose_file() {
     let file = compose_file("/tmp");
-    let expect = "/tmp/docker-compose.yml";
+    let expect = "/tmp/compose.yml";
     assert_eq!(file, expect);
 }
 
