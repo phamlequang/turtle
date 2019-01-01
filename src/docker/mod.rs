@@ -57,6 +57,11 @@ pub fn restart_services(service_names: Vec<String>, project: &str, compose_file:
     return compose_command(&action, project, compose_file);
 }
 
+pub fn stop_services(service_names: Vec<String>, project: &str, compose_file: &str) -> Command {
+    let action = format!("stop {}", service_names.join(" "));
+    return compose_command(&action, project, compose_file);
+}
+
 pub fn status_services(project: &str, compose_file: &str) -> Command {
     let action = "ps";
     return compose_command(&action, project, compose_file);
