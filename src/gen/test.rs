@@ -214,7 +214,7 @@ fn test_generate_instruction_use_groups_not_found() {
 
 #[test]
 fn test_generate_instruction_use_groups_success() {
-    test::no_parallel();
+    let _lock = test::no_parallel();
 
     let mut generator = Generator::new("etc/test");
     let instruction = generator.generate_instruction("use dep");

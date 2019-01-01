@@ -191,7 +191,7 @@ impl Generator {
         println!(">> current dir: {}, compose file: {}", util::current_directory(), &self.compose_file);
         if let Err(err) = docker::generate_compose_file(&self.compose_file, &self.config) {
             let message = format!(
-                "--> cannot generate compose file {}: {}",
+                "--> cannot generate compose file {}/{}: {}",util::current_directory(),
                 &self.compose_file, err
             );
             return Instruction::echo(&message);

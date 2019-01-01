@@ -2,7 +2,8 @@ run:
 	cargo run
 
 test:
-	cargo test --all -- --nocapture
+	rustc --version && cargo --version
+	RUST_BACKTRACE=1 cargo test --all --verbose -- --test-threads=16 --nocapture
 
 update:
 	cargo update

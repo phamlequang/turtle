@@ -36,22 +36,39 @@ fn test_history_file() {
 }
 
 #[test]
-fn test_change_and_current_directory_shortened() {
-    test::no_parallel();
+fn test_current_directory() {
+    let _lock = test::no_parallel();
 
     let cur_dir = current_directory();
     assert!(!cur_dir.is_empty());
     assert!(cur_dir.ends_with("turtle"));
+}
 
-    let result = change_directory("src");
-    assert!(result.is_ok());
+#[test]
+fn test_current_directory_shortened() {
+    let _lock = test::no_parallel();
 
     let max_len = 32;
     let dir = current_directory_shortened(max_len);
     let len = dir.len();
     assert!(len >= 1);
     assert!(len <= max_len);
-    assert!(dir.ends_with("src"));
+    assert!(dir.ends_with("turtle"));
+}
+
+#[test]
+fn test_change_directory() {
+    let _lock = test::no_parallel();
+
+    let cur_dir = current_directory();
+    assert!(cur_dir.ends_with("turtle"));
+
+    let result = change_directory("~");
+    assert!(result.is_ok());
+
+    let dir = current_directory();
+    let expect = home_directory();
+    assert_eq!(dir, expect);
 
     let result = change_directory(&cur_dir);
     assert!(result.is_ok());
