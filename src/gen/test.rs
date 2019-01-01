@@ -191,7 +191,7 @@ fn test_generate_instruction_restart_all_services() {
     let config = sample_config();
     let mut generator = Generator::new(CONFIG_DIR);
 
-    let instruction = generator.generate_instruction("restart all");
+    let instruction = generator.generate_instruction("restart");
     assert!(!instruction.should_terminate);
 
     let commands = &instruction.commands;
@@ -204,6 +204,21 @@ fn test_generate_instruction_restart_all_services() {
         "redis".to_owned(),
     ];
     let expect = docker::restart_services(service_names, &config.project, &generator.compose_file);
+    assert_eq!(&commands[0], &expect);
+}
+
+#[test]
+fn test_generate_instruction_status_services() {
+    let config = sample_config();
+    let mut generator = Generator::new(CONFIG_DIR);
+
+    let instruction = generator.generate_instruction("status");
+    assert!(!instruction.should_terminate);
+
+    let commands = &instruction.commands;
+    assert_eq!(commands.len(), 1);
+
+    let expect = docker::status_services(&config.project, &generator.compose_file);
     assert_eq!(&commands[0], &expect);
 }
 

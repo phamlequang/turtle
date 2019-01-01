@@ -89,6 +89,13 @@ fn test_restart_services() {
 }
 
 #[test]
+fn test_status_services() {
+    let command = status_services("forest", "compose.yml");
+    let expect = Command::basic_show("docker-compose -p forest -f compose.yml ps");
+    assert_eq!(command, expect);
+}
+
+#[test]
 fn test_docker_command() {
     let command = docker_command("images");
     let expect = Command::basic_hide("docker images");

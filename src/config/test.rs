@@ -148,3 +148,17 @@ fn test_match_dependencies_and_services() {
     assert!(result.contains("postgres"));
     assert!(result.contains("redis"));
 }
+
+#[test]
+fn test_match_dependencies_and_services_all() {
+    let config = sample_config();
+
+    let args = Vec::new();
+    let result = config.match_dependencies_and_services(args);
+    assert_eq!(result.len(), 4);
+
+    assert!(result.contains("camellia"));
+    assert!(result.contains("lotus"));
+    assert!(result.contains("postgres"));
+    assert!(result.contains("redis"));
+}
