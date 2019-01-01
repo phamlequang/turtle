@@ -4,14 +4,12 @@ use std::io::ErrorKind;
 const CONFIG_FILE: &str = "etc/config.toml";
 
 fn sample_config() -> Config {
-    return Config::load(CONFIG_FILE).unwrap();
+    return Config::load(CONFIG_FILE).expect("failed to load config file");
 }
 
 #[test]
 fn test_load_config_ok() {
-    let result = Config::load(CONFIG_FILE);
-    assert!(result.is_ok());
-    let config = result.unwrap();
+    let config = sample_config();
 
     assert!(!config.project.is_empty());
     assert!(config.using.is_some());
@@ -48,37 +46,24 @@ fn test_parse_config_invalid() {
 #[test]
 fn test_save_config() {
     let config = sample_config();
-    let result = config.to_toml();
-    let expect_text = result.unwrap();
+    let expect_text = config.to_toml().expect("failed to convert to toml");
 
     let new_file = "etc/new.config.toml";
     let result = config.save(new_file);
     assert!(result.is_ok());
 
-    let result = fs::read_to_string(new_file);
-    assert!(result.is_ok());
-    let output_text = result.unwrap();
-
+    let output_text = fs::read_to_string(new_file).expect("failed to read new file");
     assert_eq!(output_text, expect_text);
 
-    let result = fs::remove_file(new_file);
-    assert!(result.is_ok());
+    fs::remove_file(new_file).expect("failed to remove new file");
 }
 
 #[test]
 fn test_to_toml() {
-    let result = fs::read_to_string(CONFIG_FILE);
-    assert!(result.is_ok());
-    let toml_text = result.unwrap();
+    let toml_text = fs::read_to_string(CONFIG_FILE).expect("failed to read config file");
+    let config = Config::parse(&toml_text).expect("failed to parse toml to config");
 
-    let result = Config::parse(&toml_text);
-    assert!(result.is_ok());
-    let config = result.unwrap();
-
-    let result = config.to_toml();
-    assert!(result.is_ok());
-    let output_text = result.unwrap();
-
+    let output_text = config.to_toml().expect("failed to convert config to toml");
     assert_eq!(output_text, toml_text);
 }
 

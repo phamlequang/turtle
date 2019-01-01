@@ -218,11 +218,8 @@ fn test_generate_instruction_use_groups_not_found() {
 
 #[test]
 fn test_generate_instruction_use_groups_success() {
-    let result = fs::create_dir_all(TEST_CONFIG_DIR);
-    assert!(result.is_ok());
-
-    let result = fs::copy(CONFIG_FILE, TEST_CONFIG_FILE);
-    assert!(result.is_ok());
+    fs::create_dir_all(TEST_CONFIG_DIR).expect("failed to create test config directory");
+    fs::copy(CONFIG_FILE, TEST_CONFIG_FILE).expect("failed to copy config file to test directory");
 
     let mut generator = Generator::new(TEST_CONFIG_DIR);
     let instruction = generator.generate_instruction("use dep");
@@ -234,15 +231,12 @@ fn test_generate_instruction_use_groups_success() {
     let expect = Instruction::echo(&message);
     assert_eq!(instruction, expect);
 
-    let content = fs::read_to_string(TEST_COMPOSE_FILE).unwrap();
-    let expect = fs::read_to_string(TEST_EXPECT_FILE).unwrap();
+    let content = fs::read_to_string(TEST_COMPOSE_FILE).expect("failed to read compose file");
+    let expect = fs::read_to_string(TEST_EXPECT_FILE).expect("failed to read expect file");
     assert_eq!(content, expect);
 
-    let using = generator.config.using;
-    assert!(using.is_some());
-    let using_groups = using.unwrap();
-    assert_eq!(using_groups, vec![String::from("dep")]);
+    let using = generator.config.using.expect("using field is None");
+    assert_eq!(using, vec![String::from("dep")]);
 
-    let result = fs::remove_dir_all(TEST_CONFIG_DIR);
-    assert!(result.is_ok());
+    fs::remove_dir_all(TEST_CONFIG_DIR).expect("failed to remove test config directory");
 }
