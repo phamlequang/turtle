@@ -12,13 +12,28 @@ fn test_clone_repository() {
     };
 
     let command = clone_repository(&repository);
-    let expect = "git clone -b master \
-                  git@gitlab.com:phamlequang/turtle.git \
-                  /Users/phamlequang/projects/turtle";
+    let raw = format!(
+        "git clone -b master {} {}",
+        repository.remote, repository.local
+    );
+    let expect = Command::basic_show(&raw);
+    assert_eq!(command, expect);
+}
 
-    assert_eq!(command.raw, expect);
-    assert!(command.dir.is_empty());
-    assert!(command.show);
+#[test]
+fn test_pull_repository() {
+    let repository = Repository {
+        name: String::from("turtle"),
+        remote: String::from("git@gitlab.com:phamlequang/turtle.git"),
+        local: String::from("/Users/phamlequang/projects/turtle"),
+        branch: String::from("master"),
+        services: None,
+    };
+
+    let command = pull_repository(&repository);
+    let expect = Command::new("git pull", &repository.local, true, false, false, None);
+
+    assert_eq!(command, expect);
 }
 
 #[test]
