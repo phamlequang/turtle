@@ -11,6 +11,7 @@ use super::util;
 const QUIT: &str = "quit";
 const EXIT: &str = "exit";
 const CLONE: &str = "clone";
+const PULL: &str = "pull";
 const CD: &str = "cd";
 const MACHINE: &str = "machine";
 const COMPOSE: &str = "compose";
@@ -62,6 +63,7 @@ impl Generator {
                 QUIT | EXIT => return self.terminate(),
                 CD => return self.change_directory(&args),
                 CLONE => return self.clone_repositories(&args),
+                PULL => return self.pull_repositories(&args),
                 MACHINE => return self.machine(&args),
                 COMPOSE => return self.docker_compose(&args),
                 DOCKER => return self.docker(&args),
@@ -100,6 +102,24 @@ impl Generator {
         for name in args {
             if let Some(repository) = self.config.search_repository(name) {
                 commands.push(git::clone_repository(repository));
+            } else {
+                let message = format!("--> unknown repository [ {} ]", name);
+                commands.push(Command::echo(&message));
+            }
+        }
+
+        return Instruction::basic(commands);
+    }
+
+    fn pull_repositories(&self, args: &[&str]) -> Instruction {
+        if args.is_empty() {
+            return Instruction::skip();
+        }
+
+        let mut commands: Vec<Command> = Vec::with_capacity(args.len());
+        for name in args {
+            if let Some(repository) = self.config.search_repository(name) {
+                commands.push(git::pull_repository(repository));
             } else {
                 let message = format!("--> unknown repository [ {} ]", name);
                 commands.push(Command::echo(&message));
