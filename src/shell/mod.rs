@@ -26,15 +26,21 @@ pub fn current_git_branch() -> String {
 // Execute command as a child process and wait for it to finish,
 // return true and output string if success
 pub fn run_command(command: &Command) -> (bool, String) {
-    if let Err(err) = util::change_directory(&command.dir) {
-        println!(
-            "{}--> cannot change directory to [ {} ]: {}{}",
-            color::Fg(Red),
-            &command.dir,
-            err,
-            style::Reset,
-        );
-        return (false, String::new());
+    let dir = &command.dir;
+    if !dir.is_empty() {
+        if command.show {
+            println!("{}$ cd {}{}", color::Fg(Magenta), dir, style::Reset);
+        }
+        if let Err(err) = util::change_directory(dir) {
+            println!(
+                "{}--> cannot change directory to [ {} ]: {}{}",
+                color::Fg(Red),
+                &command.dir,
+                err,
+                style::Reset,
+            );
+            return (false, String::new());
+        }
     }
 
     let raw = &command.raw;
