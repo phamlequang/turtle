@@ -66,7 +66,7 @@ fn test_generate_instruction_goto_unknown() {
     let mut generator = Generator::new(CONFIG_DIR);
 
     let instruction = generator.generate_instruction("goto abc");
-    let command = Command::echo("--> unknown service or repository abc");
+    let command = Command::echo("--> unknown service or repository [ abc ]");
 
     let expect = Instruction::basic(vec![command]);
     assert_eq!(instruction, expect);

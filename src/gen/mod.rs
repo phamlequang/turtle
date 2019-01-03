@@ -108,7 +108,7 @@ impl Generator {
                 return self.change_directory(&[&repository.local]);
             }
 
-            let message = format!("--> unknown service or repository {}", name);
+            let message = format!("--> unknown service or repository [ {} ]", name);
             return Instruction::echo(&message);
         }
 
