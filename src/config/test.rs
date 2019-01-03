@@ -89,6 +89,27 @@ fn test_search_repository_not_found() {
 }
 
 #[test]
+fn test_search_service_found() {
+    let config = sample_config();
+    let name = "lotus";
+
+    let found = config.search_service(name);
+    assert!(found.is_some());
+
+    let service = found.unwrap();
+    assert_eq!(service.name, name);
+}
+
+#[test]
+fn test_search_service_not_found() {
+    let config = sample_config();
+    let name = "unknown";
+
+    let found = config.search_service(name);
+    assert!(found.is_none());
+}
+
+#[test]
 fn test_search_group_found() {
     let config = sample_config();
     let name = "all";
@@ -118,21 +139,22 @@ fn test_using_dependencies() {
     assert!(using_dependencies.contains("postgres"));
     assert!(using_dependencies.contains("redis"));
 
-    config.use_groups(&["rep"]);
+    config.use_groups(&["svc"]);
     let using_dependencies = config.using_dependencies();
     assert!(using_dependencies.is_empty());
 }
 
 #[test]
-fn test_using_repositories() {
+fn test_using_services() {
     let mut config = sample_config();
 
-    let using_repositories = config.using_repositories();
-    assert_eq!(using_repositories.len(), 1);
-    assert!(using_repositories.contains("flowers"));
+    let using_services = config.using_services();
+    assert_eq!(using_services.len(), 2);
+    assert!(using_services.contains("camellia"));
+    assert!(using_services.contains("lotus"));
 
     config.use_groups(&["dep"]);
-    let using_repositories = config.using_repositories();
+    let using_repositories = config.using_services();
     assert!(using_repositories.is_empty());
 }
 
@@ -140,13 +162,25 @@ fn test_using_repositories() {
 fn test_match_dependencies_and_services() {
     let config = sample_config();
 
-    let args = ["dep", "camellia"];
+    let args = ["dep", "camellia", "unknown"];
     let result = config.match_dependencies_and_services(&args);
     assert_eq!(result.len(), 3);
 
     assert!(result.contains("camellia"));
     assert!(result.contains("postgres"));
     assert!(result.contains("redis"));
+}
+
+#[test]
+fn test_match_dependencies_and_services_repo() {
+    let config = sample_config();
+
+    let args = ["flowers", "unknown"];
+    let result = config.match_dependencies_and_services(&args);
+    assert_eq!(result.len(), 2);
+
+    assert!(result.contains("camellia"));
+    assert!(result.contains("lotus"));
 }
 
 #[test]

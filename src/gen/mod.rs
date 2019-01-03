@@ -219,6 +219,11 @@ impl Generator {
         services.sort();
 
         let command = docker::restart_services(&services, &self.config.project, &self.compose_file);
+
+        println!("--> matches: {:?}", matches);
+        println!("--> svc: {:?}", services);
+        println!("--> cmd: {:?}", command);
+
         return Instruction::basic(vec![command]);
     }
 

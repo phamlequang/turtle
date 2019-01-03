@@ -38,8 +38,17 @@ pub struct Dependency {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
+pub struct Repository {
+    pub name: String,
+    pub remote: String,
+    pub local: String,
+    pub branch: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Service {
     pub name: String,
+    pub repo: String,
     pub folder: String,
     pub build: String,
     pub test: String,
@@ -47,19 +56,10 @@ pub struct Service {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct Repository {
-    pub name: String,
-    pub remote: String,
-    pub local: String,
-    pub branch: String,
-    pub services: Option<Vec<Service>>,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
 pub struct Group {
     pub name: String,
     pub dependencies: Option<Vec<String>>,
-    pub repositories: Option<Vec<String>>,
+    pub services: Option<Vec<String>>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -69,6 +69,7 @@ pub struct Config {
     pub machine: Option<Machine>,
     pub dependencies: Option<Vec<Dependency>>,
     pub repositories: Option<Vec<Repository>>,
+    pub services: Option<Vec<Service>>,
     pub groups: Option<Vec<Group>>,
 }
 
@@ -102,6 +103,17 @@ impl Config {
             for repository in repositories {
                 if repository.name == name {
                     return Some(repository);
+                }
+            }
+        }
+        return None;
+    }
+
+    pub fn search_service(&self, name: &str) -> Option<&Service> {
+        if let Some(services) = &self.services {
+            for service in services {
+                if service.name == name {
+                    return Some(service);
                 }
             }
         }
@@ -142,15 +154,15 @@ impl Config {
         return result;
     }
 
-    pub fn using_repositories(&self) -> HashSet<String> {
+    pub fn using_services(&self) -> HashSet<String> {
         let mut result = HashSet::new();
 
         if let Some(using) = &self.using {
             for name in using {
                 if let Some(group) = self.search_group(name) {
-                    if let Some(repos) = &group.repositories {
-                        for repo in repos {
-                            result.insert(repo.to_owned());
+                    if let Some(svcs) = &group.services {
+                        for svc in svcs {
+                            result.insert(svc.to_owned());
                         }
                     }
                 }
@@ -168,9 +180,13 @@ impl Config {
         let filters: HashSet<String> = HashSet::from_iter(names);
         let accept_all = filters.is_empty();
 
+        println!("--> args: {:?}", args);
+
         let mut result = HashSet::new();
 
         if let Some(groups) = &self.groups {
+            println!("--> groups: {:?}", groups);
+
             for group in groups {
                 let accept_group = filters.contains(&group.name);
 
@@ -183,18 +199,13 @@ impl Config {
                     }
                 }
 
-                if let Some(repo_names) = &group.repositories {
-                    for repo_name in repo_names {
-                        let accept_repo = filters.contains(repo_name);
-                        if let Some(repository) = self.search_repository(repo_name) {
-                            if let Some(services) = &repository.services {
-                                for service in services {
-                                    let service_name = service.name.to_owned();
-                                    let accept_service = filters.contains(&service_name);
-                                    if accept_all || accept_group || accept_repo || accept_service {
-                                        result.insert(service_name);
-                                    }
-                                }
+                if let Some(svc_names) = &group.services {
+                    for svc_name in svc_names {
+                        let accept_service = filters.contains(svc_name);
+                        if let Some(service) = self.search_service(svc_name) {
+                            let accept_repo = filters.contains(&service.repo);
+                            if accept_all || accept_group || accept_repo || accept_service {
+                                result.insert(svc_name.to_owned());
                             }
                         }
                     }
