@@ -180,13 +180,9 @@ impl Config {
         let filters: HashSet<String> = HashSet::from_iter(names);
         let accept_all = filters.is_empty();
 
-        println!("--> args: {:?}", args);
-
         let mut result = HashSet::new();
 
         if let Some(groups) = &self.groups {
-            println!("--> groups: {:?}", groups);
-
             for group in groups {
                 let accept_group = filters.contains(&group.name);
 
