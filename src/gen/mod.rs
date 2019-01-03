@@ -10,9 +10,10 @@ use super::util;
 
 const QUIT: &str = "quit";
 const EXIT: &str = "exit";
+const CD: &str = "cd";
+const GOTO: &str = "goto";
 const CLONE: &str = "clone";
 const PULL: &str = "pull";
-const CD: &str = "cd";
 const MACHINE: &str = "machine";
 const COMPOSE: &str = "compose";
 const DOCKER: &str = "docker";
@@ -62,6 +63,7 @@ impl Generator {
             match program {
                 QUIT | EXIT => return self.terminate(),
                 CD => return self.change_directory(&args),
+                GOTO => return self.goto(&args),
                 CLONE => return self.clone_repositories(&args),
                 PULL => return self.pull_repositories(&args),
                 MACHINE => return self.machine(&args),
@@ -90,6 +92,26 @@ impl Generator {
             let command = Command::new("", &dir, false, false, false, None);
             return Instruction::new(vec![command], false);
         }
+        return Instruction::skip();
+    }
+
+    fn goto(&self, args: &[&str]) -> Instruction {
+        if let Some(name) = args.first() {
+            if let Some(service) = self.config.search_service(name) {
+                if let Some(repository) = self.config.search_repository(&service.repo) {
+                    let dir = format!("{}/{}", repository.local, service.folder);
+                    return self.change_directory(&[&dir]);
+                }
+            }
+
+            if let Some(repository) = self.config.search_repository(name) {
+                return self.change_directory(&[&repository.local]);
+            }
+
+            let message = format!("--> unknown service or repository {}", name);
+            return Instruction::echo(&message);
+        }
+
         return Instruction::skip();
     }
 
