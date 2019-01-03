@@ -8,7 +8,6 @@ fn test_clone_repository() {
         remote: String::from("git@gitlab.com:phamlequang/turtle.git"),
         local: String::from("/Users/phamlequang/projects/turtle"),
         branch: String::from("master"),
-        services: None,
     };
 
     let command = clone_repository(&repository);
@@ -27,7 +26,6 @@ fn test_pull_repository() {
         remote: String::from("git@gitlab.com:phamlequang/turtle.git"),
         local: String::from("/Users/phamlequang/projects/turtle"),
         branch: String::from("master"),
-        services: None,
     };
 
     let command = pull_repository(&repository);

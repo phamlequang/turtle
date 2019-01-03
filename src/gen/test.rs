@@ -27,14 +27,57 @@ fn test_generate_instruction_terminate() {
 }
 
 #[test]
-fn test_generate_instruction_other() {
+fn test_generate_instruction_change_directory() {
     let mut generator = Generator::new(CONFIG_DIR);
 
-    let raw = "ls -la";
-    let instruction = generator.generate_instruction(raw);
+    let instruction = generator.generate_instruction("cd ..");
+    let command = Command::new("", "..", false, false, false, None);
 
-    let command = Command::basic_hide(raw);
     let expect = Instruction::basic(vec![command]);
+    assert_eq!(instruction, expect);
+}
+
+#[test]
+fn test_generate_instruction_goto_service() {
+    let mut generator = Generator::new(CONFIG_DIR);
+
+    let instruction = generator.generate_instruction("goto camellia");
+    let dir = "/Users/phamlequang/projects/flowers/camellia";
+    let command = Command::new("", dir, false, false, false, None);
+
+    let expect = Instruction::basic(vec![command]);
+    assert_eq!(instruction, expect);
+}
+
+#[test]
+fn test_generate_instruction_goto_repository() {
+    let mut generator = Generator::new(CONFIG_DIR);
+
+    let instruction = generator.generate_instruction("goto flowers");
+    let dir = "/Users/phamlequang/projects/flowers";
+    let command = Command::new("", dir, false, false, false, None);
+
+    let expect = Instruction::basic(vec![command]);
+    assert_eq!(instruction, expect);
+}
+
+#[test]
+fn test_generate_instruction_goto_unknown() {
+    let mut generator = Generator::new(CONFIG_DIR);
+
+    let instruction = generator.generate_instruction("goto abc");
+    let command = Command::echo("--> unknown service or repository [ abc ]");
+
+    let expect = Instruction::basic(vec![command]);
+    assert_eq!(instruction, expect);
+}
+
+#[test]
+fn test_generate_instruction_goto_nothing() {
+    let mut generator = Generator::new(CONFIG_DIR);
+
+    let instruction = generator.generate_instruction("goto");
+    let expect = Instruction::skip();
 
     assert_eq!(instruction, expect);
 }
@@ -68,17 +111,6 @@ fn test_generate_instruction_pull() {
     let cmd2 = Command::echo("--> unknown repository [ tree ]");
 
     let expect = Instruction::basic(vec![cmd1, cmd2]);
-    assert_eq!(instruction, expect);
-}
-
-#[test]
-fn test_generate_instruction_change_directory() {
-    let mut generator = Generator::new(CONFIG_DIR);
-
-    let instruction = generator.generate_instruction("cd ..");
-    let command = Command::new("", "..", false, false, false, None);
-
-    let expect = Instruction::basic(vec![command]);
     assert_eq!(instruction, expect);
 }
 
@@ -355,4 +387,17 @@ fn test_generate_instruction_use_groups_success() {
     assert_eq!(using, vec![String::from("dep")]);
 
     fs::remove_dir_all(TEST_CONFIG_DIR).expect("failed to remove test config directory");
+}
+
+#[test]
+fn test_generate_instruction_other() {
+    let mut generator = Generator::new(CONFIG_DIR);
+
+    let raw = "ls -la";
+    let instruction = generator.generate_instruction(raw);
+
+    let command = Command::basic_hide(raw);
+    let expect = Instruction::basic(vec![command]);
+
+    assert_eq!(instruction, expect);
 }

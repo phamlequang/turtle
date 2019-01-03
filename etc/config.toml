@@ -31,13 +31,14 @@ remote = "git@gitlab.com:phamlequang/flowers.git"
 local = "/Users/phamlequang/projects/flowers"
 branch = "master"
 
-[[repositories.services]]
+[[services]]
 name = "camellia"
+repo = "flowers"
 folder = "camellia"
 build = "cargo build"
 test = "cargo test"
 
-[repositories.services.docker]
+[services.docker]
 image = "rust:latest"
 ports = ["8000:8000"]
 working_dir = "/app"
@@ -46,13 +47,14 @@ env_file = ["/Users/phamlequang/projects/flowers/camellia/.env"]
 depends_on = ["postgres", "redis"]
 command = "cargo run"
 
-[[repositories.services]]
+[[services]]
 name = "lotus"
+repo = "flowers"
 folder = "lotus"
 build = "cargo build"
 test = "cargo test"
 
-[repositories.services.docker]
+[services.docker]
 image = "rust:latest"
 ports = ["8001:8001"]
 working_dir = "/app"
@@ -64,11 +66,11 @@ command = "cargo run"
 [[groups]]
 name = "all"
 dependencies = ["postgres", "redis"]
-repositories = ["flowers"]
+services = ["camellia", "lotus"]
 
 [[groups]]
-name = "rep"
-repositories = ["flowers"]
+name = "svc"
+services = ["camellia", "lotus"]
 
 [[groups]]
 name = "dep"
