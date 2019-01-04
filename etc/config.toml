@@ -42,7 +42,8 @@ test = "cargo test"
 image = "rust:latest"
 ports = ["8000:8000"]
 working_dir = "/app"
-env_file = [".env"]
+volumes = ["{SERVICE_DIR}:/app"]
+env_file = ["{SERVICE_DIR}/.env"]
 depends_on = ["postgres", "redis"]
 command = "cargo run"
 
@@ -57,7 +58,8 @@ test = "cargo test"
 image = "rust:latest"
 ports = ["8001:8001"]
 working_dir = "/app"
-env_file = [".env"]
+volumes = ["{SERVICE_DIR}:/app"]
+env_file = ["{SERVICE_DIR}/.env"]
 depends_on = ["postgres"]
 command = "cargo run"
 

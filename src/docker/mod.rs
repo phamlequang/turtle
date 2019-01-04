@@ -7,6 +7,8 @@ use std::io;
 use super::cmd::Command;
 use super::config::{Config, Docker, Machine};
 
+const SERVICE_DIR_PATTERN: &str = "{SERVICE_DIR}";
+
 pub fn create_machine(machine: &Machine) -> Command {
     let raw = format!(
         "docker-machine create \
@@ -119,7 +121,7 @@ pub fn generate_compose_lines(config: &Config) -> Vec<String> {
                     if !using_dependencies.contains(&dependency.name) {
                         continue;
                     }
-                    let more = compose_service(&dependency.name, &dependency.docker);
+                    let more = compose_service(&dependency.name, &dependency.docker, config);
                     lines.extend(more);
                 }
             }
@@ -129,7 +131,7 @@ pub fn generate_compose_lines(config: &Config) -> Vec<String> {
                     if !using_services.contains(&service.name) {
                         continue;
                     }
-                    let more = compose_service(&service.name, &service.docker);
+                    let more = compose_service(&service.name, &service.docker, config);
                     lines.extend(more);
                 }
             }
@@ -142,7 +144,7 @@ pub fn generate_compose_lines(config: &Config) -> Vec<String> {
     }
 }
 
-fn compose_service(name: &str, docker: &Docker) -> Vec<String> {
+fn compose_service(name: &str, docker: &Docker, config: &Config) -> Vec<String> {
     let mut lines: Vec<String> = Vec::new();
 
     lines.push(format!("  {}:", name));
@@ -169,7 +171,13 @@ fn compose_service(name: &str, docker: &Docker) -> Vec<String> {
     if let Some(volumes) = &docker.volumes {
         lines.push(format!("    volumes:"));
         for v in volumes {
-            lines.push(format!("      - {}", v));
+            let mut rv = v.to_owned();
+            if v.starts_with(SERVICE_DIR_PATTERN) {
+                if let Some(dir) = config.search_service_directory(name) {
+                    rv = v.replace(SERVICE_DIR_PATTERN, &dir)
+                }
+            }
+            lines.push(format!("      - {}", rv));
         }
     }
 
@@ -183,7 +191,13 @@ fn compose_service(name: &str, docker: &Docker) -> Vec<String> {
     if let Some(env_file) = &docker.env_file {
         lines.push(format!("    env_file:"));
         for f in env_file {
-            lines.push(format!("      - {}", f));
+            let mut fv = f.to_owned();
+            if f.starts_with(SERVICE_DIR_PATTERN) {
+                if let Some(dir) = config.search_service_directory(name) {
+                    fv = f.replace(SERVICE_DIR_PATTERN, &dir)
+                }
+            }
+            lines.push(format!("      - {}", fv));
         }
     }
 
