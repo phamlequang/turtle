@@ -14,7 +14,6 @@ pub struct Machine {
     pub cpu_count: u32,
     pub disk_size: u32,
     pub memory: u32,
-    pub volumes: Option<Vec<String>>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]

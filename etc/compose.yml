@@ -1,9 +1,4 @@
 version: '3'
-volumes:
-  postgres_data:
-    external: false
-  redis_data:
-    external: false
 services:
   postgres:
     image: postgres:latest
@@ -44,3 +39,8 @@ services:
     depends_on:
       - postgres
     command: cargo run
+volumes:
+  postgres_data:
+    external: false
+  redis_data:
+    external: false

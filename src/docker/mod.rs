@@ -98,54 +98,54 @@ pub fn generate_compose_text(config: &Config) -> String {
 
 pub fn generate_compose_lines(config: &Config) -> Vec<String> {
     let mut lines: Vec<String> = Vec::new();
+    let mut volumes: Vec<String> = Vec::new();
 
-    match &config.machine {
-        Some(machine) => {
-            lines.push(String::from("version: '3'"));
+    lines.push(String::from("version: '3'"));
+    lines.push(String::from("services:"));
 
-            if let Some(volumes) = &machine.volumes {
-                lines.push(format!("volumes:"));
-                for v in volumes {
-                    lines.push(format!("  {}:", v));
-                    lines.push(format!("    external: {}", false));
-                }
+    let using_dependencies = config.using_dependencies();
+    let using_services = config.using_services();
+
+    if let Some(dependencies) = &config.dependencies {
+        for dependency in dependencies {
+            if !using_dependencies.contains(&dependency.name) {
+                continue;
             }
-
-            lines.push(String::from("services:"));
-
-            let using_dependencies = config.using_dependencies();
-            let using_services = config.using_services();
-
-            if let Some(dependencies) = &config.dependencies {
-                for dependency in dependencies {
-                    if !using_dependencies.contains(&dependency.name) {
-                        continue;
-                    }
-                    let more = compose_service(&dependency.name, &dependency.docker, config);
-                    lines.extend(more);
-                }
-            }
-
-            if let Some(services) = &config.services {
-                for service in services {
-                    if !using_services.contains(&service.name) {
-                        continue;
-                    }
-                    let more = compose_service(&service.name, &service.docker, config);
-                    lines.extend(more);
-                }
-            }
-
-            lines.push(format!(""));
-
-            return lines;
+            let (more_lines, more_volumes) =
+                compose_service(&dependency.name, &dependency.docker, config);
+            lines.extend(more_lines);
+            volumes.extend(more_volumes);
         }
-        None => return lines,
     }
+
+    if let Some(services) = &config.services {
+        for service in services {
+            if !using_services.contains(&service.name) {
+                continue;
+            }
+            let (more_lines, more_volumes) =
+                compose_service(&service.name, &service.docker, config);
+            lines.extend(more_lines);
+            volumes.extend(more_volumes);
+        }
+    }
+
+    if !volumes.is_empty() {
+        lines.push(format!("volumes:"));
+        for v in volumes {
+            lines.push(format!("  {}:", v));
+            lines.push(format!("    external: {}", false));
+        }
+    }
+
+    lines.push(format!(""));
+
+    return lines;
 }
 
-fn compose_service(name: &str, docker: &Docker, config: &Config) -> Vec<String> {
+fn compose_service(name: &str, docker: &Docker, config: &Config) -> (Vec<String>, Vec<String>) {
     let mut lines: Vec<String> = Vec::new();
+    let mut named_volumes: Vec<String> = Vec::new();
 
     lines.push(format!("  {}:", name));
     lines.push(format!("    image: {}", docker.image));
@@ -170,14 +170,19 @@ fn compose_service(name: &str, docker: &Docker, config: &Config) -> Vec<String> 
 
     if let Some(volumes) = &docker.volumes {
         lines.push(format!("    volumes:"));
+
         for v in volumes {
-            let mut rv = v.to_owned();
+            let mut volume = v.to_owned();
             if v.starts_with(SERVICE_DIR_PATTERN) {
                 if let Some(dir) = config.search_service_directory(name) {
-                    rv = v.replace(SERVICE_DIR_PATTERN, &dir)
+                    volume = v.replace(SERVICE_DIR_PATTERN, &dir)
                 }
             }
-            lines.push(format!("      - {}", rv));
+
+            lines.push(format!("      - {}", volume));
+            if let Some(named_volume) = extract_named_volume(&volume) {
+                named_volumes.push(named_volume);
+            }
         }
     }
 
@@ -219,5 +224,23 @@ fn compose_service(name: &str, docker: &Docker, config: &Config) -> Vec<String> 
         }
     }
 
-    return lines;
+    return (lines, named_volumes);
+}
+
+fn extract_named_volume(name: &str) -> Option<String> {
+    let tokens: Vec<&str> = name.split(":").collect();
+    if tokens.len() != 2 {
+        return None;
+    }
+
+    let volume = tokens[0].to_owned();
+    let prefixes = ["/", ".", "~"];
+
+    for p in &prefixes {
+        if volume.starts_with(p) {
+            return None;
+        }
+    }
+
+    return Some(volume);
 }

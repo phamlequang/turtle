@@ -6,7 +6,6 @@ name = "turtle"
 cpu_count = 2
 disk_size = 16384
 memory = 4096
-volumes = ["postgres_data", "redis_data"]
 
 [[dependencies]]
 name = "postgres"
