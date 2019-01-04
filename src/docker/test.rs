@@ -6,7 +6,6 @@ fn sample_machine() -> Machine {
         cpu_count: 2,
         disk_size: 16384,
         memory: 4096,
-        volumes: None,
     };
 }
 
@@ -139,4 +138,25 @@ fn test_generate_compose_text() {
     let result = generate_compose_text(&config);
     let expect = fs::read_to_string("etc/compose.yml").unwrap();
     assert_eq!(result, expect);
+}
+
+#[test]
+fn test_extract_named_volume() {
+    let volume = extract_named_volume("/var/lib/mysql");
+    assert!(volume.is_none());
+
+    let volume = extract_named_volume("/opt/data:/var/lib/mysql");
+    assert!(volume.is_none());
+
+    let volume = extract_named_volume("./cache:/tmp/cache");
+    assert!(volume.is_none());
+
+    let volume = extract_named_volume("~/configs:/etc/configs/:ro");
+    assert!(volume.is_none());
+
+    let volume = extract_named_volume("mysql_data:/var/lib/mysql");
+    assert!(volume.is_some());
+
+    let named_volume = volume.unwrap();
+    assert_eq!(named_volume, "mysql_data");
 }

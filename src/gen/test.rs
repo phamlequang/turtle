@@ -103,14 +103,17 @@ fn test_generate_instruction_pull() {
     let config = sample_config();
     let mut generator = Generator::new(CONFIG_DIR);
 
-    let raw = "pull flowers tree";
+    let raw = "pull flowers lotus tree";
     let instruction = generator.generate_instruction(raw);
 
-    let repository = config.search_repository("flowers").unwrap();
-    let cmd1 = git::pull_repository(repository);
-    let cmd2 = Command::echo("--> unknown repository [ tree ]");
+    let repository1 = config.search_repository("flowers").unwrap();
+    let repository2 = config.search_service_repository("lotus").unwrap();
 
-    let expect = Instruction::basic(vec![cmd1, cmd2]);
+    let cmd1 = git::pull_repository(repository1);
+    let cmd2 = git::pull_repository(repository2);
+    let cmd3 = Command::echo("--> unknown repository or service [ tree ]");
+
+    let expect = Instruction::basic(vec![cmd1, cmd2, cmd3]);
     assert_eq!(instruction, expect);
 }
 

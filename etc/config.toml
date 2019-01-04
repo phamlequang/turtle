@@ -6,7 +6,6 @@ name = "turtle"
 cpu_count = 2
 disk_size = 16384
 memory = 4096
-volumes = ["postgres_data", "redis_data"]
 
 [[dependencies]]
 name = "postgres"
@@ -42,8 +41,8 @@ test = "cargo test"
 image = "rust:latest"
 ports = ["8000:8000"]
 working_dir = "/app"
-volumes = ["/Users/phamlequang/projects/flowers/camellia:/app"]
-env_file = ["/Users/phamlequang/projects/flowers/camellia/.env"]
+volumes = ["{SERVICE_DIR}:/app"]
+env_file = ["{SERVICE_DIR}/.env"]
 depends_on = ["postgres", "redis"]
 command = "cargo run"
 
@@ -58,8 +57,8 @@ test = "cargo test"
 image = "rust:latest"
 ports = ["8001:8001"]
 working_dir = "/app"
-volumes = ["/Users/phamlequang/projects/flowers/lotus:/app"]
-env_file = ["/Users/phamlequang/projects/flowers/lotus/.env"]
+volumes = ["{SERVICE_DIR}:/app"]
+env_file = ["{SERVICE_DIR}/.env"]
 depends_on = ["postgres"]
 command = "cargo run"
 

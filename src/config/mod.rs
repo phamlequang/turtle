@@ -14,7 +14,6 @@ pub struct Machine {
     pub cpu_count: u32,
     pub disk_size: u32,
     pub memory: u32,
-    pub volumes: Option<Vec<String>>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -115,6 +114,23 @@ impl Config {
                 if service.name == name {
                     return Some(service);
                 }
+            }
+        }
+        return None;
+    }
+
+    pub fn search_service_repository(&self, name: &str) -> Option<&Repository> {
+        if let Some(service) = self.search_service(name) {
+            return self.search_repository(&service.repo);
+        }
+        return None;
+    }
+
+    pub fn search_service_directory(&self, name: &str) -> Option<String> {
+        if let Some(service) = self.search_service(name) {
+            if let Some(repository) = self.search_repository(&service.repo) {
+                let dir = format!("{}/{}", repository.local, service.folder);
+                return Some(dir);
             }
         }
         return None;

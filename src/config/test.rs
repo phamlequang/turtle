@@ -110,6 +110,48 @@ fn test_search_service_not_found() {
 }
 
 #[test]
+fn test_search_service_repository_found() {
+    let config = sample_config();
+    let name = "lotus";
+
+    let found = config.search_service_repository(name);
+    assert!(found.is_some());
+
+    let repository = found.unwrap();
+    assert_eq!(repository.name, "flowers");
+}
+
+#[test]
+fn test_search_service_repository_not_found() {
+    let config = sample_config();
+    let name = "unknown";
+
+    let found = config.search_service_repository(name);
+    assert!(found.is_none());
+}
+
+#[test]
+fn test_search_service_directory_found() {
+    let config = sample_config();
+    let name = "camellia";
+
+    let found = config.search_service_directory(name);
+    assert!(found.is_some());
+
+    let dir = found.unwrap();
+    assert_eq!(dir, "/Users/phamlequang/projects/flowers/camellia");
+}
+
+#[test]
+fn test_search_service_directory_not_found() {
+    let config = sample_config();
+    let name = "unknown";
+
+    let found = config.search_service_directory(name);
+    assert!(found.is_none());
+}
+
+#[test]
 fn test_search_group_found() {
     let config = sample_config();
     let name = "all";
