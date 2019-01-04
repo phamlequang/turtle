@@ -142,8 +142,10 @@ impl Generator {
         for name in args {
             if let Some(repository) = self.config.search_repository(name) {
                 commands.push(git::pull_repository(repository));
+            } else if let Some(repository) = self.config.search_service_repository(name) {
+                commands.push(git::pull_repository(repository));
             } else {
-                let message = format!("--> unknown repository [ {} ]", name);
+                let message = format!("--> unknown repository or service [ {} ]", name);
                 commands.push(Command::echo(&message));
             }
         }
