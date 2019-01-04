@@ -42,8 +42,7 @@ test = "cargo test"
 image = "rust:latest"
 ports = ["8000:8000"]
 working_dir = "/app"
-volumes = ["/Users/phamlequang/projects/flowers/camellia:/app"]
-env_file = ["/Users/phamlequang/projects/flowers/camellia/.env"]
+env_file = [".env"]
 depends_on = ["postgres", "redis"]
 command = "cargo run"
 
@@ -58,8 +57,7 @@ test = "cargo test"
 image = "rust:latest"
 ports = ["8001:8001"]
 working_dir = "/app"
-volumes = ["/Users/phamlequang/projects/flowers/lotus:/app"]
-env_file = ["/Users/phamlequang/projects/flowers/lotus/.env"]
+env_file = [".env"]
 depends_on = ["postgres"]
 command = "cargo run"
 
