@@ -120,6 +120,13 @@ impl Config {
         return None;
     }
 
+    pub fn search_service_repository(&self, name: &str) -> Option<&Repository> {
+        if let Some(service) = self.search_service(name) {
+            return self.search_repository(&service.repo);
+        }
+        return None;
+    }
+
     pub fn search_group(&self, name: &str) -> Option<&Group> {
         if let Some(groups) = &self.groups {
             for group in groups {
