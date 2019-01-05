@@ -13,8 +13,18 @@ pub fn clone_repository(repository: &Repository) -> Command {
 }
 
 pub fn pull_repository(repo_dir: &str) -> Command {
-    let raw = format!("git pull");
-    return Command::new(&raw, &repo_dir, true, false, false, None);
+    return do_on_current_branch(repo_dir, "pull");
+}
+
+pub fn push_repository(repo_dir: &str) -> Command {
+    return do_on_current_branch(repo_dir, "push");
+}
+
+pub fn do_on_current_branch(repo_dir: &str, action: &str) -> Command {
+    let branch = "git branch | grep -m1 \\* | grep -v \"master\" | \
+                  grep -v \"HEAD detached\" | cut -c 3-";
+    let raw = format!("git {} origin $({})", action, branch);
+    return Command::new(&raw, repo_dir, true, false, false, None);
 }
 
 pub fn current_branch() -> Command {

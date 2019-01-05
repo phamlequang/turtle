@@ -14,6 +14,7 @@ const CD: &str = "cd";
 const GOTO: &str = "goto";
 const CLONE: &str = "clone";
 const PULL: &str = "pull";
+const PUSH: &str = "push";
 const MACHINE: &str = "machine";
 const COMPOSE: &str = "compose";
 const DOCKER: &str = "docker";
@@ -66,6 +67,7 @@ impl Generator {
                 GOTO => return self.goto(&args),
                 CLONE => return self.clone_repositories(&args),
                 PULL => return self.pull_repositories(&args),
+                PUSH => return self.push_repositories(&args),
                 MACHINE => return self.machine(&args),
                 COMPOSE => return self.docker_compose(&args),
                 DOCKER => return self.docker(&args),
@@ -134,17 +136,25 @@ impl Generator {
     }
 
     fn pull_repositories(&self, args: &[&str]) -> Instruction {
+        return self.git_do_repositories(args, git::pull_repository);
+    }
+
+    fn push_repositories(&self, args: &[&str]) -> Instruction {
+        return self.git_do_repositories(args, git::push_repository);
+    }
+
+    fn git_do_repositories(&self, args: &[&str], doit: fn(&str) -> Command) -> Instruction {
         if args.is_empty() {
-            let command = git::pull_repository("");
+            let command = doit("");
             return Instruction::basic(vec![command]);
         }
 
         let mut commands: Vec<Command> = Vec::with_capacity(args.len());
         for name in args {
             if let Some(repository) = self.config.search_repository(name) {
-                commands.push(git::pull_repository(&repository.local));
+                commands.push(doit(&repository.local));
             } else if let Some(repository) = self.config.search_service_repository(name) {
-                commands.push(git::pull_repository(&repository.local));
+                commands.push(doit(&repository.local));
             } else {
                 let message = format!("--> unknown repository or service [ {} ]", name);
                 commands.push(Command::echo(&message));
