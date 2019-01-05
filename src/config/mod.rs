@@ -192,7 +192,7 @@ impl Config {
         return result;
     }
 
-    // Return name of all services (and dependencies) that match the names in args
+    // Return name of all services and/or dependencies that match the names in args
     // or having their group or repository names that match the names in args
     // Special case: return all if args is empty
     pub fn match_services_dependencies(&self, args: &[&str], choose: usize) -> HashSet<String> {
