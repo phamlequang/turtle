@@ -27,9 +27,11 @@ fn test_clone_repository() {
 #[test]
 fn test_pull_repository() {
     let repo_dir = "/Users/phamlequang/projects/turtle";
+    let raw = "git pull origin $(git branch | grep -m1 \\* | \
+               grep -v \"master\" | grep -v \"HEAD detached\" | cut -c 3-)";
 
     let command = pull_repository(repo_dir);
-    assert_eq!(command.raw, "git pull");
+    assert_eq!(command.raw, raw);
     assert_eq!(command.dir, repo_dir);
     assert!(command.show);
     assert!(!command.silent);

@@ -13,7 +13,8 @@ pub fn clone_repository(repository: &Repository) -> Command {
 }
 
 pub fn pull_repository(repo_dir: &str) -> Command {
-    let raw = "git pull";
+    let raw = "git pull origin $(git branch | grep -m1 \\* | \
+               grep -v \"master\" | grep -v \"HEAD detached\" | cut -c 3-)";
     return Command::new(&raw, repo_dir, true, false, false, None);
 }
 
