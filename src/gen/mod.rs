@@ -135,7 +135,8 @@ impl Generator {
 
     fn pull_repositories(&self, args: &[&str]) -> Instruction {
         if args.is_empty() {
-            return Instruction::skip();
+            let command = git::pull_repository("");
+            return Instruction::basic(vec![command]);
         }
 
         let mut commands: Vec<Command> = Vec::with_capacity(args.len());
