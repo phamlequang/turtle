@@ -135,15 +135,16 @@ impl Generator {
 
     fn pull_repositories(&self, args: &[&str]) -> Instruction {
         if args.is_empty() {
-            return Instruction::skip();
+            let command = git::pull_repository("");
+            return Instruction::basic(vec![command]);
         }
 
         let mut commands: Vec<Command> = Vec::with_capacity(args.len());
         for name in args {
             if let Some(repository) = self.config.search_repository(name) {
-                commands.push(git::pull_repository(repository));
+                commands.push(git::pull_repository(&repository.local));
             } else if let Some(repository) = self.config.search_service_repository(name) {
-                commands.push(git::pull_repository(repository));
+                commands.push(git::pull_repository(&repository.local));
             } else {
                 let message = format!("--> unknown repository or service [ {} ]", name);
                 commands.push(Command::echo(&message));
@@ -229,7 +230,7 @@ impl Generator {
             return Instruction::basic(vec![command]);
         }
 
-        let matches = self.config.match_dependencies_and_services(args);
+        let matches = self.config.match_services_dependencies(args, Config::BOTH);
         let mut services: Vec<_> = matches.iter().map(String::as_ref).collect();
         services.sort();
 
@@ -238,7 +239,7 @@ impl Generator {
     }
 
     fn restart_services(&self, args: &[&str]) -> Instruction {
-        let matches = self.config.match_dependencies_and_services(args);
+        let matches = self.config.match_services_dependencies(args, Config::BOTH);
         let mut services: Vec<_> = matches.iter().map(String::as_ref).collect();
         services.sort();
 

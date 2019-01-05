@@ -99,7 +99,7 @@ fn test_generate_instruction_clone() {
 }
 
 #[test]
-fn test_generate_instruction_pull() {
+fn test_generate_instruction_pull_repositories_or_services() {
     let config = sample_config();
     let mut generator = Generator::new(CONFIG_DIR);
 
@@ -109,11 +109,23 @@ fn test_generate_instruction_pull() {
     let repository1 = config.search_repository("flowers").unwrap();
     let repository2 = config.search_service_repository("lotus").unwrap();
 
-    let cmd1 = git::pull_repository(repository1);
-    let cmd2 = git::pull_repository(repository2);
+    let cmd1 = git::pull_repository(&repository1.local);
+    let cmd2 = git::pull_repository(&repository2.local);
     let cmd3 = Command::echo("--> unknown repository or service [ tree ]");
 
     let expect = Instruction::basic(vec![cmd1, cmd2, cmd3]);
+    assert_eq!(instruction, expect);
+}
+
+#[test]
+fn test_generate_instruction_pull_current_directory() {
+    let mut generator = Generator::new(CONFIG_DIR);
+
+    let raw = "pull";
+    let instruction = generator.generate_instruction(raw);
+
+    let cmd = git::pull_repository("");
+    let expect = Instruction::basic(vec![cmd]);
     assert_eq!(instruction, expect);
 }
 

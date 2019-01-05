@@ -73,6 +73,10 @@ pub struct Config {
 }
 
 impl Config {
+    pub const SERVICE: usize = 1;
+    pub const DEPENDENCY: usize = 2;
+    pub const BOTH: usize = Self::SERVICE | Self::DEPENDENCY;
+
     pub fn load(file_path: &str) -> io::Result<Self> {
         let toml_text = fs::read_to_string(file_path)?;
         return Self::parse(&toml_text);
@@ -188,10 +192,10 @@ impl Config {
         return result;
     }
 
-    // Return name of all dependencies and services that match the names in args
+    // Return name of all services and/or dependencies that match the names in args
     // or having their group or repository names that match the names in args
     // Special case: return all if args is empty
-    pub fn match_dependencies_and_services(&self, args: &[&str]) -> HashSet<String> {
+    pub fn match_services_dependencies(&self, args: &[&str], choose: usize) -> HashSet<String> {
         let names: Vec<String> = args.iter().map(|s| String::from(*s)).collect();
         let filters: HashSet<String> = HashSet::from_iter(names);
         let accept_all = filters.is_empty();
@@ -202,22 +206,26 @@ impl Config {
             for group in groups {
                 let accept_group = filters.contains(&group.name);
 
-                if let Some(dep_names) = &group.dependencies {
-                    for dep_name in dep_names {
-                        let accept_dep = filters.contains(dep_name);
-                        if accept_all || accept_group || accept_dep {
-                            result.insert(dep_name.to_owned());
+                if choose & Self::DEPENDENCY > 0 {
+                    if let Some(dep_names) = &group.dependencies {
+                        for dep_name in dep_names {
+                            let accept_dep = filters.contains(dep_name);
+                            if accept_all || accept_group || accept_dep {
+                                result.insert(dep_name.to_owned());
+                            }
                         }
                     }
                 }
 
-                if let Some(svc_names) = &group.services {
-                    for svc_name in svc_names {
-                        let accept_service = filters.contains(svc_name);
-                        if let Some(service) = self.search_service(svc_name) {
-                            let accept_repo = filters.contains(&service.repo);
-                            if accept_all || accept_group || accept_repo || accept_service {
-                                result.insert(svc_name.to_owned());
+                if choose & Self::SERVICE > 0 {
+                    if let Some(svc_names) = &group.services {
+                        for svc_name in svc_names {
+                            let accept_service = filters.contains(svc_name);
+                            if let Some(service) = self.search_service(svc_name) {
+                                let accept_repo = filters.contains(&service.repo);
+                                if accept_all || accept_group || accept_repo || accept_service {
+                                    result.insert(svc_name.to_owned());
+                                }
                             }
                         }
                     }

@@ -201,11 +201,11 @@ fn test_using_services() {
 }
 
 #[test]
-fn test_match_dependencies_and_services() {
+fn test_match_services_dependencies() {
     let config = sample_config();
 
     let args = ["dep", "camellia", "unknown"];
-    let result = config.match_dependencies_and_services(&args);
+    let result = config.match_services_dependencies(&args, Config::BOTH);
     assert_eq!(result.len(), 3);
 
     assert!(result.contains("camellia"));
@@ -214,11 +214,11 @@ fn test_match_dependencies_and_services() {
 }
 
 #[test]
-fn test_match_dependencies_and_services_repo() {
+fn test_match_services_dependencies_repo() {
     let config = sample_config();
 
     let args = ["flowers", "unknown"];
-    let result = config.match_dependencies_and_services(&args);
+    let result = config.match_services_dependencies(&args, Config::BOTH);
     assert_eq!(result.len(), 2);
 
     assert!(result.contains("camellia"));
@@ -226,14 +226,36 @@ fn test_match_dependencies_and_services_repo() {
 }
 
 #[test]
-fn test_match_dependencies_and_services_all() {
+fn test_match_services_dependencies_all() {
     let config = sample_config();
 
-    let result = config.match_dependencies_and_services(&[]);
+    let result = config.match_services_dependencies(&[], Config::BOTH);
     assert_eq!(result.len(), 4);
 
     assert!(result.contains("camellia"));
     assert!(result.contains("lotus"));
+    assert!(result.contains("postgres"));
+    assert!(result.contains("redis"));
+}
+
+#[test]
+fn test_match_services_only() {
+    let config = sample_config();
+
+    let result = config.match_services_dependencies(&[], Config::SERVICE);
+    assert_eq!(result.len(), 2);
+
+    assert!(result.contains("camellia"));
+    assert!(result.contains("lotus"));
+}
+
+#[test]
+fn test_match_dependencies_only() {
+    let config = sample_config();
+
+    let result = config.match_services_dependencies(&["all"], Config::DEPENDENCY);
+    assert_eq!(result.len(), 2);
+
     assert!(result.contains("postgres"));
     assert!(result.contains("redis"));
 }
