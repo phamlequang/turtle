@@ -41,7 +41,6 @@ pub struct Repository {
     pub name: String,
     pub remote: String,
     pub local: String,
-    pub branch: String,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -186,6 +185,19 @@ impl Config {
                         }
                     }
                 }
+            }
+        }
+
+        return result;
+    }
+
+    pub fn using_repositories(&self) -> HashSet<String> {
+        let mut result = HashSet::new();
+
+        let service_names = self.using_services();
+        for name in &service_names {
+            if let Some(service) = self.search_service(name) {
+                result.insert(service.repo.clone());
             }
         }
 

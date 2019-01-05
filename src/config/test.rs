@@ -176,28 +176,41 @@ fn test_search_group_not_found() {
 fn test_using_dependencies() {
     let mut config = sample_config();
 
-    let using_dependencies = config.using_dependencies();
-    assert_eq!(using_dependencies.len(), 2);
-    assert!(using_dependencies.contains("postgres"));
-    assert!(using_dependencies.contains("redis"));
+    let dependencies = config.using_dependencies();
+    assert_eq!(dependencies.len(), 2);
+    assert!(dependencies.contains("postgres"));
+    assert!(dependencies.contains("redis"));
 
     config.use_groups(&["svc"]);
-    let using_dependencies = config.using_dependencies();
-    assert!(using_dependencies.is_empty());
+    let dependencies = config.using_dependencies();
+    assert!(dependencies.is_empty());
 }
 
 #[test]
 fn test_using_services() {
     let mut config = sample_config();
 
-    let using_services = config.using_services();
-    assert_eq!(using_services.len(), 2);
-    assert!(using_services.contains("camellia"));
-    assert!(using_services.contains("lotus"));
+    let services = config.using_services();
+    assert_eq!(services.len(), 2);
+    assert!(services.contains("camellia"));
+    assert!(services.contains("lotus"));
 
     config.use_groups(&["dep"]);
-    let using_repositories = config.using_services();
-    assert!(using_repositories.is_empty());
+    let services = config.using_services();
+    assert!(services.is_empty());
+}
+
+#[test]
+fn test_using_repositories() {
+    let mut config = sample_config();
+
+    let repositories = config.using_repositories();
+    assert_eq!(repositories.len(), 1);
+    assert!(repositories.contains("flowers"));
+
+    config.use_groups(&["dep"]);
+    let repositories = config.using_repositories();
+    assert!(repositories.is_empty());
 }
 
 #[test]
