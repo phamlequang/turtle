@@ -230,7 +230,7 @@ impl Generator {
             return Instruction::basic(vec![command]);
         }
 
-        let matches = self.config.match_dependencies_and_services(args);
+        let matches = self.config.match_services_dependencies(args, Config::BOTH);
         let mut services: Vec<_> = matches.iter().map(String::as_ref).collect();
         services.sort();
 
@@ -239,7 +239,7 @@ impl Generator {
     }
 
     fn restart_services(&self, args: &[&str]) -> Instruction {
-        let matches = self.config.match_dependencies_and_services(args);
+        let matches = self.config.match_services_dependencies(args, Config::BOTH);
         let mut services: Vec<_> = matches.iter().map(String::as_ref).collect();
         services.sort();
 
