@@ -38,6 +38,21 @@ fn test_pull_repository() {
 }
 
 #[test]
+fn test_push_repository() {
+    let repo_dir = "/Users/phamlequang/projects/turtle";
+    let raw = "git push origin $(git branch | grep -m1 \\* | \
+               grep -v \"master\" | grep -v \"HEAD detached\" | cut -c 3-)";
+
+    let command = push_repository(repo_dir);
+    assert_eq!(command.raw, raw);
+    assert_eq!(command.dir, repo_dir);
+    assert!(command.show);
+    assert!(!command.silent);
+    assert!(!command.pipe);
+    assert!(command.then.is_none());
+}
+
+#[test]
 fn test_current_branch() {
     let command = current_branch();
 

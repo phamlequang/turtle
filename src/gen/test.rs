@@ -120,11 +120,38 @@ fn test_generate_instruction_pull_repositories_or_services() {
 #[test]
 fn test_generate_instruction_pull_current_directory() {
     let mut generator = Generator::new(CONFIG_DIR);
-
-    let raw = "pull";
-    let instruction = generator.generate_instruction(raw);
+    let instruction = generator.generate_instruction("pull");
 
     let cmd = git::pull_repository("");
+    let expect = Instruction::basic(vec![cmd]);
+    assert_eq!(instruction, expect);
+}
+
+#[test]
+fn test_generate_instruction_push_repositories_or_services() {
+    let config = sample_config();
+    let mut generator = Generator::new(CONFIG_DIR);
+
+    let raw = "push flowers lotus tree";
+    let instruction = generator.generate_instruction(raw);
+
+    let repository1 = config.search_repository("flowers").unwrap();
+    let repository2 = config.search_service_repository("lotus").unwrap();
+
+    let cmd1 = git::push_repository(&repository1.local);
+    let cmd2 = git::push_repository(&repository2.local);
+    let cmd3 = Command::echo("--> unknown repository or service [ tree ]");
+
+    let expect = Instruction::basic(vec![cmd1, cmd2, cmd3]);
+    assert_eq!(instruction, expect);
+}
+
+#[test]
+fn test_generate_instruction_push_current_directory() {
+    let mut generator = Generator::new(CONFIG_DIR);
+    let instruction = generator.generate_instruction("push");
+
+    let cmd = git::push_repository("");
     let expect = Instruction::basic(vec![cmd]);
     assert_eq!(instruction, expect);
 }
