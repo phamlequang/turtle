@@ -44,6 +44,7 @@ volumes = ["{SERVICE_DIR}:/app"]
 env_file = ["{SERVICE_DIR}/.env"]
 depends_on = ["postgres", "redis"]
 command = "cargo run"
+labels = ["author=phamlequang"]
 
 [[services]]
 name = "lotus"

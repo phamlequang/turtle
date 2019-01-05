@@ -27,6 +27,8 @@ services:
       - postgres
       - redis
     command: cargo run
+    labels:
+      - author=phamlequang
   lotus:
     image: rust:latest
     ports:

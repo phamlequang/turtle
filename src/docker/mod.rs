@@ -220,7 +220,7 @@ fn compose_service(name: &str, docker: &Docker, config: &Config) -> (Vec<String>
     if let Some(labels) = &docker.labels {
         lines.push(format!("    labels:"));
         for l in labels {
-            lines.push(format!("      {}", l));
+            lines.push(format!("      - {}", l));
         }
     }
 
