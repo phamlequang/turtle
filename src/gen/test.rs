@@ -83,7 +83,7 @@ fn test_generate_instruction_goto_nothing() {
 }
 
 #[test]
-fn test_generate_instruction_clone() {
+fn test_generate_instruction_clone_repositories() {
     let config = sample_config();
     let mut generator = Generator::new(CONFIG_DIR);
 
@@ -95,6 +95,20 @@ fn test_generate_instruction_clone() {
     let cmd2 = Command::echo("--> unknown repository [ tree ]");
 
     let expect = Instruction::basic(vec![cmd1, cmd2]);
+    assert_eq!(instruction, expect);
+}
+
+#[test]
+fn test_generate_instruction_clone_all() {
+    let config = sample_config();
+    let mut generator = Generator::new(CONFIG_DIR);
+
+    let instruction = generator.generate_instruction("clone");
+    let repository = config.search_repository("flowers").unwrap();
+
+    let cmd = git::clone_repository(repository);
+    let expect = Instruction::basic(vec![cmd]);
+
     assert_eq!(instruction, expect);
 }
 

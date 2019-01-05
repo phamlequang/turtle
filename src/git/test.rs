@@ -7,14 +7,10 @@ fn test_clone_repository() {
         name: String::from("turtle"),
         remote: String::from("git@gitlab.com:phamlequang/turtle.git"),
         local: String::from("/Users/phamlequang/projects/turtle"),
-        branch: String::from("master"),
     };
 
     let command = clone_repository(&repository);
-    let raw = format!(
-        "git clone -b master {} {}",
-        repository.remote, repository.local
-    );
+    let raw = format!("git clone {} {}", repository.remote, repository.local);
 
     assert_eq!(command.raw, raw);
     assert_eq!(command.dir, "");

@@ -119,7 +119,13 @@ impl Generator {
 
     fn clone_repositories(&self, args: &[&str]) -> Instruction {
         if args.is_empty() {
-            return Instruction::skip();
+            let repos = self.config.using_repositories();
+            if repos.is_empty() {
+                return Instruction::echo("--> nothing to clone");
+            }
+
+            let repos: Vec<&str> = repos.iter().map(String::as_ref).collect();
+            return self.clone_repositories(&repos);
         }
 
         let mut commands: Vec<Command> = Vec::with_capacity(args.len());
