@@ -109,8 +109,8 @@ fn test_generate_instruction_pull() {
     let repository1 = config.search_repository("flowers").unwrap();
     let repository2 = config.search_service_repository("lotus").unwrap();
 
-    let cmd1 = git::pull_repository(repository1);
-    let cmd2 = git::pull_repository(repository2);
+    let cmd1 = git::pull_repository(&repository1.local);
+    let cmd2 = git::pull_repository(&repository2.local);
     let cmd3 = Command::echo("--> unknown repository or service [ tree ]");
 
     let expect = Instruction::basic(vec![cmd1, cmd2, cmd3]);

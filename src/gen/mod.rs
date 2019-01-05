@@ -141,9 +141,9 @@ impl Generator {
         let mut commands: Vec<Command> = Vec::with_capacity(args.len());
         for name in args {
             if let Some(repository) = self.config.search_repository(name) {
-                commands.push(git::pull_repository(repository));
+                commands.push(git::pull_repository(&repository.local));
             } else if let Some(repository) = self.config.search_service_repository(name) {
-                commands.push(git::pull_repository(repository));
+                commands.push(git::pull_repository(&repository.local));
             } else {
                 let message = format!("--> unknown repository or service [ {} ]", name);
                 commands.push(Command::echo(&message));

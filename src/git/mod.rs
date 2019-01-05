@@ -12,10 +12,9 @@ pub fn clone_repository(repository: &Repository) -> Command {
     return Command::basic_show(&raw);
 }
 
-pub fn pull_repository(repository: &Repository) -> Command {
+pub fn pull_repository(repo_dir: &str) -> Command {
     let raw = format!("git pull");
-    let dir = &repository.local;
-    return Command::new(&raw, &dir, true, false, false, None);
+    return Command::new(&raw, &repo_dir, true, false, false, None);
 }
 
 pub fn current_branch() -> Command {

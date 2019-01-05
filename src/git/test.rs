@@ -15,23 +15,26 @@ fn test_clone_repository() {
         "git clone -b master {} {}",
         repository.remote, repository.local
     );
-    let expect = Command::basic_show(&raw);
-    assert_eq!(command, expect);
+
+    assert_eq!(command.raw, raw);
+    assert_eq!(command.dir, "");
+    assert!(command.show);
+    assert!(!command.silent);
+    assert!(!command.pipe);
+    assert!(command.then.is_none());
 }
 
 #[test]
 fn test_pull_repository() {
-    let repository = Repository {
-        name: String::from("turtle"),
-        remote: String::from("git@gitlab.com:phamlequang/turtle.git"),
-        local: String::from("/Users/phamlequang/projects/turtle"),
-        branch: String::from("master"),
-    };
+    let repo_dir = "/Users/phamlequang/projects/turtle";
 
-    let command = pull_repository(&repository);
-    let expect = Command::new("git pull", &repository.local, true, false, false, None);
-
-    assert_eq!(command, expect);
+    let command = pull_repository(repo_dir);
+    assert_eq!(command.raw, "git pull");
+    assert_eq!(command.dir, repo_dir);
+    assert!(command.show);
+    assert!(!command.silent);
+    assert!(!command.pipe);
+    assert!(command.then.is_none());
 }
 
 #[test]
@@ -41,6 +44,7 @@ fn test_current_branch() {
     assert_eq!(command.raw, "git branch");
     assert!(command.dir.is_empty());
     assert!(!command.show);
+    assert!(command.silent);
     assert!(command.pipe);
     assert!(command.then.is_some());
 
