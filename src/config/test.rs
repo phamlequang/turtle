@@ -272,3 +272,21 @@ fn test_match_dependencies_only() {
     assert!(result.contains("postgres"));
     assert!(result.contains("redis"));
 }
+
+#[test]
+fn test_fill_patterns() {
+    let config = sample_config();
+    let service = config.search_service("camellia").unwrap();
+
+    let filled_text = config.fill_patterns("{REPO_DIR}:/app", None);
+    let expect_text = "{REPO_DIR}:/app";
+    assert_eq!(filled_text, expect_text);
+
+    let filled_text = config.fill_patterns("{REPO_DIR}:/app", Some(&service));
+    let expect_text = "/Users/phamlequang/projects/flowers:/app";
+    assert_eq!(filled_text, expect_text);
+
+    let filled_text = config.fill_patterns("{SERVICE_DIR}/.env", Some(&service));
+    let expect_text = "/Users/phamlequang/projects/flowers/camellia/.env";
+    assert_eq!(filled_text, expect_text);
+}

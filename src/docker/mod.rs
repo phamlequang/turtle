@@ -5,9 +5,7 @@ use std::fs;
 use std::io;
 
 use super::cmd::Command;
-use super::config::{Config, Docker, Machine};
-
-const SERVICE_DIR_PATTERN: &str = "{SERVICE_DIR}";
+use super::config::{Config, Docker, Machine, Service};
 
 pub fn create_machine(machine: &Machine) -> Command {
     let raw = format!(
@@ -112,7 +110,7 @@ pub fn generate_compose_lines(config: &Config) -> Vec<String> {
                 continue;
             }
             let (more_lines, more_volumes) =
-                compose_service(&dependency.name, &dependency.docker, config);
+                compose_service(&dependency.name, &dependency.docker, config, None);
             lines.extend(more_lines);
             volumes.extend(more_volumes);
         }
@@ -124,7 +122,7 @@ pub fn generate_compose_lines(config: &Config) -> Vec<String> {
                 continue;
             }
             let (more_lines, more_volumes) =
-                compose_service(&service.name, &service.docker, config);
+                compose_service(&service.name, &service.docker, config, Some(service));
             lines.extend(more_lines);
             volumes.extend(more_volumes);
         }
@@ -143,7 +141,12 @@ pub fn generate_compose_lines(config: &Config) -> Vec<String> {
     return lines;
 }
 
-fn compose_service(name: &str, docker: &Docker, config: &Config) -> (Vec<String>, Vec<String>) {
+fn compose_service(
+    name: &str,
+    docker: &Docker,
+    config: &Config,
+    service: Option<&Service>,
+) -> (Vec<String>, Vec<String>) {
     let mut lines: Vec<String> = Vec::new();
     let mut named_volumes: Vec<String> = Vec::new();
 
@@ -152,8 +155,13 @@ fn compose_service(name: &str, docker: &Docker, config: &Config) -> (Vec<String>
 
     if let Some(build) = &docker.build {
         lines.push(format!("    build:"));
-        for b in build {
-            lines.push(format!("      {}", b));
+
+        let context = config.fill_patterns(&build.context, service);
+        lines.push(format!("      context: {}", context));
+
+        if let Some(docker_file) = &build.docker_file {
+            let docker_file = config.fill_patterns(docker_file, service);
+            lines.push(format!("      dockerfile: {}", docker_file));
         }
     }
 
@@ -172,14 +180,9 @@ fn compose_service(name: &str, docker: &Docker, config: &Config) -> (Vec<String>
         lines.push(format!("    volumes:"));
 
         for v in volumes {
-            let mut volume = v.to_owned();
-            if v.starts_with(SERVICE_DIR_PATTERN) {
-                if let Some(dir) = config.search_service_directory(name) {
-                    volume = v.replace(SERVICE_DIR_PATTERN, &dir)
-                }
-            }
-
+            let volume = config.fill_patterns(v, service);
             lines.push(format!("      - {}", volume));
+
             if let Some(named_volume) = extract_named_volume(&volume) {
                 named_volumes.push(named_volume);
             }
@@ -196,13 +199,8 @@ fn compose_service(name: &str, docker: &Docker, config: &Config) -> (Vec<String>
     if let Some(env_file) = &docker.env_file {
         lines.push(format!("    env_file:"));
         for f in env_file {
-            let mut fv = f.to_owned();
-            if f.starts_with(SERVICE_DIR_PATTERN) {
-                if let Some(dir) = config.search_service_directory(name) {
-                    fv = f.replace(SERVICE_DIR_PATTERN, &dir)
-                }
-            }
-            lines.push(format!("      - {}", fv));
+            let file = config.fill_patterns(f, service);
+            lines.push(format!("      - {}", file));
         }
     }
 

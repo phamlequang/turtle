@@ -8,6 +8,9 @@ use std::fs;
 use std::io;
 use std::iter::FromIterator;
 
+const SERVICE_DIR_PATTERN: &str = "{SERVICE_DIR}";
+const REPO_DIR_PATTERN: &str = "{REPO_DIR}";
+
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Machine {
     pub name: String,
@@ -17,9 +20,14 @@ pub struct Machine {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
+pub struct DockerBuild {
+    pub context: String,
+    pub docker_file: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Docker {
     pub image: String,
-    pub build: Option<Vec<String>>,
     pub ports: Option<Vec<String>>,
     pub working_dir: Option<String>,
     pub volumes: Option<Vec<String>>,
@@ -28,6 +36,7 @@ pub struct Docker {
     pub depends_on: Option<Vec<String>>,
     pub command: Option<String>,
     pub labels: Option<Vec<String>>,
+    pub build: Option<DockerBuild>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -245,6 +254,20 @@ impl Config {
             }
         }
 
+        return result;
+    }
+
+    pub fn fill_patterns(&self, text: &str, service: Option<&Service>) -> String {
+        let mut result = text.to_owned();
+        if let Some(service) = service {
+            if result.contains(SERVICE_DIR_PATTERN) || result.contains(REPO_DIR_PATTERN) {
+                if let Some(repository) = self.search_repository(&service.repo) {
+                    let service_dir = format!("{}/{}", repository.local, service.folder);
+                    result = result.replace(SERVICE_DIR_PATTERN, &service_dir);
+                    result = result.replace(REPO_DIR_PATTERN, &repository.local);
+                }
+            }
+        }
         return result;
     }
 }

@@ -15,18 +15,21 @@ services:
     volumes:
       - redis_data:/data
   camellia:
-    image: rust:latest
+    image: camellia
+    build:
+      context: /Users/phamlequang/projects/flowers
+      dockerfile: camellia/Dockerfile
     ports:
       - 8000:8000
-    working_dir: /app
+    working_dir: /app/camellia
     volumes:
-      - /Users/phamlequang/projects/flowers/camellia:/app
+      - /Users/phamlequang/projects/flowers:/app
     env_file:
       - /Users/phamlequang/projects/flowers/camellia/.env
     depends_on:
       - postgres
       - redis
-    command: cargo run
+    command: ../wait-for-it.sh postgres:5432 -- cargo run
     labels:
       - author=phamlequang
   lotus:
