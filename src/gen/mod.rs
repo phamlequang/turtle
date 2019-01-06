@@ -99,11 +99,8 @@ impl Generator {
 
     fn goto(&self, args: &[&str]) -> Instruction {
         if let Some(name) = args.first() {
-            if let Some(service) = self.config.search_service(name) {
-                if let Some(repository) = self.config.search_repository(&service.repo) {
-                    let dir = format!("{}/{}", repository.local, service.folder);
-                    return self.change_directory(&[&dir]);
-                }
+            if let Some(service_dir) = self.config.search_service_directory(name) {
+                return self.change_directory(&[&service_dir]);
             }
 
             if let Some(repository) = self.config.search_repository(name) {
@@ -321,7 +318,7 @@ impl Generator {
         }
 
         let message = format!(
-            "--> successfully generated new compose file [ {} ] and save config file [ {} ]",
+            "--> saved compose: [ {} ] and config: [ {} ]",
             &self.compose_file, &self.config_file,
         );
         return Instruction::echo(&message);

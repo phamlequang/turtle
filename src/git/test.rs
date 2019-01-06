@@ -6,7 +6,7 @@ fn test_clone_repository() {
     let repository = Repository {
         name: String::from("turtle"),
         remote: String::from("git@gitlab.com:phamlequang/turtle.git"),
-        local: String::from("/Users/phamlequang/projects/turtle"),
+        local: String::from("~/projects/turtle"),
     };
 
     let command = clone_repository(&repository);
@@ -22,7 +22,7 @@ fn test_clone_repository() {
 
 #[test]
 fn test_pull_repository() {
-    let repo_dir = "/Users/phamlequang/projects/turtle";
+    let repo_dir = "~/projects/turtle";
     let raw = "git pull origin $(git branch | grep -m1 \\* | \
                grep -v \"master\" | grep -v \"HEAD detached\" | cut -c 3-)";
 
@@ -37,7 +37,7 @@ fn test_pull_repository() {
 
 #[test]
 fn test_push_repository() {
-    let repo_dir = "/Users/phamlequang/projects/turtle";
+    let repo_dir = "~/projects/turtle";
     let raw = "git push origin $(git branch | grep -m1 \\* | \
                grep -v \"master\" | grep -v \"HEAD detached\" | cut -c 3-)";
 

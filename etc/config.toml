@@ -27,7 +27,7 @@ volumes = ["redis_data:/data"]
 [[repositories]]
 name = "flowers"
 remote = "git@gitlab.com:phamlequang/flowers.git"
-local = "/Users/phamlequang/projects/flowers"
+local = "~/projects/flowers"
 
 [[services]]
 name = "camellia"
@@ -37,14 +37,18 @@ build = "cargo build"
 test = "cargo test"
 
 [services.docker]
-image = "rust:latest"
+image = "camellia"
 ports = ["8000:8000"]
-working_dir = "/app"
-volumes = ["{SERVICE_DIR}:/app"]
+working_dir = "/app/camellia"
+volumes = ["{REPO_DIR}:/app"]
 env_file = ["{SERVICE_DIR}/.env"]
 depends_on = ["postgres", "redis"]
-command = "cargo run"
+command = "../wait-for-it.sh postgres:5432 -- cargo run"
 labels = ["author=phamlequang"]
+
+[services.docker.build]
+context = "{REPO_DIR}"
+docker_file = "camellia/Dockerfile"
 
 [[services]]
 name = "lotus"
