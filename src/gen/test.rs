@@ -42,7 +42,7 @@ fn test_generate_instruction_goto_service() {
     let mut generator = Generator::new(CONFIG_DIR);
 
     let instruction = generator.generate_instruction("goto camellia");
-    let dir = "/Users/phamlequang/projects/flowers/camellia";
+    let dir = "~/projects/flowers/camellia";
     let command = Command::new("", dir, false, false, false, None);
 
     let expect = Instruction::basic(vec![command]);
@@ -54,7 +54,7 @@ fn test_generate_instruction_goto_repository() {
     let mut generator = Generator::new(CONFIG_DIR);
 
     let instruction = generator.generate_instruction("goto flowers");
-    let dir = "/Users/phamlequang/projects/flowers";
+    let dir = "~/projects/flowers";
     let command = Command::new("", dir, false, false, false, None);
 
     let expect = Instruction::basic(vec![command]);
@@ -429,7 +429,7 @@ fn test_generate_instruction_use_groups_success() {
     let instruction = generator.generate_instruction("use dep");
 
     let message = format!(
-        "--> successfully generated new compose file [ {} ] and save config file [ {} ]",
+        "--> saved compose: [ {} ] and config: [ {} ]",
         TEST_COMPOSE_FILE, TEST_CONFIG_FILE,
     );
     let expect = Instruction::echo(&message);

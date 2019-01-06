@@ -139,7 +139,7 @@ fn test_search_service_directory_found() {
     assert!(found.is_some());
 
     let dir = found.unwrap();
-    assert_eq!(dir, "/Users/phamlequang/projects/flowers/camellia");
+    assert_eq!(dir, "~/projects/flowers/camellia");
 }
 
 #[test]
@@ -283,10 +283,10 @@ fn test_fill_patterns() {
     assert_eq!(filled_text, expect_text);
 
     let filled_text = config.fill_patterns("{REPO_DIR}:/app", Some(&service));
-    let expect_text = "/Users/phamlequang/projects/flowers:/app";
+    let expect_text = "~/projects/flowers:/app";
     assert_eq!(filled_text, expect_text);
 
     let filled_text = config.fill_patterns("{SERVICE_DIR}/.env", Some(&service));
-    let expect_text = "/Users/phamlequang/projects/flowers/camellia/.env";
+    let expect_text = "~/projects/flowers/camellia/.env";
     assert_eq!(filled_text, expect_text);
 }

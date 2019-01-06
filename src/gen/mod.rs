@@ -318,7 +318,7 @@ impl Generator {
         }
 
         let message = format!(
-            "--> successfully generated new compose file [ {} ] and save config file [ {} ]",
+            "--> saved compose: [ {} ] and config: [ {} ]",
             &self.compose_file, &self.config_file,
         );
         return Instruction::echo(&message);

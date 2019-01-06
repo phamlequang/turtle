@@ -27,7 +27,7 @@ volumes = ["redis_data:/data"]
 [[repositories]]
 name = "flowers"
 remote = "git@gitlab.com:phamlequang/flowers.git"
-local = "/Users/phamlequang/projects/flowers"
+local = "~/projects/flowers"
 
 [[services]]
 name = "camellia"
