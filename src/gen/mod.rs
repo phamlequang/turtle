@@ -26,6 +26,7 @@ const RESTART: &str = "restart";
 const STATUS: &str = "status";
 const BASH: &str = "bash";
 const SH: &str = "sh";
+const BUILD: &str = "build";
 
 #[derive(Debug)]
 pub struct Generator {
@@ -78,6 +79,7 @@ impl Generator {
                 RESTART => return self.restart_services(&args),
                 STATUS => return self.status_services(),
                 BASH | SH => return self.open_service_shell(&program, &args),
+                BUILD => return self.build_services(&args),
                 _ => return self.other(raw),
             }
         }
@@ -285,6 +287,29 @@ impl Generator {
                 return Instruction::echo(&message);
             }
         }
+    }
+
+    fn build_services(&self, args: &[&str]) -> Instruction {
+        let matches = self
+            .config
+            .match_services_dependencies(args, Config::SERVICE);
+
+        let mut svc_names: Vec<_> = matches.iter().map(String::as_ref).collect();
+        svc_names.sort();
+
+        let mut commands: Vec<Command> = Vec::new();
+        for svc_name in svc_names {
+            if let Some(service) = self.config.search_service(svc_name) {
+                if let Some(action) = self.config.search_action(&service.action) {
+                    if let Some(dir) = self.config.service_directory(service) {
+                        let command = Command::new(&action.build, &dir, true, false, false, None);
+                        commands.push(command);
+                    }
+                }
+            }
+        }
+
+        return Instruction::basic(commands);
     }
 
     fn use_groups(&mut self, args: &[&str]) -> Instruction {

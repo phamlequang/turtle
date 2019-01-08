@@ -173,6 +173,22 @@ fn test_search_service_directory_not_found() {
 }
 
 #[test]
+fn test_service_directory() {
+    let config = sample_config();
+    let name = "camellia";
+
+    let service = config.search_service(name);
+    assert!(service.is_some());
+    let service = service.unwrap();
+
+    let found = config.service_directory(&service);
+    assert!(found.is_some());
+
+    let dir = found.unwrap();
+    assert_eq!(dir, "~/projects/flowers/camellia");
+}
+
+#[test]
 fn test_search_group_found() {
     let config = sample_config();
     let name = "all";

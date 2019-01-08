@@ -446,6 +446,28 @@ fn test_generate_instruction_use_groups_success() {
 }
 
 #[test]
+fn test_generate_instruction_build_services() {
+    let config = sample_config();
+    let mut generator = Generator::new(CONFIG_DIR);
+
+    let instruction = generator.generate_instruction("build flowers");
+    assert!(!instruction.should_terminate);
+
+    let commands = &instruction.commands;
+    assert_eq!(commands.len(), 2);
+
+    let services = vec!["camellia", "lotus"];
+    for (i, name) in services.iter().enumerate() {
+        let dir = config.search_service_directory(name);
+        assert!(dir.is_some());
+        let dir = dir.unwrap();
+
+        let expect = Command::new("cargo build", &dir, true, false, false, None);
+        assert_eq!(&commands[i], &expect);
+    }
+}
+
+#[test]
 fn test_generate_instruction_other() {
     let mut generator = Generator::new(CONFIG_DIR);
 

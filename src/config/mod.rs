@@ -158,10 +158,15 @@ impl Config {
 
     pub fn search_service_directory(&self, name: &str) -> Option<String> {
         if let Some(service) = self.search_service(name) {
-            if let Some(repository) = self.search_repository(&service.repo) {
-                let dir = format!("{}/{}", repository.local, service.folder);
-                return Some(dir);
-            }
+            return self.service_directory(service);
+        }
+        return None;
+    }
+
+    pub fn service_directory(&self, service: &Service) -> Option<String> {
+        if let Some(repository) = self.search_repository(&service.repo) {
+            let dir = format!("{}/{}", repository.local, service.folder);
+            return Some(dir);
         }
         return None;
     }
