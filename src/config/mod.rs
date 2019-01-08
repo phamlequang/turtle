@@ -53,12 +53,18 @@ pub struct Repository {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
+pub struct Action {
+    pub name: String,
+    pub build: String,
+    pub test: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Service {
     pub name: String,
     pub repo: String,
     pub folder: String,
-    pub build: String,
-    pub test: String,
+    pub action: String,
     pub docker: Docker,
 }
 
@@ -76,6 +82,7 @@ pub struct Config {
     pub machine: Option<Machine>,
     pub dependencies: Option<Vec<Dependency>>,
     pub repositories: Option<Vec<Repository>>,
+    pub actions: Option<Vec<Action>>,
     pub services: Option<Vec<Service>>,
     pub groups: Option<Vec<Group>>,
 }
@@ -120,6 +127,17 @@ impl Config {
         return None;
     }
 
+    pub fn search_action(&self, name: &str) -> Option<&Action> {
+        if let Some(actions) = &self.actions {
+            for action in actions {
+                if action.name == name {
+                    return Some(action);
+                }
+            }
+        }
+        return None;
+    }
+
     pub fn search_service(&self, name: &str) -> Option<&Service> {
         if let Some(services) = &self.services {
             for service in services {
@@ -140,10 +158,15 @@ impl Config {
 
     pub fn search_service_directory(&self, name: &str) -> Option<String> {
         if let Some(service) = self.search_service(name) {
-            if let Some(repository) = self.search_repository(&service.repo) {
-                let dir = format!("{}/{}", repository.local, service.folder);
-                return Some(dir);
-            }
+            return self.service_directory(service);
+        }
+        return None;
+    }
+
+    pub fn service_directory(&self, service: &Service) -> Option<String> {
+        if let Some(repository) = self.search_repository(&service.repo) {
+            let dir = format!("{}/{}", repository.local, service.folder);
+            return Some(dir);
         }
         return None;
     }
