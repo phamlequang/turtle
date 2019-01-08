@@ -89,6 +89,27 @@ fn test_search_repository_not_found() {
 }
 
 #[test]
+fn test_search_action_found() {
+    let config = sample_config();
+    let name = "cargo";
+
+    let found = config.search_action(name);
+    assert!(found.is_some());
+
+    let action = found.unwrap();
+    assert_eq!(action.name, name);
+}
+
+#[test]
+fn test_search_action_not_found() {
+    let config = sample_config();
+    let name = "unknown";
+
+    let found = config.search_action(name);
+    assert!(found.is_none());
+}
+
+#[test]
 fn test_search_service_found() {
     let config = sample_config();
     let name = "lotus";

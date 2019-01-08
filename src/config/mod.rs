@@ -127,6 +127,17 @@ impl Config {
         return None;
     }
 
+    pub fn search_action(&self, name: &str) -> Option<&Action> {
+        if let Some(actions) = &self.actions {
+            for action in actions {
+                if action.name == name {
+                    return Some(action);
+                }
+            }
+        }
+        return None;
+    }
+
     pub fn search_service(&self, name: &str) -> Option<&Service> {
         if let Some(services) = &self.services {
             for service in services {
