@@ -53,12 +53,18 @@ pub struct Repository {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
+pub struct Action {
+    pub name: String,
+    pub build: String,
+    pub test: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Service {
     pub name: String,
     pub repo: String,
     pub folder: String,
-    pub build: String,
-    pub test: String,
+    pub action: String,
     pub docker: Docker,
 }
 
@@ -76,6 +82,7 @@ pub struct Config {
     pub machine: Option<Machine>,
     pub dependencies: Option<Vec<Dependency>>,
     pub repositories: Option<Vec<Repository>>,
+    pub actions: Option<Vec<Action>>,
     pub services: Option<Vec<Service>>,
     pub groups: Option<Vec<Group>>,
 }

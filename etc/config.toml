@@ -29,12 +29,16 @@ name = "flowers"
 remote = "git@gitlab.com:phamlequang/flowers.git"
 local = "~/projects/flowers"
 
+[[actions]]
+name = "cargo"
+build = "cargo build"
+test = "cargo test"
+
 [[services]]
 name = "camellia"
 repo = "flowers"
 folder = "camellia"
-build = "cargo build"
-test = "cargo test"
+action = "cargo"
 
 [services.docker]
 image = "camellia"
@@ -54,8 +58,7 @@ docker_file = "camellia/Dockerfile"
 name = "lotus"
 repo = "flowers"
 folder = "lotus"
-build = "cargo build"
-test = "cargo test"
+action = "cargo"
 
 [services.docker]
 image = "rust:latest"
