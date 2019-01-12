@@ -60,6 +60,12 @@ pub struct Action {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
+pub struct Pattern {
+    pub format: String,
+    pub expand: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Service {
     pub name: String,
     pub repo: String,
@@ -83,6 +89,7 @@ pub struct Config {
     pub dependencies: Option<Vec<Dependency>>,
     pub repositories: Option<Vec<Repository>>,
     pub actions: Option<Vec<Action>>,
+    pub patterns: Option<Vec<Pattern>>,
     pub services: Option<Vec<Service>>,
     pub groups: Option<Vec<Group>>,
 }
@@ -282,6 +289,13 @@ impl Config {
 
     pub fn fill_patterns(&self, text: &str, service: Option<&Service>) -> String {
         let mut result = text.to_owned();
+
+        if let Some(patterns) = &self.patterns {
+            for pattern in patterns {
+                result = result.replace(&pattern.format, &pattern.expand);
+            }
+        }
+
         if let Some(service) = service {
             if result.contains(SERVICE_DIR_PATTERN) || result.contains(REPO_DIR_PATTERN) {
                 if let Some(repository) = self.search_repository(&service.repo) {
@@ -291,6 +305,7 @@ impl Config {
                 }
             }
         }
+
         return result;
     }
 }

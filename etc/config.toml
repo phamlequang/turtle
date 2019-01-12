@@ -34,6 +34,14 @@ name = "cargo"
 build = "cargo build"
 test = "cargo test"
 
+[[patterns]]
+format = "{APP_DIR}"
+expand = "/rust/app/flowers"
+
+[[patterns]]
+format = "{RUN_CMD}"
+expand = "../wait-for-it.sh postgres:5432 -- cargo run"
+
 [[services]]
 name = "camellia"
 repo = "flowers"
@@ -43,11 +51,11 @@ action = "cargo"
 [services.docker]
 image = "camellia"
 ports = ["8000:8000"]
-working_dir = "/app/camellia"
-volumes = ["{REPO_DIR}:/app"]
+working_dir = "{APP_DIR}/camellia"
+volumes = ["{REPO_DIR}:{APP_DIR}"]
 env_file = ["{SERVICE_DIR}/.env"]
 depends_on = ["postgres", "redis"]
-command = "../wait-for-it.sh postgres:5432 -- cargo run"
+command = "{RUN_CMD}"
 labels = ["author=phamlequang"]
 
 [services.docker.build]
@@ -61,13 +69,18 @@ folder = "lotus"
 action = "cargo"
 
 [services.docker]
-image = "rust:latest"
+image = "lotus"
 ports = ["8001:8001"]
-working_dir = "/app"
-volumes = ["{SERVICE_DIR}:/app"]
+working_dir = "{APP_DIR}/lotus"
+volumes = ["{REPO_DIR}:{APP_DIR}"]
 env_file = ["{SERVICE_DIR}/.env"]
-depends_on = ["postgres"]
-command = "cargo run"
+depends_on = ["postgres", "redis"]
+command = "{RUN_CMD}"
+labels = ["author=phamlequang"]
+
+[services.docker.build]
+context = "{REPO_DIR}"
+docker_file = "lotus/Dockerfile"
 
 [[groups]]
 name = "all"

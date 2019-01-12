@@ -16,6 +16,9 @@ fn test_load_config_ok() {
     assert!(config.machine.is_some());
     assert!(config.dependencies.is_some());
     assert!(config.repositories.is_some());
+    assert!(config.actions.is_some());
+    assert!(config.patterns.is_some());
+    assert!(config.services.is_some());
     assert!(config.groups.is_some());
 }
 
