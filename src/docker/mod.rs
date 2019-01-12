@@ -153,6 +153,10 @@ fn compose_service(
     lines.push(format!("  {}:", name));
     lines.push(format!("    image: {}", docker.image));
 
+    if let Some(container_name) = &docker.container_name {
+        lines.push(format!("    container_name: {}", container_name));
+    }
+
     if let Some(build) = &docker.build {
         lines.push(format!("    build:"));
 

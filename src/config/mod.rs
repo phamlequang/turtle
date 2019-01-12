@@ -28,6 +28,7 @@ pub struct DockerBuild {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Docker {
     pub image: String,
+    pub container_name: Option<String>,
     pub ports: Option<Vec<String>>,
     pub working_dir: Option<String>,
     pub volumes: Option<Vec<String>>,

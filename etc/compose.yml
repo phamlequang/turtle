@@ -2,6 +2,7 @@ version: '3'
 services:
   postgres:
     image: postgres:latest
+    container_name: postgres
     ports:
       - 5432:5432
     volumes:
@@ -10,12 +11,14 @@ services:
       - POSTGRES_PASSWORD=secret
   redis:
     image: redis:latest
+    container_name: redis
     ports:
       - 6379:6379
     volumes:
       - redis_data:/data
   camellia:
     image: camellia
+    container_name: camellia
     build:
       context: ~/projects/flowers
       dockerfile: camellia/Dockerfile
@@ -34,6 +37,7 @@ services:
       - author=phamlequang
   lotus:
     image: lotus
+    container_name: lotus
     build:
       context: ~/projects/flowers
       dockerfile: lotus/Dockerfile
