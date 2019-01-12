@@ -14,7 +14,6 @@ Another goal of turtle is to still allow user to run any normal shell commands w
 
 ## Backlogs
 
-- Ability to define arbitrary patterns for path replacement.
 - Better UI for status command.
 - Load config from different file for different projects.
 - Ability to define arbitrary command shortcuts.
