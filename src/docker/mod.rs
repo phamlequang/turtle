@@ -153,6 +153,10 @@ fn compose_service(
     lines.push(format!("  {}:", name));
     lines.push(format!("    image: {}", docker.image));
 
+    if let Some(container_name) = &docker.container_name {
+        lines.push(format!("    container_name: {}", container_name));
+    }
+
     if let Some(build) = &docker.build {
         lines.push(format!("    build:"));
 
@@ -173,7 +177,8 @@ fn compose_service(
     }
 
     if let Some(working_dir) = &docker.working_dir {
-        lines.push(format!("    working_dir: {}", working_dir));
+        let dir = config.fill_patterns(working_dir, service);
+        lines.push(format!("    working_dir: {}", dir));
     }
 
     if let Some(volumes) = &docker.volumes {
@@ -212,7 +217,8 @@ fn compose_service(
     }
 
     if let Some(command) = &docker.command {
-        lines.push(format!("    command: {}", command));
+        let cmd = config.fill_patterns(command, service);
+        lines.push(format!("    command: {}", cmd));
     }
 
     if let Some(labels) = &docker.labels {

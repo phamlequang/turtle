@@ -2,6 +2,7 @@ version: '3'
 services:
   postgres:
     image: postgres:latest
+    container_name: postgres
     ports:
       - 5432:5432
     volumes:
@@ -10,20 +11,22 @@ services:
       - POSTGRES_PASSWORD=secret
   redis:
     image: redis:latest
+    container_name: redis
     ports:
       - 6379:6379
     volumes:
       - redis_data:/data
   camellia:
     image: camellia
+    container_name: camellia
     build:
       context: ~/projects/flowers
       dockerfile: camellia/Dockerfile
     ports:
       - 8000:8000
-    working_dir: /app/camellia
+    working_dir: /rust/app/flowers/camellia
     volumes:
-      - ~/projects/flowers:/app
+      - ~/projects/flowers:/rust/app/flowers
     env_file:
       - ~/projects/flowers/camellia/.env
     depends_on:
@@ -33,17 +36,24 @@ services:
     labels:
       - author=phamlequang
   lotus:
-    image: rust:latest
+    image: lotus
+    container_name: lotus
+    build:
+      context: ~/projects/flowers
+      dockerfile: lotus/Dockerfile
     ports:
       - 8001:8001
-    working_dir: /app
+    working_dir: /rust/app/flowers/lotus
     volumes:
-      - ~/projects/flowers/lotus:/app
+      - ~/projects/flowers:/rust/app/flowers
     env_file:
       - ~/projects/flowers/lotus/.env
     depends_on:
       - postgres
-    command: cargo run
+      - redis
+    command: ../wait-for-it.sh postgres:5432 -- cargo run
+    labels:
+      - author=phamlequang
 volumes:
   postgres_data:
     external: false
