@@ -46,6 +46,8 @@ Command | Description | Example
 `logs {service}`|Show and follow logs of a specific service.|`➜ logs lotus`
 `build [service1] [service2]`|Build some services using the command specified in the config file.|`➜ build camellia lotus`
 `test [service1] [service2]`|Test some services using the command specified in the config file.|`➜ test camellia lotus`
+`sh {service}`|Access /bin/sh shell of a specific service.|`➜ sh lotus`
+`bash {service}`|Access /bin/bash shell of a specific service.|`➜ bash lotus`
 
 ## Backlogs
 
