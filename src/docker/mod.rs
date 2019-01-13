@@ -1,11 +1,13 @@
 #[cfg(test)]
 mod test;
 
+use std::cmp;
 use std::fs;
 use std::io;
 
 use super::cmd::Command;
 use super::config::{Config, Docker, Machine, Service};
+use super::decr;
 
 pub fn create_machine(machine: &Machine) -> Command {
     let raw = format!(
@@ -63,8 +65,69 @@ pub fn stop_services(service_names: &[&str], project: &str, compose_file: &str) 
 }
 
 pub fn status_services(project: &str, compose_file: &str) -> Command {
-    let action = "ps";
-    return compose_command(&action, project, compose_file);
+    let fmt = "{{index .Config.Labels \"com.docker.compose.service\"}}||\
+               {{.State.Status}}||\
+               {{.Config.Image}}||\
+               {{.State.StartedAt}}";
+    let ps = format!("docker-compose -p {} -f {} ps -q", project, compose_file);
+    let raw = format!("docker inspect --format='{}' $({} | xargs)", fmt, ps);
+
+    let exec = |stdout: &str| -> (bool, String) {
+        let mut lines: Vec<String> = Vec::new();
+
+        let (mut ws, mut wt, mut wi) = (8, 8, 8);
+        for line in stdout.lines() {
+            let tokens: Vec<_> = line.split("||").collect();
+            if tokens.len() != 4 {
+                return (false, format!("unexpected output line: {}", line));
+            }
+
+            ws = cmp::max(ws, tokens[0].len());
+            wt = cmp::max(wt, tokens[1].len() + 2);
+            wi = cmp::max(wi, tokens[2].len());
+        }
+
+        let header = format!(
+            "{:ws$}\t{:wt$}\t{:wi$}\t{}",
+            "SERVICE",
+            "STATUS",
+            "IMAGE",
+            "CREATED AT",
+            ws = ws,
+            wt = wt,
+            wi = wi,
+        );
+        lines.push(header);
+
+        for line in stdout.lines() {
+            let tokens: Vec<_> = line.split("||").collect();
+
+            let mark = match tokens[1] {
+                "running" => decr::green("✓"),
+                "paused" => decr::yellow("-"),
+                _ => decr::red("𐄂"),
+            };
+
+            let row = format!(
+                "{:ws$}\t{:wt$}\t{:wi$}\t{}",
+                tokens[0],
+                format!("{} {}", mark, tokens[1]),
+                tokens[2],
+                tokens[3],
+                ws = ws,
+                wt = wt,
+                wi = wi,
+            );
+            lines.push(row);
+        }
+
+        let output = lines.join("\n");
+        println!("{}", output);
+
+        return (true, output);
+    };
+
+    return Command::new(&raw, "", false, true, true, Some(Box::new(exec)));
 }
 
 pub fn compose_exec(service: &str, cmd: &str, project: &str, compose_file: &str) -> Command {

@@ -101,8 +101,38 @@ fn test_stop_services() {
 #[test]
 fn test_status_services() {
     let command = status_services("forest", "compose.yml");
-    let expect = Command::basic_show("docker-compose -p forest -f compose.yml ps");
-    assert_eq!(command, expect);
+
+    let raw = "docker inspect --format='\
+               {{index .Config.Labels \"com.docker.compose.service\"}}||\
+               {{.State.Status}}||\
+               {{.Config.Image}}||\
+               {{.State.StartedAt}}' \
+               $(docker-compose -p forest -f compose.yml ps -q | xargs)";
+
+    assert_eq!(command.raw, raw);
+    assert!(command.dir.is_empty());
+    assert!(!command.show);
+    assert!(command.silent);
+    assert!(command.pipe);
+    assert!(command.then.is_some());
+
+    let exec = command.then.unwrap();
+    let stdout = "camellia||running||camellia||2019-01-13T12:08:02.0454347Z\n\
+                  lotus||exited||lotus||2019-01-13T12:08:01.9303336Z\n\
+                  redis||paused||redis:latest||	2019-01-13T12:08:00.9464002Z\n";
+    let expect = format!(
+        "SERVICE \tSTATUS   \tIMAGE       \tCREATED AT\n\
+         camellia\t{} running\tcamellia    \t2019-01-13T12:08:02.0454347Z\n\
+         lotus   \t{} exited\tlotus       \t2019-01-13T12:08:01.9303336Z\n\
+         redis   \t{} paused\tredis:latest\t\t2019-01-13T12:08:00.9464002Z",
+        decr::green("✓"),
+        decr::red("𐄂"),
+        decr::yellow("-"),
+    );
+
+    let (success, output) = exec(stdout);
+    assert!(success);
+    assert_eq!(output, expect);
 }
 
 #[test]
