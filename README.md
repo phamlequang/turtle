@@ -44,9 +44,12 @@ Command | Description | Example
 `restart`|Restart all services using the generated docker-compose file.|`➜ restart`
 `restart [service1] [service2] ...`|Restart a list of space-separated services.|`➜ restart redis lotus`
 `logs {service}`|Show and follow logs of a specific service.|`➜ logs lotus`
+`build [service1] [service2]`|Build some services using the command specified in the config file.|`➜ build camellia lotus`
+`test [service1] [service2]`|Test some services using the command specified in the config file.|`➜ test camellia lotus`
 
 ## Backlogs
 
+- Change working directory back to previous one after running some commands.
 - Setup DNS host alias to connect to services by domain.
 - Load config from different file for different projects.
 - Ability to define arbitrary command shortcuts.
