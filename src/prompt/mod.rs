@@ -71,8 +71,8 @@ impl Prompt {
         let dir = util::current_directory_shortened(CURRENT_DIR_MAX_LENGTH);
         let branch = shell::current_git_branch();
 
-        let dir = format!("{}{}➜ {}", style::Bold, color::Fg(Cyan), dir);
-        let prompt = format!("{} ~ {}", color::Fg(Yellow), style::Reset);
+        let dir = format!("{}{} ~ {}", style::Bold, color::Fg(Cyan), dir);
+        let prompt = format!("{} ➜ {}", color::Fg(Yellow), style::Reset);
 
         if branch.is_empty() {
             return format!("{}{}", dir, prompt);

@@ -12,6 +12,22 @@ Another goal of turtle is to still allow user to run any normal shell commands w
 
 ## Commands
 
+Command | Description | Example
+--------|-------------|--------
+`quit`|Exit turtle shell|`➜ quit`
+`exit`|Exit turtle shell|`➜ exit`
+`cd {path}`|Change current working directory|`➜ cd ~/projects/flowers/camellia/`
+`goto {repository}`|Change current working directory to repository directory|`➜ goto flowers`
+`goto {service}`|Change current working directory to service directory|`➜ goto lotus`
+`clone`|Clone all repositories|`➜ clone`
+`clone [repository1] [repository2] ...`|Clone a list of space-separated repositories|`➜ clone flowers trees`
+`pull`|Git pull latest code on current branch of current working directory's repository|`➜ pull`
+`pull [repository1] [repository2] ...`|Git pull latest code on current branch of the listed space-separated repositories]|`➜ pull flowers trees`
+`pull [service1] [service2] ...`|Git pull latest code on current branch of the repositories of the listed space-separated services]|`➜ pull camellia lotus`
+`push`|Git push latest code on current branch of current working directory's repository|`➜ push`
+`push [repository1] [repository2] ...`|Git push latest code on current branch of the listed space-separated repositories]|`➜ push flowers trees`
+`push [service1] [service2] ...`|Git push latest code on current branch of the repositories of the listed space-separated services]|`➜ push camellia lotus`
+
 ## Backlogs
 
 - Setup DNS host alias to connect to services by domain.
@@ -19,3 +35,7 @@ Another goal of turtle is to still allow user to run any normal shell commands w
 - Ability to define arbitrary command shortcuts.
 - Add commands to work with kubernetes.
 - Add commands to work with aws or localstack.
+
+## Copyright
+
+- Turtle project avatar is created by [FreeVector.com](https://www.freevector.com/free-cartoon-turtle-vector-18447)
