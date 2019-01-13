@@ -14,7 +14,7 @@ Another goal of turtle is to still allow user to run any normal shell commands w
 
 The following list contains supported shortcut commands of current turtle version. All example commands are using the [sample config file](https://gitlab.com/phamlequang/turtle/blob/master/etc/config.toml) in `etc` folder.
 
-Command | Description | Example
+**Command** | **Description** | **Example**
 --------|-------------|--------
 `quit`|Exit turtle shell.|`➜ quit`
 `exit`|Exit turtle shell.|`➜ exit`
@@ -44,8 +44,8 @@ Command | Description | Example
 `restart`|Restart all services using the generated docker-compose file.|`➜ restart`
 `restart [service1] [service2] ...`|Restart a list of space-separated services.|`➜ restart redis lotus`
 `logs {service}`|Show and follow logs of a specific service.|`➜ logs lotus`
-`build [service1] [service2]`|Build some services using the command specified in the config file.|`➜ build camellia lotus`
-`test [service1] [service2]`|Test some services using the command specified in the config file.|`➜ test camellia lotus`
+`build [service1] [service2] ...`|Build some services using the command specified in the config file.|`➜ build camellia lotus`
+`test [service1] [service2] ...`|Test some services using the command specified in the config file.|`➜ test camellia lotus`
 `sh {service}`|Access /bin/sh shell of a specific service.|`➜ sh lotus`
 `bash {service}`|Access /bin/bash shell of a specific service.|`➜ bash lotus`
 
