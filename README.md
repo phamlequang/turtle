@@ -12,24 +12,46 @@ Another goal of turtle is to still allow user to run any normal shell commands w
 
 ## Commands
 
-Command | Description | Example
+The following list contains supported shortcut commands of current turtle version. All example commands are using the [sample config file](https://gitlab.com/phamlequang/turtle/blob/master/etc/config.toml) in `etc` folder.
+
+**Command** | **Description** | **Example**
 --------|-------------|--------
-`quit`|Exit turtle shell|`➜ quit`
-`exit`|Exit turtle shell|`➜ exit`
-`cd {path}`|Change current working directory|`➜ cd ~/projects/flowers/camellia/`
-`goto {repository}`|Change current working directory to repository directory|`➜ goto flowers`
-`goto {service}`|Change current working directory to service directory|`➜ goto lotus`
-`clone`|Clone all repositories|`➜ clone`
-`clone [repository1] [repository2] ...`|Clone a list of space-separated repositories|`➜ clone flowers trees`
-`pull`|Git pull latest code on current branch of current working directory's repository|`➜ pull`
-`pull [repository1] [repository2] ...`|Git pull latest code on current branch of the listed space-separated repositories]|`➜ pull flowers trees`
-`pull [service1] [service2] ...`|Git pull latest code on current branch of the repositories of the listed space-separated services]|`➜ pull camellia lotus`
-`push`|Git push latest code on current branch of current working directory's repository|`➜ push`
-`push [repository1] [repository2] ...`|Git push latest code on current branch of the listed space-separated repositories]|`➜ push flowers trees`
-`push [service1] [service2] ...`|Git push latest code on current branch of the repositories of the listed space-separated services]|`➜ push camellia lotus`
+`quit`|Exit turtle shell.|`➜ quit`
+`exit`|Exit turtle shell.|`➜ exit`
+`cd {path}`|Change current working directory.|`➜ cd ~/projects/flowers/camellia/`
+`goto {repository}`|Change current working directory to repository directory.|`➜ goto flowers`
+`goto {service}`|Change current working directory to service directory.|`➜ goto lotus`
+`clone`|Clone all repositories.|`➜ clone`
+`clone [repository1] [repository2] ...`|Clone a list of space-separated repositories.|`➜ clone flowers trees`
+`pull`|Git pull latest code on current branch of current working directory's repository.|`➜ pull`
+`pull [repository1] [repository2] ...`|Git pull latest code on current branch of the listed space-separated repositories.|`➜ pull flowers trees`
+`pull [service1] [service2] ...`|Git pull latest code on current branch of the repositories of the listed space-separated services.|`➜ pull camellia lotus`
+`push`|Git push latest code on current branch of current working directory's repository.|`➜ push`
+`push [repository1] [repository2] ...`|Git push latest code on current branch of the listed space-separated repositories.|`➜ push flowers trees`
+`push [service1] [service2] ...`|Git push latest code on current branch of the repositories of the listed space-separated services.|`➜ push camellia lotus`
+`dkmc {command}`|Run any docker-machine commands.|`➜ dkmc ls`
+`dkmc create`|Create the docker machine specified by config file.|`➜ dkmc create`
+`dkmc start`|Start docker machine.|`➜ dkmc start`
+`dkmc upcerts`|Update/regenerate docker machine's certificates.|`➜ dkmc upcerts`
+`dkmc load`|Load docker machine's environments.|`➜ dkmc load`
+`dkcp {command}`|Run any docker-compose commands.|`➜ dkcp up`
+`dk {command}`|Run any docker commands.|`➜ dk ps`
+`use {group}`|Generate a new docker-compose file for a group of services.|`➜ use all`
+`start`|Start all services using the generated docker-compose file.|`➜ start`
+`status`|Show current status of all services.|`➜ status`
+`stop`|Stop all services using the generated docker-compose file.|`➜ stop`
+`stop [service1] [service2] ...`|Stop a list of space-separated services.|`➜ stop redis lotus`
+`restart`|Restart all services using the generated docker-compose file.|`➜ restart`
+`restart [service1] [service2] ...`|Restart a list of space-separated services.|`➜ restart redis lotus`
+`logs {service}`|Show and follow logs of a specific service.|`➜ logs lotus`
+`build [service1] [service2] ...`|Build some services using the command specified in the config file.|`➜ build camellia lotus`
+`test [service1] [service2] ...`|Test some services using the command specified in the config file.|`➜ test camellia lotus`
+`sh {service}`|Access /bin/sh shell of a specific service.|`➜ sh lotus`
+`bash {service}`|Access /bin/bash shell of a specific service.|`➜ bash lotus`
 
 ## Backlogs
 
+- Change working directory back to previous one after running some commands.
 - Setup DNS host alias to connect to services by domain.
 - Load config from different file for different projects.
 - Ability to define arbitrary command shortcuts.

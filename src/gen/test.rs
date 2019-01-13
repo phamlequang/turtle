@@ -175,7 +175,7 @@ fn test_generate_instruction_machine_create() {
     let config = sample_config();
 
     let mut generator = Generator::new(CONFIG_DIR);
-    let instruction = generator.generate_instruction("machine create");
+    let instruction = generator.generate_instruction("dkmc create");
 
     let machine = &config.machine.unwrap();
     let command = docker::create_machine(machine);
@@ -189,7 +189,7 @@ fn test_generate_instruction_machine_remove() {
     let config = sample_config();
 
     let mut generator = Generator::new(CONFIG_DIR);
-    let instruction = generator.generate_instruction("machine rm");
+    let instruction = generator.generate_instruction("dkmc rm");
 
     let machine = &config.machine.unwrap();
     let command = docker::machine_command("rm", machine);
@@ -203,7 +203,7 @@ fn test_generate_instruction_machine_update_certificates() {
     let config = sample_config();
 
     let mut generator = Generator::new(CONFIG_DIR);
-    let instruction = generator.generate_instruction("machine upcerts");
+    let instruction = generator.generate_instruction("dkmc upcerts");
 
     let machine = &config.machine.unwrap();
     let command = docker::update_certificates(machine);
@@ -217,7 +217,7 @@ fn test_generate_instruction_machine_load_environment() {
     let config = sample_config();
 
     let mut generator = Generator::new(CONFIG_DIR);
-    let instruction = generator.generate_instruction("machine load");
+    let instruction = generator.generate_instruction("dkmc load");
 
     let machine = &config.machine.unwrap();
     let command = docker::load_environments(machine);
@@ -229,7 +229,7 @@ fn test_generate_instruction_machine_load_environment() {
 #[test]
 fn test_generate_instruction_docker_list_containers() {
     let mut generator = Generator::new(CONFIG_DIR);
-    let instruction = generator.generate_instruction("docker ps");
+    let instruction = generator.generate_instruction("dk ps");
 
     let command = docker::list_containers();
     let expect = Instruction::basic(vec![command]);
@@ -240,7 +240,7 @@ fn test_generate_instruction_docker_list_containers() {
 #[test]
 fn test_generate_instruction_docker_list_images() {
     let mut generator = Generator::new(CONFIG_DIR);
-    let instruction = generator.generate_instruction("docker images");
+    let instruction = generator.generate_instruction("dk images");
 
     let command = docker::docker_command("images");
     let expect = Instruction::basic(vec![command]);
@@ -253,7 +253,7 @@ fn test_generate_instruction_docker_compose() {
     let config = sample_config();
 
     let mut generator = Generator::new(CONFIG_DIR);
-    let instruction = generator.generate_instruction("compose up -d");
+    let instruction = generator.generate_instruction("dkcp up -d");
 
     let command = docker::compose_command("up -d", &config.project, &generator.compose_file);
     let expect = Instruction::basic(vec![command]);
