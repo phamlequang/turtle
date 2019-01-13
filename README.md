@@ -18,40 +18,45 @@ The following list contains supported shortcut commands of current turtle versio
 --------|-------------|--------
 `quit`|Exit turtle shell.|`➜ quit`
 `exit`|Exit turtle shell.|`➜ exit`
-`cd {path}`|Change current working directory.|`➜ cd ~/projects/flowers/camellia/`
-`goto {repository}`|Change current working directory to repository directory.|`➜ goto flowers`
-`goto {service}`|Change current working directory to service directory.|`➜ goto lotus`
-`clone`|Clone all repositories.|`➜ clone`
-`clone [repository1] [repository2] ...`|Clone a list of space-separated repositories.|`➜ clone flowers trees`
-`pull`|Git pull latest code on current branch of current working directory's repository.|`➜ pull`
-`pull [repository1] [repository2] ...`|Git pull latest code on current branch of the listed space-separated repositories.|`➜ pull flowers trees`
-`pull [service1] [service2] ...`|Git pull latest code on current branch of the repositories of the listed space-separated services.|`➜ pull camellia lotus`
-`push`|Git push latest code on current branch of current working directory's repository.|`➜ push`
-`push [repository1] [repository2] ...`|Git push latest code on current branch of the listed space-separated repositories.|`➜ push flowers trees`
-`push [service1] [service2] ...`|Git push latest code on current branch of the repositories of the listed space-separated services.|`➜ push camellia lotus`
+`cd {path}`|Change current working directory to the provided path.|`➜ cd ~/projects/flowers/camellia/`
+`goto {repository}`|Change current working directory to the provided repository's directory.|`➜ goto flowers`
+`goto {service}`|Change current working directory to the provided service's directory.|`➜ goto lotus`
+`clone`|Clone all repositories listed in the config file.|`➜ clone`
+`clone [repository1] [repository2] ...`|Clone a list of provided repositories.|`➜ clone flowers trees`
+`pull`|Git pull latest codes on current branch of the repository that contains current working directory.|`➜ pull`
+`pull [repository1] [repository2] ...`|Git pull latest codes on current branch of the provided repositories.|`➜ pull flowers trees`
+`pull [service1] [service2] ...`|Git pull latest codes on current branch of the provided services' repositories.|`➜ pull camellia lotus`
+`push`|Git push latest codes on current branch of the repository that contains current working directory.|`➜ push`
+`push [repository1] [repository2] ...`|Git push latest codes on current branch of the provided repositories.|`➜ push flowers trees`
+`push [service1] [service2] ...`|Git push latest codes on current branch of the provided services' repositories.|`➜ push camellia lotus`
 `dkmc {command}`|Run any docker-machine commands.|`➜ dkmc ls`
-`dkmc create`|Create the docker machine specified by config file.|`➜ dkmc create`
-`dkmc start`|Start docker machine.|`➜ dkmc start`
-`dkmc upcerts`|Update/regenerate docker machine's certificates.|`➜ dkmc upcerts`
-`dkmc load`|Load docker machine's environments.|`➜ dkmc load`
+`dkmc create`|Create a new docker machine as described in the config file.|`➜ dkmc create`
+`dkmc start`|Start the created docker machine.|`➜ dkmc start`
+`dkmc upcerts`|Update or regenerate the created docker machine's certificates.|`➜ dkmc upcerts`
+`dkmc load`|Load the created docker machine's environments.|`➜ dkmc load`
 `dkcp {command}`|Run any docker-compose commands.|`➜ dkcp up`
 `dk {command}`|Run any docker commands.|`➜ dk ps`
-`use {group}`|Generate a new docker-compose file for a group of services.|`➜ use all`
+`use {group}`|Generate or rewrite the working docker-compose file for a group of services.|`➜ use all`
 `start`|Start all services using the generated docker-compose file.|`➜ start`
 `status`|Show current status of all services.|`➜ status`
 `stop`|Stop all services using the generated docker-compose file.|`➜ stop`
-`stop [service1] [service2] ...`|Stop a list of space-separated services.|`➜ stop redis lotus`
+`stop [service1] [service2] ...`|Stop the provided services.|`➜ stop redis lotus`
 `restart`|Restart all services using the generated docker-compose file.|`➜ restart`
-`restart [service1] [service2] ...`|Restart a list of space-separated services.|`➜ restart redis lotus`
+`restart [service1] [service2] ...`|Restart the provided services.|`➜ restart redis lotus`
 `logs {service}`|Show and follow logs of a specific service.|`➜ logs lotus`
-`build [service1] [service2] ...`|Build some services using the command specified in the config file.|`➜ build camellia lotus`
-`test [service1] [service2] ...`|Test some services using the command specified in the config file.|`➜ test camellia lotus`
-`sh {service}`|Access /bin/sh shell of a specific service.|`➜ sh lotus`
-`bash {service}`|Access /bin/bash shell of a specific service.|`➜ bash lotus`
+`build`|Build all services using the command specified in the config file.|`➜ build`
+`build [service1] [service2] ...`|Build the provided services.|`➜ build camellia lotus`
+`build [repository1] [repository2] ...`|Build services in the provided repositories.|`➜ build flowers`
+`build [group1] [group2] ...`|Build services in the provided groups.|`➜ build svc`
+`test`|Test all services using the command specified in the config file.|`➜ test camellia lotus`
+`test [service1] [service2] ...`|Test the provided services.|`➜ test camellia lotus`
+`test [repository1] [repository2] ...`|Test services in the provided repositories.|`➜ test flowers`
+`test [group1] [group2] ...`|Test services in the provided groups.|`➜ test svc`
+`sh {service}`|Access `/bin/sh` shell of a specific service.|`➜ sh lotus`
+`bash {service}`|Access `/bin/bash` shell of a specific service.|`➜ bash lotus`
 
 ## Backlogs
 
-- Change working directory back to previous one after running some commands.
 - Setup DNS host alias to connect to services by domain.
 - Load config from different file for different projects.
 - Ability to define arbitrary command shortcuts.

@@ -21,7 +21,7 @@ pub fn do_on_current_branch(repo_dir: &str, action: &str) -> Command {
     let branch = "git branch | grep -m1 \\* | grep -v \"master\" | \
                   grep -v \"HEAD detached\" | cut -c 3-";
     let raw = format!("git {} origin $({})", action, branch);
-    return Command::new(&raw, repo_dir, true, false, false, None);
+    return Command::new(&raw, repo_dir, true, false, false, None, true);
 }
 
 pub fn current_branch() -> Command {
@@ -36,5 +36,5 @@ pub fn current_branch() -> Command {
         return (true, String::new());
     };
 
-    return Command::new(raw, "", false, true, true, Some(Box::new(exec)));
+    return Command::new(raw, "", false, true, true, Some(Box::new(exec)), true);
 }

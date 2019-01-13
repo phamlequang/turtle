@@ -13,6 +13,7 @@ pub struct Command {
     pub silent: bool,
     pub pipe: bool,
     pub then: Option<ExecFn>,
+    pub back: bool,
 }
 
 impl Command {
@@ -23,6 +24,7 @@ impl Command {
         silent: bool,
         pipe: bool,
         then: Option<ExecFn>,
+        back: bool,
     ) -> Self {
         return Self {
             raw: String::from(raw),
@@ -31,15 +33,16 @@ impl Command {
             silent: silent,
             pipe: pipe,
             then: then,
+            back: back,
         };
     }
 
     pub fn basic_hide(raw: &str) -> Self {
-        return Self::new(raw, "", false, false, false, None);
+        return Self::new(raw, "", false, false, false, None, true);
     }
 
     pub fn basic_show(raw: &str) -> Self {
-        return Self::new(raw, "", true, false, false, None);
+        return Self::new(raw, "", true, false, false, None, true);
     }
 
     pub fn echo(message: &str) -> Self {
@@ -56,6 +59,7 @@ impl PartialEq for Command {
             || self.show != other.show
             || self.silent != other.silent
             || self.pipe != other.pipe
+            || self.back != other.back
         {
             return false;
         }
