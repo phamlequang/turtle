@@ -26,14 +26,23 @@ pub fn current_git_branch() -> String {
 // Execute command as a child process and wait for it to finish,
 // return true and output string if success
 pub fn run_command(command: &Command) -> (bool, String) {
+    let back_dir = util::current_directory();
     if !change_directory(&command.dir, command.show) {
         return (false, String::new());
     }
 
-    let (success, stdout) = run_raw_command(command);
+    let (mut success, mut stdout) = run_raw_command(command);
     if success {
         if let Some(then) = &command.then {
-            return then(&stdout);
+            let (ok, out) = then(&stdout);
+            success = ok;
+            stdout = out;
+        }
+    }
+
+    if command.back && !command.dir.is_empty() {
+        if !change_directory(&back_dir, command.show) {
+            return (false, String::new());
         }
     }
 
