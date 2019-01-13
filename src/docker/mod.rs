@@ -127,7 +127,7 @@ pub fn status_services(project: &str, compose_file: &str) -> Command {
         return (true, output);
     };
 
-    return Command::new(&raw, "", false, true, true, Some(Box::new(exec)));
+    return Command::new(&raw, "", false, true, true, Some(Box::new(exec)), true);
 }
 
 pub fn compose_exec(service: &str, cmd: &str, project: &str, compose_file: &str) -> Command {

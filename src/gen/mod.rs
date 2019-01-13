@@ -94,7 +94,7 @@ impl Generator {
 
     fn change_directory(&self, args: &[&str]) -> Instruction {
         if let Some(dir) = args.first() {
-            let command = Command::new("", &dir, false, false, false, None);
+            let command = Command::new("", &dir, false, false, false, None, false);
             return Instruction::new(vec![command], false);
         }
         return Instruction::skip();
@@ -314,7 +314,7 @@ impl Generator {
                             continue;
                         }
 
-                        let command = Command::new(raw, &dir, true, false, false, None);
+                        let command = Command::new(raw, &dir, true, false, false, None, true);
                         commands.push(command);
                     }
                 }

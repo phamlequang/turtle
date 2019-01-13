@@ -12,12 +12,8 @@ fn test_clone_repository() {
     let command = clone_repository(&repository);
     let raw = format!("git clone {} {}", repository.remote, repository.local);
 
-    assert_eq!(command.raw, raw);
-    assert_eq!(command.dir, "");
-    assert!(command.show);
-    assert!(!command.silent);
-    assert!(!command.pipe);
-    assert!(command.then.is_none());
+    let expect = Command::new(&raw, "", true, false, false, None, true);
+    assert_eq!(command, expect);
 }
 
 #[test]
@@ -27,12 +23,8 @@ fn test_pull_repository() {
                grep -v \"master\" | grep -v \"HEAD detached\" | cut -c 3-)";
 
     let command = pull_repository(repo_dir);
-    assert_eq!(command.raw, raw);
-    assert_eq!(command.dir, repo_dir);
-    assert!(command.show);
-    assert!(!command.silent);
-    assert!(!command.pipe);
-    assert!(command.then.is_none());
+    let expect = Command::new(&raw, repo_dir, true, false, false, None, true);
+    assert_eq!(command, expect);
 }
 
 #[test]
@@ -42,12 +34,8 @@ fn test_push_repository() {
                grep -v \"master\" | grep -v \"HEAD detached\" | cut -c 3-)";
 
     let command = push_repository(repo_dir);
-    assert_eq!(command.raw, raw);
-    assert_eq!(command.dir, repo_dir);
-    assert!(command.show);
-    assert!(!command.silent);
-    assert!(!command.pipe);
-    assert!(command.then.is_none());
+    let expect = Command::new(&raw, repo_dir, true, false, false, None, true);
+    assert_eq!(command, expect);
 }
 
 #[test]
@@ -60,6 +48,7 @@ fn test_current_branch() {
     assert!(command.silent);
     assert!(command.pipe);
     assert!(command.then.is_some());
+    assert!(command.back);
 
     let exec = command.then.unwrap();
     let (success, branch) = exec("master\n* feature\n");

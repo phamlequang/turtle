@@ -31,7 +31,7 @@ fn test_generate_instruction_change_directory() {
     let mut generator = Generator::new(CONFIG_DIR);
 
     let instruction = generator.generate_instruction("cd ..");
-    let command = Command::new("", "..", false, false, false, None);
+    let command = Command::new("", "..", false, false, false, None, false);
 
     let expect = Instruction::basic(vec![command]);
     assert_eq!(instruction, expect);
@@ -43,7 +43,7 @@ fn test_generate_instruction_goto_service() {
 
     let instruction = generator.generate_instruction("goto camellia");
     let dir = "~/projects/flowers/camellia";
-    let command = Command::new("", dir, false, false, false, None);
+    let command = Command::new("", dir, false, false, false, None, false);
 
     let expect = Instruction::basic(vec![command]);
     assert_eq!(instruction, expect);
@@ -55,7 +55,7 @@ fn test_generate_instruction_goto_repository() {
 
     let instruction = generator.generate_instruction("goto flowers");
     let dir = "~/projects/flowers";
-    let command = Command::new("", dir, false, false, false, None);
+    let command = Command::new("", dir, false, false, false, None, false);
 
     let expect = Instruction::basic(vec![command]);
     assert_eq!(instruction, expect);
@@ -462,7 +462,7 @@ fn test_generate_instruction_build_services() {
         assert!(dir.is_some());
         let dir = dir.unwrap();
 
-        let expect = Command::new("cargo build", &dir, true, false, false, None);
+        let expect = Command::new("cargo build", &dir, true, false, false, None, true);
         assert_eq!(&commands[i], &expect);
     }
 }
@@ -484,7 +484,7 @@ fn test_generate_instruction_test_services() {
         assert!(dir.is_some());
         let dir = dir.unwrap();
 
-        let expect = Command::new("cargo test", &dir, true, false, false, None);
+        let expect = Command::new("cargo test", &dir, true, false, false, None, true);
         assert_eq!(&commands[i], &expect);
     }
 }

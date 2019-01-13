@@ -93,7 +93,7 @@ pub fn run_instruction(instruction: &Instruction) -> bool {
     return true;
 }
 
-fn change_directory(dir: &str, show: bool) -> bool {
+pub fn change_directory(dir: &str, show: bool) -> bool {
     if !dir.is_empty() {
         if show {
             println!("{}$ cd {}{}", color::Fg(Magenta), dir, style::Reset);

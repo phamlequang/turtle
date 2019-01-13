@@ -115,6 +115,7 @@ fn test_status_services() {
     assert!(command.silent);
     assert!(command.pipe);
     assert!(command.then.is_some());
+    assert!(command.back);
 
     let exec = command.then.unwrap();
     let stdout = "camellia||running||camellia||2019-01-13T12:08:02.0454347Z\n\

@@ -7,7 +7,16 @@ fn test_run_command_pipe() {
         return (true, s);
     };
 
-    let command = Command::new("echo julia", "", true, false, true, Some(Box::new(exec)));
+    let command = Command::new(
+        "echo julia",
+        "",
+        true,
+        false,
+        true,
+        Some(Box::new(exec)),
+        true,
+    );
+
     let (success, output) = run_command(&command);
     assert!(success);
     assert_eq!(output, "hello julia\n");
@@ -20,7 +29,16 @@ fn test_run_command_no_pipe() {
         return (true, s);
     };
 
-    let command = Command::new("echo ruby", "", true, false, false, Some(Box::new(exec)));
+    let command = Command::new(
+        "echo ruby",
+        "",
+        true,
+        false,
+        false,
+        Some(Box::new(exec)),
+        true,
+    );
+
     let (success, output) = run_command(&command);
     assert!(success);
     assert_eq!(output, "name = []");
