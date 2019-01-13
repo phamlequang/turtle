@@ -1,5 +1,6 @@
 mod cmd;
 mod config;
+mod decr;
 mod docker;
 mod gen;
 mod git;
