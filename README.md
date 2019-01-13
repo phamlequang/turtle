@@ -27,6 +27,13 @@ Command | Description | Example
 `push`|Git push latest code on current branch of current working directory's repository|`➜ push`
 `push [repository1] [repository2] ...`|Git push latest code on current branch of the listed space-separated repositories]|`➜ push flowers trees`
 `push [service1] [service2] ...`|Git push latest code on current branch of the repositories of the listed space-separated services]|`➜ push camellia lotus`
+`dkmc {command}`|Run any docker-machine commands|`➜ dkmc ls`
+`dkmc create`|Create the docker machine specified by config file|`➜ dkmc create`
+`dkmc start`|Start docker machine|`➜ dkmc start`
+`dkmc upcerts`|Update/regenerate docker machine's certificates|`➜ dkmc upcerts`
+`dkmc load`|Load docker machine's environments|`➜ dkmc load`
+`dkcp {command}`|Run any docker-compose commands|`dkcp up`
+`dk {command}`|Run any docker commands|`dk ps`
 
 ## Backlogs
 
