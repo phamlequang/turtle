@@ -14,7 +14,6 @@ Another goal of turtle is to still allow user to run any normal shell commands w
 
 ## Backlogs
 
-- Better UI for status command.
 - Setup DNS host alias to connect to services by domain.
 - Load config from different file for different projects.
 - Ability to define arbitrary command shortcuts.
