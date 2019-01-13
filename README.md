@@ -12,6 +12,8 @@ Another goal of turtle is to still allow user to run any normal shell commands w
 
 ## Commands
 
+The following list contains supported shortcut commands of current turtle version. All example commands are using the [sample config file](https://gitlab.com/phamlequang/turtle/blob/master/etc/config.toml) in `etc` folder.
+
 Command | Description | Example
 --------|-------------|--------
 `quit`|Exit turtle shell|`➜ quit`
@@ -32,8 +34,9 @@ Command | Description | Example
 `dkmc start`|Start docker machine|`➜ dkmc start`
 `dkmc upcerts`|Update/regenerate docker machine's certificates|`➜ dkmc upcerts`
 `dkmc load`|Load docker machine's environments|`➜ dkmc load`
-`dkcp {command}`|Run any docker-compose commands|`dkcp up`
-`dk {command}`|Run any docker commands|`dk ps`
+`dkcp {command}`|Run any docker-compose commands|`➜ dkcp up`
+`dk {command}`|Run any docker commands|`➜ dk ps`
+`logs {service}`|Show and follow logs of a specific service|`➜ logs lotus`
 
 ## Backlogs
 
