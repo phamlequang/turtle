@@ -8,7 +8,13 @@ One goal of turtle is to provide a set of simple commands to setup, run and mana
 
 Another goal of turtle is to still allow user to run any normal shell commands when they're inside its shell. It just helps speed up by providing more shortcuts. As of now, some shortcut commands to work with git and docker are supported, kubernetes are comming up. In the future, user will be able to easily define their own shortcut commands.
 
-## Setup
+## Installation
+
+- To be filled ...
+
+## Configuration
+
+- To be filled ...
 
 ## Commands
 
@@ -58,7 +64,6 @@ The following list contains all supported shortcut commands of the current turtl
 ## Backlogs
 
 - Setup DNS host alias to connect to services by domain.
-- Load config from different file for different projects.
 - Ability to define arbitrary command shortcuts.
 - Add commands to work with kubernetes.
 - Add commands to work with aws or localstack.
