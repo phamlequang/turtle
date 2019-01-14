@@ -47,14 +47,14 @@ impl Generator {
             match Config::load(&config_file) {
                 Ok(cfg) => config = cfg,
                 Err(err) => {
-                    let msg = format!("--> cannot load config file [ {} ]: {}", config_file, err);
+                    let msg = format!("cannot load config file [ {} ]: {}", config_file, err);
                     return Err(msg);
                 }
             }
         } else {
             config = Config::new(project);
             if let Err(err) = config.save(&config_file) {
-                let msg = format!("--> cannot save config file [ {} ]: {}", config_file, err);
+                let msg = format!("cannot save config file [ {} ]: {}", config_file, err);
                 return Err(msg);
             }
             println!("--> new config file was generated: [ {} ]", config_file);

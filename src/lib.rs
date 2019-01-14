@@ -21,7 +21,7 @@ pub fn run() {
     let mut generator = match gen::Generator::new(&config_dir, project) {
         Ok(gnrt) => gnrt,
         Err(err) => {
-            println!("failed to create generator: {}", err);
+            println!("--> cannot create generator: {}", err);
             return;
         }
     };
@@ -30,7 +30,7 @@ pub fn run() {
     prompt.load_history(&history_file);
     prompt.clear_screen();
 
-    ctrlc::set_handler(|| ()).expect("error setting ctrl-c handler");
+    ctrlc::set_handler(|| ()).expect("--> cannot set ctrl-c handler");
 
     let mut stop = false;
     while !stop {

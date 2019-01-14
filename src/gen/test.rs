@@ -15,7 +15,7 @@ fn sample_config() -> Config {
 }
 
 fn sample_generator() -> Generator {
-    return Generator::new(CONFIG_DIR, PROJECT).expect("failed to create sample generator");
+    return Generator::new(CONFIG_DIR, PROJECT).expect("cannot create sample generator");
 }
 
 #[test]
@@ -23,7 +23,7 @@ fn test_new_generator_new_project_ok() {
     let test_dir = "etc/new";
     let project = "forest";
 
-    fs::create_dir_all(test_dir).expect("failed to create test directory");
+    fs::create_dir_all(test_dir).expect("cannot create test directory");
 
     let result = Generator::new(test_dir, project);
     assert!(result.is_ok());
@@ -31,7 +31,7 @@ fn test_new_generator_new_project_ok() {
     let config_file = util::config_file(test_dir, project);
     assert!(util::path_exist(&config_file));
 
-    fs::remove_dir_all(test_dir).expect("failed to remove test directory");
+    fs::remove_dir_all(test_dir).expect("cannot remove test directory");
 }
 
 #[test]
@@ -461,11 +461,10 @@ fn test_generate_instruction_use_groups_success() {
     let config_file: &str = &util::config_file(test_dir, PROJECT);
     let compose_file: &str = &util::compose_file(test_dir, PROJECT);
 
-    fs::create_dir_all(test_dir).expect("failed to create test directory");
-    fs::copy(sample_config_file(), config_file)
-        .expect("failed to copy config file to test directory");
+    fs::create_dir_all(test_dir).expect("cannot create test directory");
+    fs::copy(sample_config_file(), config_file).expect("cannot copy config file to test directory");
 
-    let mut generator = Generator::new(test_dir, PROJECT).expect("failed to create test generator");
+    let mut generator = Generator::new(test_dir, PROJECT).expect("cannot create test generator");
     let instruction = generator.generate_instruction("use dep");
 
     let message = format!(
@@ -475,14 +474,14 @@ fn test_generate_instruction_use_groups_success() {
     let expect = Instruction::echo(&message);
     assert_eq!(instruction, expect);
 
-    let content = fs::read_to_string(compose_file).expect("failed to read compose file");
-    let expect = fs::read_to_string(expect_file).expect("failed to read expect file");
+    let content = fs::read_to_string(compose_file).expect("cannot read compose file");
+    let expect = fs::read_to_string(expect_file).expect("cannot read expect file");
     assert_eq!(content, expect);
 
     let using = generator.config.using.expect("using field is None");
     assert_eq!(using, vec![String::from("dep")]);
 
-    fs::remove_dir_all(test_dir).expect("failed to remove test directory");
+    fs::remove_dir_all(test_dir).expect("cannot remove test directory");
 }
 
 #[test]

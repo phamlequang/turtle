@@ -40,13 +40,13 @@ impl Prompt {
 
     pub fn load_history(&mut self, history_file: &str) {
         if let Err(err) = self.editor.load_history(history_file) {
-            println!("--> cannot load history from {}: {}", history_file, err)
+            println!("--> cannot load history from [ {} ]: {}", history_file, err)
         }
     }
 
     pub fn save_history(&self, history_file: &str) {
         if let Err(err) = self.editor.save_history(history_file) {
-            println!("--> cannot save history to {}: {}", history_file, err);
+            println!("--> cannot save history to [ {} ]: {}", history_file, err);
         }
     }
 
