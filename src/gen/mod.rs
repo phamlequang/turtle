@@ -41,24 +41,25 @@ impl Generator {
         let config_file = util::config_file(config_dir, project);
         let compose_file = util::compose_file(config_dir, project);
 
-        let config: Config;
-
-        if util::path_exist(&config_file) {
+        let config = if util::path_exist(&config_file) {
             match Config::load(&config_file) {
-                Ok(cfg) => config = cfg,
+                Ok(cfg) => cfg,
                 Err(err) => {
                     let msg = format!("cannot load config file [ {} ]: {}", config_file, err);
                     return Err(msg);
                 }
             }
         } else {
-            config = Config::new(project);
-            if let Err(err) = config.save(&config_file) {
+            let cfg = Config::new(project);
+
+            if let Err(err) = cfg.save(&config_file) {
                 let msg = format!("cannot save config file [ {} ]: {}", config_file, err);
                 return Err(msg);
             }
+
             println!("--> new config file was generated: [ {} ]", config_file);
-        }
+            cfg
+        };
 
         let generator = Self {
             config,
