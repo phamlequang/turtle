@@ -18,9 +18,15 @@ pub fn run() {
     let config_dir = util::default_config_directory();
     let history_file = util::history_file(&config_dir, project);
 
-    let mut generator = gen::Generator::new(&config_dir, project);
-    let mut prompt = prompt::Prompt::new();
+    let mut generator = match gen::Generator::new(&config_dir, project) {
+        Ok(gnrt) => gnrt,
+        Err(err) => {
+            println!("failed to create generator: {}", err);
+            return;
+        }
+    };
 
+    let mut prompt = prompt::Prompt::new();
     prompt.load_history(&history_file);
     prompt.clear_screen();
 

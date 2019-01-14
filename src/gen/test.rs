@@ -15,7 +15,38 @@ fn sample_config() -> Config {
 }
 
 fn sample_generator() -> Generator {
-    return Generator::new(CONFIG_DIR, PROJECT);
+    return Generator::new(CONFIG_DIR, PROJECT).expect("failed to create sample generator");
+}
+
+#[test]
+fn test_new_generator_new_project_ok() {
+    let test_dir = "etc/new";
+    let project = "forest";
+
+    fs::create_dir_all(test_dir).expect("failed to create test directory");
+
+    let result = Generator::new(test_dir, project);
+    assert!(result.is_ok());
+
+    let config_file = util::config_file(test_dir, project);
+    assert!(util::path_exist(&config_file));
+
+    fs::remove_dir_all(test_dir).expect("failed to remove test directory");
+}
+
+#[test]
+fn test_new_generator_new_project_error() {
+    let test_dir = "etc/unknown";
+    let project = "forest";
+
+    let result = Generator::new(test_dir, project);
+    assert!(result.is_err());
+
+    let msg = result.unwrap_err();
+    assert!(msg.contains("cannot save config file"));
+
+    let config_file = util::config_file(test_dir, project);
+    assert!(!util::path_exist(&config_file));
 }
 
 #[test]
@@ -424,17 +455,17 @@ fn test_generate_instruction_use_groups_not_found() {
 
 #[test]
 fn test_generate_instruction_use_groups_success() {
-    let test_dir = "etc/test";
+    let test_dir = "etc/use";
     let expect_file = "etc/expect.compose.yml";
 
     let config_file: &str = &util::config_file(test_dir, PROJECT);
     let compose_file: &str = &util::compose_file(test_dir, PROJECT);
 
-    fs::create_dir_all(test_dir).expect("failed to create test config directory");
+    fs::create_dir_all(test_dir).expect("failed to create test directory");
     fs::copy(sample_config_file(), config_file)
         .expect("failed to copy config file to test directory");
 
-    let mut generator = Generator::new(test_dir, PROJECT);
+    let mut generator = Generator::new(test_dir, PROJECT).expect("failed to create test generator");
     let instruction = generator.generate_instruction("use dep");
 
     let message = format!(
@@ -451,7 +482,7 @@ fn test_generate_instruction_use_groups_success() {
     let using = generator.config.using.expect("using field is None");
     assert_eq!(using, vec![String::from("dep")]);
 
-    fs::remove_dir_all(test_dir).expect("failed to remove test config directory");
+    fs::remove_dir_all(test_dir).expect("failed to remove test directory");
 }
 
 #[test]

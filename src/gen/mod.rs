@@ -37,7 +37,7 @@ pub struct Generator {
 }
 
 impl Generator {
-    pub fn new(config_dir: &str, project: &str) -> Generator {
+    pub fn new(config_dir: &str, project: &str) -> Result<Generator, String> {
         let config_file = util::config_file(config_dir, project);
         let compose_file = util::compose_file(config_dir, project);
 
@@ -47,21 +47,25 @@ impl Generator {
             match Config::load(&config_file) {
                 Ok(cfg) => config = cfg,
                 Err(err) => {
-                    panic!("--> cannot load config file [ {} ]: {}", config_file, err);
+                    let msg = format!("--> cannot load config file [ {} ]: {}", config_file, err);
+                    return Err(msg);
                 }
             }
         } else {
             config = Config::new(project);
             if let Err(err) = config.save(&config_file) {
-                panic!("--> cannot save config file [ {} ]: {}", config_file, err);
+                let msg = format!("--> cannot save config file [ {} ]: {}", config_file, err);
+                return Err(msg);
             }
+            println!("--> new config file was generated: [ {} ]", config_file);
         }
 
-        return Self {
+        let generator = Self {
             config,
             config_file,
             compose_file,
         };
+        return Ok(generator);
     }
 
     // Takes a raw instruction string, returns a list of instructions to execute
