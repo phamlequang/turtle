@@ -1,27 +1,34 @@
-mod cmd;
-mod config;
-mod decr;
-mod docker;
-mod gen;
-mod git;
-mod instr;
-mod prompt;
-mod shell;
-mod util;
+pub mod cmd;
+pub mod config;
+pub mod decr;
+pub mod docker;
+pub mod gen;
+pub mod git;
+pub mod instr;
+pub mod prompt;
+pub mod shell;
+pub mod util;
 
 use ctrlc;
 
-// Run turtle shell
-pub fn run() {
-    let config_dir = util::config_directory();
-    let history_file = util::history_file(&config_dir);
-    let mut generator = gen::Generator::new(&config_dir);
+// Run turtle shell for a specific project
+pub fn run(project: &str) {
+    let config_dir = util::default_config_directory();
+    let history_file = util::history_file(&config_dir, project);
 
-    ctrlc::set_handler(|| ()).expect("error setting ctrl-c handler");
+    let mut generator = match gen::Generator::new(&config_dir, project) {
+        Ok(gnrt) => gnrt,
+        Err(err) => {
+            println!("--> cannot create generator: {}", err);
+            return;
+        }
+    };
 
     let mut prompt = prompt::Prompt::new();
     prompt.load_history(&history_file);
     prompt.clear_screen();
+
+    ctrlc::set_handler(|| ()).expect("--> cannot set ctrl-c handler");
 
     let mut stop = false;
     while !stop {

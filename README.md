@@ -12,48 +12,48 @@ Another goal of turtle is to still allow user to run any normal shell commands w
 
 ## Commands
 
-The following list contains supported shortcut commands of current turtle version. All example commands are using the [sample config file](https://gitlab.com/phamlequang/turtle/blob/master/etc/config.toml) in `etc` folder.
+The following list contains all supported shortcut commands of the current turtle version.
 
-**Command** | **Description** | **Example**
---------|-------------|--------
-`quit`|Exit turtle shell.|`➜ quit`
-`exit`|Exit turtle shell.|`➜ exit`
-`cd {path}`|Change current working directory to the provided path.|`➜ cd ~/projects/flowers/camellia/`
-`goto {repository}`|Change current working directory to the provided repository's directory.|`➜ goto flowers`
-`goto {service}`|Change current working directory to the provided service's directory.|`➜ goto lotus`
-`clone`|Clone all repositories listed in the config file.|`➜ clone`
-`clone [repository1] [repository2] ...`|Clone a list of provided repositories.|`➜ clone flowers trees`
-`pull`|Git pull latest codes on current branch of the repository that contains current working directory.|`➜ pull`
-`pull [repository1] [repository2] ...`|Git pull latest codes on current branch of the provided repositories.|`➜ pull flowers trees`
-`pull [service1] [service2] ...`|Git pull latest codes on current branch of the provided services' repositories.|`➜ pull camellia lotus`
-`push`|Git push latest codes on current branch of the repository that contains current working directory.|`➜ push`
-`push [repository1] [repository2] ...`|Git push latest codes on current branch of the provided repositories.|`➜ push flowers trees`
-`push [service1] [service2] ...`|Git push latest codes on current branch of the provided services' repositories.|`➜ push camellia lotus`
-`dkmc {command}`|Run any docker-machine commands.|`➜ dkmc ls`
-`dkmc create`|Create a new docker machine as described in the config file.|`➜ dkmc create`
-`dkmc start`|Start the created docker machine.|`➜ dkmc start`
-`dkmc upcerts`|Update or regenerate the created docker machine's certificates.|`➜ dkmc upcerts`
-`dkmc load`|Load the created docker machine's environments.|`➜ dkmc load`
-`dkcp {command}`|Run any docker-compose commands.|`➜ dkcp up`
-`dk {command}`|Run any docker commands.|`➜ dk ps`
-`use {group}`|Generate or rewrite the working docker-compose file for a group of services.|`➜ use all`
-`start`|Start all services using the generated docker-compose file.|`➜ start`
-`status`|Show current status of all services.|`➜ status`
-`stop`|Stop all services using the generated docker-compose file.|`➜ stop`
-`stop [service1] [service2] ...`|Stop the provided services.|`➜ stop redis lotus`
-`restart`|Restart all services using the generated docker-compose file.|`➜ restart`
-`restart [service1] [service2] ...`|Restart the provided services.|`➜ restart redis lotus`
-`logs {service}`|Show and follow logs of a specific service.|`➜ logs lotus`
-`build`|Build all services using the command specified in the config file.|`➜ build`
-`build [service1] [service2] ...`|Build the provided services.|`➜ build camellia lotus`
-`build [repository1] [repository2] ...`|Build services in the provided repositories.|`➜ build flowers`
-`build [group1] [group2] ...`|Build services in the provided groups.|`➜ build svc`
-`test`|Test all services using the command specified in the config file.|`➜ test camellia lotus`
-`test [service1] [service2] ...`|Test the provided services.|`➜ test camellia lotus`
-`test [repository1] [repository2] ...`|Test services in the provided repositories.|`➜ test flowers`
-`test [group1] [group2] ...`|Test services in the provided groups.|`➜ test svc`
-`sh {service}`|Access `/bin/sh` shell of a specific service.|`➜ sh lotus`
-`bash {service}`|Access `/bin/bash` shell of a specific service.|`➜ bash lotus`
+**Command** | **Description**
+--------|-------------
+`quit`|Exit turtle shell.
+`exit`|Exit turtle shell.
+`cd {path}`|Change current working directory to the provided path.
+`goto {repository}`|Change current working directory to the provided repository's directory.
+`goto {service}`|Change current working directory to the provided service's directory.
+`clone`|Clone all repositories listed in the config file.
+`clone [repository1] [repository2] ...`|Clone a list of provided repositories.
+`pull`|Git pull latest codes on current branch of the repository that contains current working directory.
+`pull [repository1] [repository2] ...`|Git pull latest codes on current branch of the provided repositories.
+`pull [service1] [service2] ...`|Git pull latest codes on current branch of the provided services' repositories.
+`push`|Git push latest codes on current branch of the repository that contains current working directory.
+`push [repository1] [repository2] ...`|Git push latest codes on current branch of the provided repositories.
+`push [service1] [service2] ...`|Git push latest codes on current branch of the provided services' repositories.
+`dkmc {command}`|Run any docker-machine commands.
+`dkmc create`|Create a new docker machine as described in the config file.
+`dkmc start`|Start the created docker machine.
+`dkmc upcerts`|Update or regenerate the created docker machine's certificates.
+`dkmc load`|Load the created docker machine's environments.
+`dkcp {command}`|Run any docker-compose commands.
+`dk {command}`|Run any docker commands.
+`use {group}`|Generate or rewrite the working docker-compose file for a group of services.
+`start`|Start all services using the generated docker-compose file.
+`status`|Show current status of all services.
+`stop`|Stop all services using the generated docker-compose file.
+`stop [service1] [service2] ...`|Stop the provided services.
+`restart`|Restart all services using the generated docker-compose file.
+`restart [service1] [service2] ...`|Restart the provided services.
+`logs {service}`|Show and follow logs of a specific service.
+`build`|Build all services using the command specified in the config file.
+`build [service1] [service2] ...`|Build the provided services.
+`build [repository1] [repository2] ...`|Build services in the provided repositories.
+`build [group1] [group2] ...`|Build services in the provided groups.
+`test`|Test all services using the command specified in the config file.
+`test [service1] [service2] ...`|Test the provided services.
+`test [repository1] [repository2] ...`|Test services in the provided repositories.
+`test [group1] [group2] ...`|Test services in the provided groups.
+`sh {service}`|Access `/bin/sh` shell of a specific service.
+`bash {service}`|Access `/bin/bash` shell of a specific service.
 
 ## Backlogs
 

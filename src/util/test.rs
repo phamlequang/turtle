@@ -7,30 +7,30 @@ fn test_home_directory() {
 }
 
 #[test]
-fn test_config_directory() {
-    let directory = config_directory();
+fn test_default_config_directory() {
+    let directory = default_config_directory();
     let expect = format!("{}/.turtle", home_directory());
     assert_eq!(directory, expect);
 }
 
 #[test]
 fn test_config_file() {
-    let file = config_file("/tmp");
-    let expect = "/tmp/config.toml";
+    let file = config_file("/tmp", "turtle");
+    let expect = "/tmp/turtle.config.toml";
     assert_eq!(file, expect);
 }
 
 #[test]
 fn test_compose_file() {
-    let file = compose_file("/tmp");
-    let expect = "/tmp/compose.yml";
+    let file = compose_file("/tmp", "turtle");
+    let expect = "/tmp/turtle.compose.yml";
     assert_eq!(file, expect);
 }
 
 #[test]
 fn test_history_file() {
-    let file = history_file("/tmp");
-    let expect = "/tmp/.history";
+    let file = history_file("/tmp", "turtle");
+    let expect = "/tmp/turtle.history";
     assert_eq!(file, expect);
 }
 
@@ -82,4 +82,10 @@ fn test_normalize_path() {
     let path = "~/Desktop/test.txt";
     let expect = format!("{}/Desktop/test.txt", home_directory());
     assert_eq!(normalize_path(path), expect);
+}
+
+#[test]
+fn test_path_exist() {
+    assert!(path_exist("src/config/test.rs"));
+    assert!(!path_exist("unknown/path/"));
 }
