@@ -13,15 +13,18 @@ use ctrlc;
 
 // Run turtle shell
 pub fn run() {
-    let config_dir = util::config_directory();
-    let history_file = util::history_file(&config_dir);
-    let mut generator = gen::Generator::new(&config_dir);
+    let project = "turtle";
 
-    ctrlc::set_handler(|| ()).expect("error setting ctrl-c handler");
+    let config_dir = util::default_config_directory();
+    let history_file = util::history_file(&config_dir, project);
 
+    let mut generator = gen::Generator::new(&config_dir, project);
     let mut prompt = prompt::Prompt::new();
+
     prompt.load_history(&history_file);
     prompt.clear_screen();
+
+    ctrlc::set_handler(|| ()).expect("error setting ctrl-c handler");
 
     let mut stop = false;
     while !stop {

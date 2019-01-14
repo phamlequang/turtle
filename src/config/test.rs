@@ -1,7 +1,7 @@
 use super::*;
 use std::io::ErrorKind;
 
-const CONFIG_FILE: &str = "etc/config.toml";
+const CONFIG_FILE: &str = "etc/sample.config.toml";
 
 fn sample_config() -> Config {
     return Config::load(CONFIG_FILE).expect("failed to load config file");

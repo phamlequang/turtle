@@ -3,20 +3,24 @@ use super::*;
 use std::fs;
 
 const CONFIG_DIR: &str = "etc";
-const CONFIG_FILE: &str = "etc/config.toml";
-const TEST_CONFIG_DIR: &str = "etc/test";
-const TEST_CONFIG_FILE: &str = "etc/test/config.toml";
-const TEST_COMPOSE_FILE: &str = "etc/test/compose.yml";
-const TEST_EXPECT_FILE: &str = "etc/expect.yml";
+const PROJECT: &str = "sample";
+
+fn sample_config_file() -> String {
+    return util::config_file(CONFIG_DIR, PROJECT);
+}
 
 fn sample_config() -> Config {
-    return Config::load(CONFIG_FILE).unwrap();
+    let config_file = sample_config_file();
+    return Config::load(&config_file).unwrap();
+}
+
+fn sample_generator() -> Generator {
+    return Generator::new(CONFIG_DIR, PROJECT);
 }
 
 #[test]
 fn test_generate_instruction_terminate() {
-    let mut generator = Generator::new(CONFIG_DIR);
-
+    let mut generator = sample_generator();
     let expect = Instruction::terminate();
 
     let instruction = generator.generate_instruction("quit");
@@ -28,7 +32,7 @@ fn test_generate_instruction_terminate() {
 
 #[test]
 fn test_generate_instruction_change_directory() {
-    let mut generator = Generator::new(CONFIG_DIR);
+    let mut generator = sample_generator();
 
     let instruction = generator.generate_instruction("cd ..");
     let command = Command::new("", "..", false, false, false, None, false);
@@ -39,9 +43,9 @@ fn test_generate_instruction_change_directory() {
 
 #[test]
 fn test_generate_instruction_goto_service() {
-    let mut generator = Generator::new(CONFIG_DIR);
-
+    let mut generator = sample_generator();
     let instruction = generator.generate_instruction("goto camellia");
+
     let dir = "~/projects/flowers/camellia";
     let command = Command::new("", dir, false, false, false, None, false);
 
@@ -51,7 +55,7 @@ fn test_generate_instruction_goto_service() {
 
 #[test]
 fn test_generate_instruction_goto_repository() {
-    let mut generator = Generator::new(CONFIG_DIR);
+    let mut generator = sample_generator();
 
     let instruction = generator.generate_instruction("goto flowers");
     let dir = "~/projects/flowers";
@@ -63,7 +67,7 @@ fn test_generate_instruction_goto_repository() {
 
 #[test]
 fn test_generate_instruction_goto_unknown() {
-    let mut generator = Generator::new(CONFIG_DIR);
+    let mut generator = sample_generator();
 
     let instruction = generator.generate_instruction("goto abc");
     let command = Command::echo("--> unknown service or repository [ abc ]");
@@ -74,7 +78,7 @@ fn test_generate_instruction_goto_unknown() {
 
 #[test]
 fn test_generate_instruction_goto_nothing() {
-    let mut generator = Generator::new(CONFIG_DIR);
+    let mut generator = sample_generator();
 
     let instruction = generator.generate_instruction("goto");
     let expect = Instruction::skip();
@@ -84,8 +88,8 @@ fn test_generate_instruction_goto_nothing() {
 
 #[test]
 fn test_generate_instruction_clone_repositories() {
+    let mut generator = sample_generator();
     let config = sample_config();
-    let mut generator = Generator::new(CONFIG_DIR);
 
     let raw = "clone flowers tree";
     let instruction = generator.generate_instruction(raw);
@@ -100,8 +104,8 @@ fn test_generate_instruction_clone_repositories() {
 
 #[test]
 fn test_generate_instruction_clone_all() {
+    let mut generator = sample_generator();
     let config = sample_config();
-    let mut generator = Generator::new(CONFIG_DIR);
 
     let instruction = generator.generate_instruction("clone");
     let repository = config.search_repository("flowers").unwrap();
@@ -114,8 +118,8 @@ fn test_generate_instruction_clone_all() {
 
 #[test]
 fn test_generate_instruction_pull_repositories_or_services() {
+    let mut generator = sample_generator();
     let config = sample_config();
-    let mut generator = Generator::new(CONFIG_DIR);
 
     let raw = "pull flowers lotus tree";
     let instruction = generator.generate_instruction(raw);
@@ -133,7 +137,7 @@ fn test_generate_instruction_pull_repositories_or_services() {
 
 #[test]
 fn test_generate_instruction_pull_current_directory() {
-    let mut generator = Generator::new(CONFIG_DIR);
+    let mut generator = sample_generator();
     let instruction = generator.generate_instruction("pull");
 
     let cmd = git::pull_repository("");
@@ -144,7 +148,7 @@ fn test_generate_instruction_pull_current_directory() {
 #[test]
 fn test_generate_instruction_push_repositories_or_services() {
     let config = sample_config();
-    let mut generator = Generator::new(CONFIG_DIR);
+    let mut generator = sample_generator();
 
     let raw = "push flowers lotus tree";
     let instruction = generator.generate_instruction(raw);
@@ -162,7 +166,7 @@ fn test_generate_instruction_push_repositories_or_services() {
 
 #[test]
 fn test_generate_instruction_push_current_directory() {
-    let mut generator = Generator::new(CONFIG_DIR);
+    let mut generator = sample_generator();
     let instruction = generator.generate_instruction("push");
 
     let cmd = git::push_repository("");
@@ -174,7 +178,7 @@ fn test_generate_instruction_push_current_directory() {
 fn test_generate_instruction_machine_create() {
     let config = sample_config();
 
-    let mut generator = Generator::new(CONFIG_DIR);
+    let mut generator = sample_generator();
     let instruction = generator.generate_instruction("dkmc create");
 
     let machine = &config.machine.unwrap();
@@ -188,7 +192,7 @@ fn test_generate_instruction_machine_create() {
 fn test_generate_instruction_machine_remove() {
     let config = sample_config();
 
-    let mut generator = Generator::new(CONFIG_DIR);
+    let mut generator = sample_generator();
     let instruction = generator.generate_instruction("dkmc rm");
 
     let machine = &config.machine.unwrap();
@@ -201,8 +205,7 @@ fn test_generate_instruction_machine_remove() {
 #[test]
 fn test_generate_instruction_machine_update_certificates() {
     let config = sample_config();
-
-    let mut generator = Generator::new(CONFIG_DIR);
+    let mut generator = sample_generator();
     let instruction = generator.generate_instruction("dkmc upcerts");
 
     let machine = &config.machine.unwrap();
@@ -215,8 +218,7 @@ fn test_generate_instruction_machine_update_certificates() {
 #[test]
 fn test_generate_instruction_machine_load_environment() {
     let config = sample_config();
-
-    let mut generator = Generator::new(CONFIG_DIR);
+    let mut generator = sample_generator();
     let instruction = generator.generate_instruction("dkmc load");
 
     let machine = &config.machine.unwrap();
@@ -228,7 +230,7 @@ fn test_generate_instruction_machine_load_environment() {
 
 #[test]
 fn test_generate_instruction_docker_list_containers() {
-    let mut generator = Generator::new(CONFIG_DIR);
+    let mut generator = sample_generator();
     let instruction = generator.generate_instruction("dk ps");
 
     let command = docker::list_containers();
@@ -239,7 +241,7 @@ fn test_generate_instruction_docker_list_containers() {
 
 #[test]
 fn test_generate_instruction_docker_list_images() {
-    let mut generator = Generator::new(CONFIG_DIR);
+    let mut generator = sample_generator();
     let instruction = generator.generate_instruction("dk images");
 
     let command = docker::docker_command("images");
@@ -252,7 +254,7 @@ fn test_generate_instruction_docker_list_images() {
 fn test_generate_instruction_docker_compose() {
     let config = sample_config();
 
-    let mut generator = Generator::new(CONFIG_DIR);
+    let mut generator = sample_generator();
     let instruction = generator.generate_instruction("dkcp up -d");
 
     let command = docker::compose_command("up -d", &config.project, &generator.compose_file);
@@ -265,7 +267,7 @@ fn test_generate_instruction_docker_compose() {
 fn test_generate_instruction_docker_service_logs() {
     let config = sample_config();
 
-    let mut generator = Generator::new(CONFIG_DIR);
+    let mut generator = sample_generator();
     let instruction = generator.generate_instruction("logs camellia");
 
     let command = docker::service_logs("camellia", &config.project, &generator.compose_file);
@@ -277,7 +279,7 @@ fn test_generate_instruction_docker_service_logs() {
 #[test]
 fn test_generate_instruction_start_services() {
     let config = sample_config();
-    let mut generator = Generator::new(CONFIG_DIR);
+    let mut generator = sample_generator();
 
     let instruction = generator.generate_instruction("start");
     assert!(!instruction.should_terminate);
@@ -292,7 +294,7 @@ fn test_generate_instruction_start_services() {
 #[test]
 fn test_generate_instruction_stop_services() {
     let config = sample_config();
-    let mut generator = Generator::new(CONFIG_DIR);
+    let mut generator = sample_generator();
 
     let instruction = generator.generate_instruction("stop redis camellia");
     assert!(!instruction.should_terminate);
@@ -308,7 +310,7 @@ fn test_generate_instruction_stop_services() {
 #[test]
 fn test_generate_instruction_stop_all_services() {
     let config = sample_config();
-    let mut generator = Generator::new(CONFIG_DIR);
+    let mut generator = sample_generator();
 
     let instruction = generator.generate_instruction("stop");
     assert!(!instruction.should_terminate);
@@ -323,7 +325,7 @@ fn test_generate_instruction_stop_all_services() {
 #[test]
 fn test_generate_instruction_restart_services() {
     let config = sample_config();
-    let mut generator = Generator::new(CONFIG_DIR);
+    let mut generator = sample_generator();
 
     let instruction = generator.generate_instruction("restart postgres lotus");
     assert!(!instruction.should_terminate);
@@ -339,7 +341,7 @@ fn test_generate_instruction_restart_services() {
 #[test]
 fn test_generate_instruction_open_service_bash_shell() {
     let config = sample_config();
-    let mut generator = Generator::new(CONFIG_DIR);
+    let mut generator = sample_generator();
 
     let instruction = generator.generate_instruction("bash lotus");
     assert!(!instruction.should_terminate);
@@ -354,7 +356,7 @@ fn test_generate_instruction_open_service_bash_shell() {
 #[test]
 fn test_generate_instruction_open_service_sh_shell() {
     let config = sample_config();
-    let mut generator = Generator::new(CONFIG_DIR);
+    let mut generator = sample_generator();
 
     let instruction = generator.generate_instruction("sh redis");
     assert!(!instruction.should_terminate);
@@ -368,7 +370,7 @@ fn test_generate_instruction_open_service_sh_shell() {
 
 #[test]
 fn test_generate_instruction_open_shell_no_service() {
-    let mut generator = Generator::new(CONFIG_DIR);
+    let mut generator = sample_generator();
 
     let instruction = generator.generate_instruction("sh");
     assert!(!instruction.should_terminate);
@@ -383,7 +385,7 @@ fn test_generate_instruction_open_shell_no_service() {
 #[test]
 fn test_generate_instruction_restart_all_services() {
     let config = sample_config();
-    let mut generator = Generator::new(CONFIG_DIR);
+    let mut generator = sample_generator();
 
     let instruction = generator.generate_instruction("restart");
     assert!(!instruction.should_terminate);
@@ -399,7 +401,7 @@ fn test_generate_instruction_restart_all_services() {
 #[test]
 fn test_generate_instruction_status_services() {
     let config = sample_config();
-    let mut generator = Generator::new(CONFIG_DIR);
+    let mut generator = sample_generator();
 
     let instruction = generator.generate_instruction("status");
     assert!(!instruction.should_terminate);
@@ -413,7 +415,7 @@ fn test_generate_instruction_status_services() {
 
 #[test]
 fn test_generate_instruction_use_groups_not_found() {
-    let mut generator = Generator::new(CONFIG_DIR);
+    let mut generator = sample_generator();
     let instruction = generator.generate_instruction("use abcd");
 
     let expect = Instruction::echo("--> unknown group [ abcd ]");
@@ -422,33 +424,40 @@ fn test_generate_instruction_use_groups_not_found() {
 
 #[test]
 fn test_generate_instruction_use_groups_success() {
-    fs::create_dir_all(TEST_CONFIG_DIR).expect("failed to create test config directory");
-    fs::copy(CONFIG_FILE, TEST_CONFIG_FILE).expect("failed to copy config file to test directory");
+    let test_dir = "etc/test";
+    let expect_file = "etc/expect.compose.yml";
 
-    let mut generator = Generator::new(TEST_CONFIG_DIR);
+    let config_file: &str = &util::config_file(test_dir, PROJECT);
+    let compose_file: &str = &util::compose_file(test_dir, PROJECT);
+
+    fs::create_dir_all(test_dir).expect("failed to create test config directory");
+    fs::copy(sample_config_file(), config_file)
+        .expect("failed to copy config file to test directory");
+
+    let mut generator = Generator::new(test_dir, PROJECT);
     let instruction = generator.generate_instruction("use dep");
 
     let message = format!(
         "--> saved compose: [ {} ] and config: [ {} ]",
-        TEST_COMPOSE_FILE, TEST_CONFIG_FILE,
+        compose_file, config_file,
     );
     let expect = Instruction::echo(&message);
     assert_eq!(instruction, expect);
 
-    let content = fs::read_to_string(TEST_COMPOSE_FILE).expect("failed to read compose file");
-    let expect = fs::read_to_string(TEST_EXPECT_FILE).expect("failed to read expect file");
+    let content = fs::read_to_string(compose_file).expect("failed to read compose file");
+    let expect = fs::read_to_string(expect_file).expect("failed to read expect file");
     assert_eq!(content, expect);
 
     let using = generator.config.using.expect("using field is None");
     assert_eq!(using, vec![String::from("dep")]);
 
-    fs::remove_dir_all(TEST_CONFIG_DIR).expect("failed to remove test config directory");
+    fs::remove_dir_all(test_dir).expect("failed to remove test config directory");
 }
 
 #[test]
 fn test_generate_instruction_build_services() {
     let config = sample_config();
-    let mut generator = Generator::new(CONFIG_DIR);
+    let mut generator = sample_generator();
 
     let instruction = generator.generate_instruction("build flowers");
     assert!(!instruction.should_terminate);
@@ -470,7 +479,7 @@ fn test_generate_instruction_build_services() {
 #[test]
 fn test_generate_instruction_test_services() {
     let config = sample_config();
-    let mut generator = Generator::new(CONFIG_DIR);
+    let mut generator = sample_generator();
 
     let instruction = generator.generate_instruction("test lotus camellia");
     assert!(!instruction.should_terminate);
@@ -491,7 +500,7 @@ fn test_generate_instruction_test_services() {
 
 #[test]
 fn test_generate_instruction_other() {
-    let mut generator = Generator::new(CONFIG_DIR);
+    let mut generator = sample_generator();
 
     let raw = "ls -la";
     let instruction = generator.generate_instruction(raw);

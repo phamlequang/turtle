@@ -37,15 +37,23 @@ pub struct Generator {
 }
 
 impl Generator {
-    pub fn new(config_dir: &str) -> Generator {
-        let config_file = util::config_file(&config_dir);
-        let compose_file = util::compose_file(&config_dir);
+    pub fn new(config_dir: &str, project: &str) -> Generator {
+        let config_file = util::config_file(config_dir, project);
+        let compose_file = util::compose_file(config_dir, project);
+
         let config: Config;
 
-        match Config::load(&config_file) {
-            Ok(cfg) => config = cfg,
-            Err(err) => {
-                panic!("--> cannot load config file [ {} ]: {}", config_file, err);
+        if util::path_exist(&config_file) {
+            match Config::load(&config_file) {
+                Ok(cfg) => config = cfg,
+                Err(err) => {
+                    panic!("--> cannot load config file [ {} ]: {}", config_file, err);
+                }
+            }
+        } else {
+            config = Config::new(project);
+            if let Err(err) = config.save(&config_file) {
+                panic!("--> cannot save config file [ {} ]: {}", config_file, err);
             }
         }
 

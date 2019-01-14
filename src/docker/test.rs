@@ -165,9 +165,9 @@ fn test_list_containers() {
 
 #[test]
 fn test_generate_compose_text() {
-    let config = Config::load("etc/config.toml").unwrap();
+    let config = Config::load("etc/sample.config.toml").unwrap();
     let result = generate_compose_text(&config);
-    let expect = fs::read_to_string("etc/compose.yml").unwrap();
+    let expect = fs::read_to_string("etc/sample.compose.yml").unwrap();
     assert_eq!(result, expect);
 }
 

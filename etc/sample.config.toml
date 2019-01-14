@@ -1,4 +1,4 @@
-project = "forest"
+project = "sample"
 using = ["all"]
 
 [machine]
