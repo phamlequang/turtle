@@ -1,20 +1,18 @@
-mod cmd;
-mod config;
-mod decr;
-mod docker;
-mod gen;
-mod git;
-mod instr;
-mod prompt;
-mod shell;
-mod util;
+pub mod cmd;
+pub mod config;
+pub mod decr;
+pub mod docker;
+pub mod gen;
+pub mod git;
+pub mod instr;
+pub mod prompt;
+pub mod shell;
+pub mod util;
 
 use ctrlc;
 
-// Run turtle shell
-pub fn run() {
-    let project = "turtle";
-
+// Run turtle shell for a specific project
+pub fn run(project: &str) {
     let config_dir = util::default_config_directory();
     let history_file = util::history_file(&config_dir, project);
 
