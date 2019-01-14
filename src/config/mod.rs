@@ -100,6 +100,20 @@ impl Config {
     pub const DEPENDENCY: usize = 2;
     pub const BOTH: usize = Self::SERVICE | Self::DEPENDENCY;
 
+    pub fn new(project: &str) -> Self {
+        return Self {
+            project: String::from(project),
+            using: None,
+            machine: None,
+            dependencies: None,
+            repositories: None,
+            actions: None,
+            patterns: None,
+            services: None,
+            groups: None,
+        };
+    }
+
     pub fn load(file_path: &str) -> io::Result<Self> {
         let toml_text = fs::read_to_string(file_path)?;
         return Self::parse(&toml_text);

@@ -16,7 +16,7 @@ pub fn home_directory() -> String {
     return String::new();
 }
 
-pub fn config_directory() -> String {
+pub fn default_config_directory() -> String {
     let mut dir = home_directory();
     if dir.len() == 0 {
         dir = String::from("/tmp");
@@ -24,16 +24,16 @@ pub fn config_directory() -> String {
     return format!("{}/.turtle", dir);
 }
 
-pub fn config_file(dir: &str) -> String {
-    return format!("{}/config.toml", dir);
+pub fn config_file(dir: &str, project: &str) -> String {
+    return format!("{}/{}.config.toml", dir, project);
 }
 
-pub fn compose_file(dir: &str) -> String {
-    return format!("{}/compose.yml", dir);
+pub fn compose_file(dir: &str, project: &str) -> String {
+    return format!("{}/{}.compose.yml", dir, project);
 }
 
-pub fn history_file(dir: &str) -> String {
-    return format!("{}/.history", dir);
+pub fn history_file(dir: &str, project: &str) -> String {
+    return format!("{}/{}.history", dir, project);
 }
 
 // Change to a specific directory, return true if success
@@ -91,4 +91,8 @@ pub fn normalize_path(path: &str) -> String {
         return format!("{}{}", home_directory(), path.trim_start_matches(TILDE));
     }
     return String::from(path);
+}
+
+pub fn path_exist(path: &str) -> bool {
+    return Path::new(path).exists();
 }
