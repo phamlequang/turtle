@@ -2,6 +2,7 @@ pub mod brew;
 pub mod cmd;
 pub mod config;
 pub mod decr;
+pub mod dns;
 pub mod docker;
 pub mod gen;
 pub mod git;

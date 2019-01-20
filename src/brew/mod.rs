@@ -14,3 +14,8 @@ pub fn install_packages(names: &[&str]) -> Command {
     let raw = format!("brew install {}", names.join(" "));
     return Command::basic_show(&raw);
 }
+
+pub fn restart_service(name: &str) -> Command {
+    let raw = format!("brew services restart {}", name);
+    return Command::basic_show(&raw);
+}

@@ -17,5 +17,14 @@ fn test_install_packages() {
 
     let raw = "brew install dnsmasq docker";
     let expect = Command::basic_show(raw);
-    assert_eq!(command, expect)
+    assert_eq!(command, expect);
+}
+
+#[test]
+fn test_restart_service() {
+    let command = restart_service("mongodb");
+    let raw = "brew services restart mongodb";
+
+    let expect = Command::basic_show(&raw);
+    assert_eq!(command, expect);
 }
