@@ -6,6 +6,7 @@ name = "turtle"
 cpu_count = 2
 disk_size = 16384
 memory = 4096
+dns = "dev.turtle.com"
 
 [[dependencies]]
 name = "postgres"

@@ -6,6 +6,7 @@ fn sample_machine() -> Machine {
         cpu_count: 2,
         disk_size: 16384,
         memory: 4096,
+        dns: String::from("dev.turtle.com"),
     };
 }
 
