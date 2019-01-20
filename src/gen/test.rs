@@ -62,6 +62,28 @@ fn test_generate_instruction_terminate() {
 }
 
 #[test]
+fn test_generate_instruction_install_brew() {
+    let mut generator = sample_generator();
+    let instruction = generator.generate_instruction("install brew");
+
+    let command = brew::install_brew();
+    let expect = Instruction::basic(vec![command]);
+    assert_eq!(instruction, expect);
+}
+
+#[test]
+fn test_generate_instruction_install_packages() {
+    let mut generator = sample_generator();
+    let instruction = generator.generate_instruction("install docker docker-compose");
+
+    let names = ["docker", "docker-compose"];
+    let command = brew::install_packages(&names);
+
+    let expect = Instruction::basic(vec![command]);
+    assert_eq!(instruction, expect);
+}
+
+#[test]
 fn test_generate_instruction_change_directory() {
     let mut generator = sample_generator();
 

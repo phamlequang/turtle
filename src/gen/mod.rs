@@ -1,6 +1,7 @@
 #[cfg(test)]
 mod test;
 
+use super::brew;
 use super::cmd::Command;
 use super::config::Config;
 use super::docker;
@@ -10,6 +11,7 @@ use super::util;
 
 const QUIT: &str = "quit";
 const EXIT: &str = "exit";
+const INSTALL: &str = "install";
 const CD: &str = "cd";
 const GOTO: &str = "goto";
 const CLONE: &str = "clone";
@@ -78,6 +80,7 @@ impl Generator {
 
             match program {
                 QUIT | EXIT => return self.terminate(),
+                INSTALL => return self.install(&args),
                 CD => return self.change_directory(&args),
                 GOTO => return self.goto(&args),
                 CLONE => return self.clone_repositories(&args),
@@ -105,10 +108,19 @@ impl Generator {
         return Instruction::terminate();
     }
 
+    fn install(&self, args: &[&str]) -> Instruction {
+        let command = if args.contains(&"brew") {
+            brew::install_brew()
+        } else {
+            brew::install_packages(args)
+        };
+        return Instruction::basic(vec![command]);
+    }
+
     fn change_directory(&self, args: &[&str]) -> Instruction {
         if let Some(dir) = args.first() {
             let command = Command::new("", &dir, false, false, false, None, false);
-            return Instruction::new(vec![command], false);
+            return Instruction::basic(vec![command]);
         }
         return Instruction::skip();
     }
