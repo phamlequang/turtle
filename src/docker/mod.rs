@@ -2,6 +2,7 @@
 mod test;
 
 use std::cmp;
+use std::env;
 use std::fs;
 use std::io;
 
@@ -32,8 +33,33 @@ pub fn update_certificates(machine: &Machine) -> Command {
 }
 
 pub fn load_environments(machine: &Machine) -> Command {
-    let raw = format!("eval \"$(docker-machine env {})\"", machine.name);
-    return Command::basic_show(&raw);
+    let raw = format!("docker-machine env {}", machine.name);
+
+    let exec = |stdout: &str| -> (bool, String) {
+        let mut result: Vec<String> = Vec::new();
+
+        for line in stdout.lines() {
+            if line.starts_with("export ") {
+                let s = line.trim_start_matches("export ");
+                let a: Vec<_> = s.split("=").collect();
+
+                if a.len() == 2 {
+                    let key = a[0];
+                    let val = a[1].trim_matches('"');
+
+                    let row = format!("{}={}", key, val);
+                    println!("{}", line);
+
+                    env::set_var(key, val);
+                    result.push(row);
+                }
+            }
+        }
+
+        return (true, result.join("\n"));
+    };
+
+    return Command::new(&raw, "", false, true, true, Some(Box::new(exec)), true);
 }
 
 pub fn machine_command(action: &str, machine: &Machine) -> Command {
