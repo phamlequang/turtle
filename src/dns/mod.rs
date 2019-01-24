@@ -26,7 +26,7 @@ pub fn update(domain: &str, machine: &str) -> Command {
     return Command::basic_show(&raw);
 }
 
-pub fn resolve(domain: &str, machine: &str) -> Command {
+pub fn resolve(domain: &str) -> Command {
     let raw = format!(
         "sudo tee {}/{} > /dev/null << EOF\n\
          nameserver 127.0.0.1\n\
@@ -34,7 +34,7 @@ pub fn resolve(domain: &str, machine: &str) -> Command {
          search {}\n\
          search_order 1\n\
          EOF",
-        RESOLVER_FOLDER, machine, domain, domain,
+        RESOLVER_FOLDER, domain, domain, domain,
     );
     return Command::basic_show(&raw);
 }

@@ -65,6 +65,7 @@ The following list contains all supported shortcut commands of the current turtl
 
 ## Backlogs
 
+- More flexible command matching.
 - Ability to define arbitrary command shortcuts.
 - Add commands to work with kafka.
 - Add commands to work with kubernetes.

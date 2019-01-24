@@ -402,7 +402,7 @@ impl Generator {
                         } else {
                             let raw = format!("sudo mkdir -p {}", dns::RESOLVER_FOLDER);
                             commands.push(Command::basic_show(&raw));
-                            commands.push(dns::resolve(&machine.dns, &machine.name));
+                            commands.push(dns::resolve(&machine.dns));
                         };
                     } else {
                         let message = "--> docker machine config doesn't exist";
