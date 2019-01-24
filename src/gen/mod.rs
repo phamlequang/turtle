@@ -1,8 +1,10 @@
 #[cfg(test)]
 mod test;
 
+use super::brew;
 use super::cmd::Command;
 use super::config::Config;
+use super::dns;
 use super::docker;
 use super::git;
 use super::instr::Instruction;
@@ -10,6 +12,7 @@ use super::util;
 
 const QUIT: &str = "quit";
 const EXIT: &str = "exit";
+const INSTALL: &str = "install";
 const CD: &str = "cd";
 const GOTO: &str = "goto";
 const CLONE: &str = "clone";
@@ -28,6 +31,7 @@ const BASH: &str = "bash";
 const SH: &str = "sh";
 const BUILD: &str = "build";
 const TEST: &str = "test";
+const DNS: &str = "dns";
 
 #[derive(Debug)]
 pub struct Generator {
@@ -78,6 +82,7 @@ impl Generator {
 
             match program {
                 QUIT | EXIT => return self.terminate(),
+                INSTALL => return self.install(&args),
                 CD => return self.change_directory(&args),
                 GOTO => return self.goto(&args),
                 CLONE => return self.clone_repositories(&args),
@@ -94,6 +99,7 @@ impl Generator {
                 STATUS => return self.status_services(),
                 BASH | SH => return self.open_service_shell(&program, &args),
                 BUILD | TEST => return self.do_services(&program, &args),
+                DNS => return self.do_dns(&args),
                 _ => return self.other(raw),
             }
         }
@@ -105,10 +111,19 @@ impl Generator {
         return Instruction::terminate();
     }
 
+    fn install(&self, args: &[&str]) -> Instruction {
+        let command = if args.contains(&"brew") {
+            brew::install_brew()
+        } else {
+            brew::install_packages(args)
+        };
+        return Instruction::basic(vec![command]);
+    }
+
     fn change_directory(&self, args: &[&str]) -> Instruction {
         if let Some(dir) = args.first() {
             let command = Command::new("", &dir, false, false, false, None, false);
-            return Instruction::new(vec![command], false);
+            return Instruction::basic(vec![command]);
         }
         return Instruction::skip();
     }
@@ -187,7 +202,7 @@ impl Generator {
         match &self.config.machine {
             Some(machine) => {
                 if let Some(action) = args.first() {
-                    match action.as_ref() {
+                    match *action {
                         "create" => {
                             let command = docker::create_machine(machine);
                             return Instruction::basic(vec![command]);
@@ -215,7 +230,7 @@ impl Generator {
 
     fn docker(&self, args: &[&str]) -> Instruction {
         if let Some(action) = args.first() {
-            match action.as_ref() {
+            match *action {
                 "ps" => {
                     let command = docker::list_containers();
                     return Instruction::basic(vec![command]);
@@ -372,6 +387,37 @@ impl Generator {
             &self.compose_file, &self.config_file,
         );
         return Instruction::echo(&message);
+    }
+
+    fn do_dns(&self, args: &[&str]) -> Instruction {
+        if let Some(action) = args.first() {
+            let mut commands: Vec<Command> = Vec::new();
+            match *action {
+                "install" => commands.push(dns::install()),
+                "restart" => commands.push(dns::restart()),
+                "update" | "resolve" => {
+                    if let Some(machine) = &self.config.machine {
+                        if *action == "update" {
+                            commands.push(dns::update(&machine.dns, &machine.name));
+                        } else {
+                            let raw = format!("sudo mkdir -p {}", dns::RESOLVER_FOLDER);
+                            commands.push(Command::basic_show(&raw));
+                            commands.push(dns::resolve(&machine.dns));
+                        };
+                    } else {
+                        let message = "--> docker machine config doesn't exist";
+                        commands.push(Command::echo(message));
+                    }
+                }
+                _ => {
+                    let message = format!("--> unsupported action {}", action);
+                    commands.push(Command::echo(&message));
+                }
+            };
+            return Instruction::basic(commands);
+        }
+
+        return Instruction::skip();
     }
 
     fn other(&self, raw: &str) -> Instruction {

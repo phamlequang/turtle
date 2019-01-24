@@ -6,6 +6,7 @@ fn sample_machine() -> Machine {
         cpu_count: 2,
         disk_size: 16384,
         memory: 4096,
+        dns: String::from("dev.turtle.com"),
     };
 }
 
@@ -43,10 +44,30 @@ fn test_update_certificates() {
 #[test]
 fn test_load_environments() {
     let machine = sample_machine();
-
     let command = load_environments(&machine);
-    let expect = Command::basic_show("eval \"$(docker-machine env turtle)\"");
-    assert_eq!(command, expect);
+
+    assert_eq!(command.raw, "docker-machine env turtle");
+    assert!(command.dir.is_empty());
+    assert!(!command.show);
+    assert!(command.silent);
+    assert!(command.pipe);
+    assert!(command.then.is_some());
+    assert!(command.back);
+
+    let stdout = "export DOCKER_TLS_VERIFY=\"1\"\n\
+                  export DOCKER_HOST=\"tcp://192.168.99.100:2376\"\n\
+                  export DOCKER_CERT_PATH=\"/Users/phamlequang/.docker/machine/machines/turtle\"\n\
+                  export DOCKER_MACHINE_NAME=\"turtle\"";
+    let expect = "DOCKER_TLS_VERIFY=1\n\
+                  DOCKER_HOST=tcp://192.168.99.100:2376\n\
+                  DOCKER_CERT_PATH=/Users/phamlequang/.docker/machine/machines/turtle\n\
+                  DOCKER_MACHINE_NAME=turtle";
+
+    let exec = command.then.unwrap();
+    let (success, result) = exec(stdout);
+
+    assert!(success);
+    assert_eq!(result, expect);
 }
 
 #[test]

@@ -24,6 +24,8 @@ The following list contains all supported shortcut commands of the current turtl
 --------|-------------
 `quit`|Exit turtle shell.
 `exit`|Exit turtle shell.
+`install brew`|Install Homebrew.
+`install [package1] [package2] ..`|Install a list of packages using Homebrew.
 `cd {path}`|Change current working directory to the provided path.
 `goto {repository}`|Change current working directory to the provided repository's directory.
 `goto {service}`|Change current working directory to the provided service's directory.
@@ -63,8 +65,10 @@ The following list contains all supported shortcut commands of the current turtl
 
 ## Backlogs
 
-- Setup DNS host alias to connect to services by domain.
+- Need to check why the DNS is still not working.
+- More flexible command matching.
 - Ability to define arbitrary command shortcuts.
+- Add commands to work with kafka.
 - Add commands to work with kubernetes.
 - Add commands to work with aws or localstack.
 
