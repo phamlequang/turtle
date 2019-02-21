@@ -5,6 +5,8 @@ use std::env;
 use std::io;
 use std::path::{Path, MAIN_SEPARATOR};
 
+use super::config::Shortcut;
+
 const TILDE: &str = "~";
 
 pub fn home_directory() -> String {
@@ -88,11 +90,31 @@ pub fn shorten_directory(dir: &str, max_len: usize) -> String {
 pub fn normalize_path(path: &str) -> String {
     let path = path.trim();
     if path.starts_with(TILDE) {
-        return format!("{}{}", home_directory(), path.trim_start_matches(TILDE));
+        return format!(
+            "{}{}",
+            home_directory(),
+            path.trim_start_matches(TILDE)
+        );
     }
     return String::from(path);
 }
 
 pub fn path_exist(path: &str) -> bool {
     return Path::new(path).exists();
+}
+
+pub fn normalize_spaces(text: &str) -> String {
+    let tokens: Vec<&str> = text.split_whitespace().collect();
+    return tokens.join(" ");
+}
+
+pub fn replace_shortcuts(text: &str, shortcuts: &[Shortcut]) -> String {
+    for shortcut in shortcuts {
+        for prefix in &shortcut.prefixes {
+            if text.starts_with(prefix) {
+                return text.replacen(prefix, &shortcut.value, 1);
+            }
+        }
+    }
+    return String::from(text);
 }

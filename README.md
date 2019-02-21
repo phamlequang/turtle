@@ -65,9 +65,6 @@ The following list contains all supported shortcut commands of the current turtl
 
 ## Backlogs
 
-- Need to check why the DNS is still not working.
-- More flexible command matching.
-- Ability to define arbitrary command shortcuts.
 - Add commands to work with kafka.
 - Add commands to work with kubernetes.
 - Add commands to work with aws or localstack.

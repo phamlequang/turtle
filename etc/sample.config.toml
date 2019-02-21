@@ -99,3 +99,7 @@ services = ["camellia", "lotus"]
 [[groups]]
 name = "dep"
 dependencies = ["postgres", "redis"]
+
+[[shortcuts]]
+value = "goto"
+prefixes = ["go to", "gt"]

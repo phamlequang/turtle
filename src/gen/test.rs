@@ -15,7 +15,8 @@ fn sample_config() -> Config {
 }
 
 fn sample_generator() -> Generator {
-    return Generator::new(CONFIG_DIR, PROJECT).expect("cannot create sample generator");
+    return Generator::new(CONFIG_DIR, PROJECT)
+        .expect("cannot create sample generator");
 }
 
 #[test]
@@ -74,7 +75,8 @@ fn test_generate_instruction_install_brew() {
 #[test]
 fn test_generate_instruction_install_packages() {
     let mut generator = sample_generator();
-    let instruction = generator.generate_instruction("install docker docker-compose");
+    let instruction =
+        generator.generate_instruction("install docker docker-compose");
 
     let names = ["docker", "docker-compose"];
     let command = brew::install_packages(&names);
@@ -107,10 +109,10 @@ fn test_generate_instruction_goto_service() {
 }
 
 #[test]
-fn test_generate_instruction_goto_repository() {
+fn test_generate_instruction_goto_repository_with_spaces() {
     let mut generator = sample_generator();
 
-    let instruction = generator.generate_instruction("goto flowers");
+    let instruction = generator.generate_instruction("  go  to  flowers  ");
     let dir = "~/projects/flowers";
     let command = Command::new("", dir, false, false, false, None, false);
 
@@ -310,7 +312,11 @@ fn test_generate_instruction_docker_compose() {
     let mut generator = sample_generator();
     let instruction = generator.generate_instruction("dkcp up -d");
 
-    let command = docker::compose_command("up -d", &config.project, &generator.compose_file);
+    let command = docker::compose_command(
+        "up -d",
+        &config.project,
+        &generator.compose_file,
+    );
     let expect = Instruction::basic(vec![command]);
 
     assert_eq!(instruction, expect);
@@ -323,7 +329,11 @@ fn test_generate_instruction_docker_service_logs() {
     let mut generator = sample_generator();
     let instruction = generator.generate_instruction("logs camellia");
 
-    let command = docker::service_logs("camellia", &config.project, &generator.compose_file);
+    let command = docker::service_logs(
+        "camellia",
+        &config.project,
+        &generator.compose_file,
+    );
     let expect = Instruction::basic(vec![command]);
 
     assert_eq!(instruction, expect);
@@ -340,7 +350,11 @@ fn test_generate_instruction_start_services() {
     let commands = &instruction.commands;
     assert_eq!(commands.len(), 1);
 
-    let expect = docker::compose_command("up -d", &config.project, &generator.compose_file);
+    let expect = docker::compose_command(
+        "up -d",
+        &config.project,
+        &generator.compose_file,
+    );
     assert_eq!(&commands[0], &expect);
 }
 
@@ -356,7 +370,11 @@ fn test_generate_instruction_stop_services() {
     assert_eq!(commands.len(), 1);
 
     let service_names = ["camellia", "redis"];
-    let expect = docker::stop_services(&service_names, &config.project, &generator.compose_file);
+    let expect = docker::stop_services(
+        &service_names,
+        &config.project,
+        &generator.compose_file,
+    );
     assert_eq!(&commands[0], &expect);
 }
 
@@ -371,7 +389,11 @@ fn test_generate_instruction_stop_all_services() {
     let commands = &instruction.commands;
     assert_eq!(commands.len(), 1);
 
-    let expect = docker::compose_command("down", &config.project, &generator.compose_file);
+    let expect = docker::compose_command(
+        "down",
+        &config.project,
+        &generator.compose_file,
+    );
     assert_eq!(&commands[0], &expect);
 }
 
@@ -387,7 +409,11 @@ fn test_generate_instruction_restart_services() {
     assert_eq!(commands.len(), 1);
 
     let service_names = ["lotus", "postgres"];
-    let expect = docker::restart_services(&service_names, &config.project, &generator.compose_file);
+    let expect = docker::restart_services(
+        &service_names,
+        &config.project,
+        &generator.compose_file,
+    );
     assert_eq!(&commands[0], &expect);
 }
 
@@ -402,7 +428,12 @@ fn test_generate_instruction_open_service_bash_shell() {
     let commands = &instruction.commands;
     assert_eq!(commands.len(), 1);
 
-    let expect = docker::compose_exec("lotus", "bash", &config.project, &generator.compose_file);
+    let expect = docker::compose_exec(
+        "lotus",
+        "bash",
+        &config.project,
+        &generator.compose_file,
+    );
     assert_eq!(&commands[0], &expect);
 }
 
@@ -417,7 +448,12 @@ fn test_generate_instruction_open_service_sh_shell() {
     let commands = &instruction.commands;
     assert_eq!(commands.len(), 1);
 
-    let expect = docker::compose_exec("redis", "/bin/sh", &config.project, &generator.compose_file);
+    let expect = docker::compose_exec(
+        "redis",
+        "/bin/sh",
+        &config.project,
+        &generator.compose_file,
+    );
     assert_eq!(&commands[0], &expect);
 }
 
@@ -447,7 +483,11 @@ fn test_generate_instruction_restart_all_services() {
     assert_eq!(commands.len(), 1);
 
     let service_names = ["camellia", "lotus", "postgres", "redis"];
-    let expect = docker::restart_services(&service_names, &config.project, &generator.compose_file);
+    let expect = docker::restart_services(
+        &service_names,
+        &config.project,
+        &generator.compose_file,
+    );
     assert_eq!(&commands[0], &expect);
 }
 
@@ -462,7 +502,8 @@ fn test_generate_instruction_status_services() {
     let commands = &instruction.commands;
     assert_eq!(commands.len(), 1);
 
-    let expect = docker::status_services(&config.project, &generator.compose_file);
+    let expect =
+        docker::status_services(&config.project, &generator.compose_file);
     assert_eq!(&commands[0], &expect);
 }
 
@@ -484,9 +525,11 @@ fn test_generate_instruction_use_groups_success() {
     let compose_file: &str = &util::compose_file(test_dir, PROJECT);
 
     fs::create_dir_all(test_dir).expect("cannot create test directory");
-    fs::copy(sample_config_file(), config_file).expect("cannot copy config file to test directory");
+    fs::copy(sample_config_file(), config_file)
+        .expect("cannot copy config file to test directory");
 
-    let mut generator = Generator::new(test_dir, PROJECT).expect("cannot create test generator");
+    let mut generator = Generator::new(test_dir, PROJECT)
+        .expect("cannot create test generator");
     let instruction = generator.generate_instruction("use dep");
 
     let message = format!(
@@ -496,8 +539,10 @@ fn test_generate_instruction_use_groups_success() {
     let expect = Instruction::echo(&message);
     assert_eq!(instruction, expect);
 
-    let content = fs::read_to_string(compose_file).expect("cannot read compose file");
-    let expect = fs::read_to_string(expect_file).expect("cannot read expect file");
+    let content =
+        fs::read_to_string(compose_file).expect("cannot read compose file");
+    let expect =
+        fs::read_to_string(expect_file).expect("cannot read expect file");
     assert_eq!(content, expect);
 
     let using = generator.config.using.expect("using field is None");
@@ -523,7 +568,8 @@ fn test_generate_instruction_build_services() {
         assert!(dir.is_some());
         let dir = dir.unwrap();
 
-        let expect = Command::new("cargo build", &dir, true, false, false, None, true);
+        let expect =
+            Command::new("cargo build", &dir, true, false, false, None, true);
         assert_eq!(&commands[i], &expect);
     }
 }
@@ -545,7 +591,8 @@ fn test_generate_instruction_test_services() {
         assert!(dir.is_some());
         let dir = dir.unwrap();
 
-        let expect = Command::new("cargo test", &dir, true, false, false, None, true);
+        let expect =
+            Command::new("cargo test", &dir, true, false, false, None, true);
         assert_eq!(&commands[i], &expect);
     }
 }
