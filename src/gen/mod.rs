@@ -49,7 +49,10 @@ impl Generator {
             match Config::load(&config_file) {
                 Ok(cfg) => cfg,
                 Err(err) => {
-                    let msg = format!("cannot load config file [ {} ]: {}", config_file, err);
+                    let msg = format!(
+                        "cannot load config file [ {} ]: {}",
+                        config_file, err
+                    );
                     return Err(msg);
                 }
             }
@@ -57,7 +60,10 @@ impl Generator {
             let cfg = Config::new(project);
 
             if let Err(err) = cfg.save(&config_file) {
-                let msg = format!("cannot save config file [ {} ]: {}", config_file, err);
+                let msg = format!(
+                    "cannot save config file [ {} ]: {}",
+                    config_file, err
+                );
                 return Err(msg);
             }
 
@@ -75,6 +81,11 @@ impl Generator {
 
     // Takes a raw instruction string, returns a list of instructions to execute
     pub fn generate_instruction(&mut self, raw: &str) -> Instruction {
+        let mut raw = util::normalize_spaces(raw);
+        if let Some(shortcuts) = &self.config.shortcuts {
+            raw = util::replace_shortcuts(&raw, shortcuts);
+        }
+
         let mut tokens = raw.trim().split_whitespace();
 
         if let Some(program) = tokens.next() {
@@ -100,7 +111,7 @@ impl Generator {
                 BASH | SH => return self.open_service_shell(&program, &args),
                 BUILD | TEST => return self.do_services(&program, &args),
                 DNS => return self.do_dns(&args),
-                _ => return self.other(raw),
+                _ => return self.other(&raw),
             }
         }
 
@@ -122,7 +133,8 @@ impl Generator {
 
     fn change_directory(&self, args: &[&str]) -> Instruction {
         if let Some(dir) = args.first() {
-            let command = Command::new("", &dir, false, false, false, None, false);
+            let command =
+                Command::new("", &dir, false, false, false, None, false);
             return Instruction::basic(vec![command]);
         }
         return Instruction::skip();
@@ -130,7 +142,9 @@ impl Generator {
 
     fn goto(&self, args: &[&str]) -> Instruction {
         if let Some(name) = args.first() {
-            if let Some(service_dir) = self.config.search_service_directory(name) {
+            if let Some(service_dir) =
+                self.config.search_service_directory(name)
+            {
                 return self.change_directory(&[&service_dir]);
             }
 
@@ -138,7 +152,8 @@ impl Generator {
                 return self.change_directory(&[&repository.local]);
             }
 
-            let message = format!("--> unknown service or repository [ {} ]", name);
+            let message =
+                format!("--> unknown service or repository [ {} ]", name);
             return Instruction::echo(&message);
         }
 
@@ -177,7 +192,11 @@ impl Generator {
         return self.git_do_repositories(args, git::push_repository);
     }
 
-    fn git_do_repositories(&self, args: &[&str], doit: fn(&str) -> Command) -> Instruction {
+    fn git_do_repositories(
+        &self,
+        args: &[&str],
+        doit: fn(&str) -> Command,
+    ) -> Instruction {
         if args.is_empty() {
             let command = doit("");
             return Instruction::basic(vec![command]);
@@ -187,10 +206,13 @@ impl Generator {
         for name in args {
             if let Some(repository) = self.config.search_repository(name) {
                 commands.push(doit(&repository.local));
-            } else if let Some(repository) = self.config.search_service_repository(name) {
+            } else if let Some(repository) =
+                self.config.search_service_repository(name)
+            {
                 commands.push(doit(&repository.local));
             } else {
-                let message = format!("--> unknown repository or service [ {} ]", name);
+                let message =
+                    format!("--> unknown repository or service [ {} ]", name);
                 commands.push(Command::echo(&message));
             }
         }
@@ -217,13 +239,18 @@ impl Generator {
                         }
                         _ => {
                             let raw = args.join(" ");
-                            let command = docker::machine_command(&raw, machine);
+                            let command =
+                                docker::machine_command(&raw, machine);
                             return Instruction::basic(vec![command]);
                         }
                     }
                 }
             }
-            None => return Instruction::echo("--> docker machine config is not found"),
+            None => {
+                return Instruction::echo(
+                    "--> docker machine config is not found",
+                )
+            }
         }
         return Instruction::skip();
     }
@@ -250,53 +277,83 @@ impl Generator {
             return Instruction::skip();
         }
         let action = args.join(" ");
-        let command = docker::compose_command(&action, &self.config.project, &self.compose_file);
+        let command = docker::compose_command(
+            &action,
+            &self.config.project,
+            &self.compose_file,
+        );
         return Instruction::basic(vec![command]);
     }
 
     fn service_logs(&self, args: &[&str]) -> Instruction {
         if let Some(service_name) = args.first() {
-            let command =
-                docker::service_logs(service_name, &self.config.project, &self.compose_file);
+            let command = docker::service_logs(
+                service_name,
+                &self.config.project,
+                &self.compose_file,
+            );
             return Instruction::basic(vec![command]);
         }
         return Instruction::skip();
     }
 
     fn start_services(&self) -> Instruction {
-        let command = docker::compose_command("up -d", &self.config.project, &self.compose_file);
+        let command = docker::compose_command(
+            "up -d",
+            &self.config.project,
+            &self.compose_file,
+        );
         return Instruction::basic(vec![command]);
     }
 
     fn stop_services(&self, args: &[&str]) -> Instruction {
         if args.len() == 0 {
-            let command = docker::compose_command("down", &self.config.project, &self.compose_file);
+            let command = docker::compose_command(
+                "down",
+                &self.config.project,
+                &self.compose_file,
+            );
             return Instruction::basic(vec![command]);
         }
 
-        let matches = self.config.match_services_dependencies(args, Config::BOTH);
+        let matches =
+            self.config.match_services_dependencies(args, Config::BOTH);
         let mut services: Vec<_> = matches.iter().map(String::as_ref).collect();
         services.sort();
 
-        let command = docker::stop_services(&services, &self.config.project, &self.compose_file);
+        let command = docker::stop_services(
+            &services,
+            &self.config.project,
+            &self.compose_file,
+        );
         return Instruction::basic(vec![command]);
     }
 
     fn restart_services(&self, args: &[&str]) -> Instruction {
-        let matches = self.config.match_services_dependencies(args, Config::BOTH);
+        let matches =
+            self.config.match_services_dependencies(args, Config::BOTH);
         let mut services: Vec<_> = matches.iter().map(String::as_ref).collect();
         services.sort();
 
-        let command = docker::restart_services(&services, &self.config.project, &self.compose_file);
+        let command = docker::restart_services(
+            &services,
+            &self.config.project,
+            &self.compose_file,
+        );
         return Instruction::basic(vec![command]);
     }
 
     fn status_services(&self) -> Instruction {
-        let command = docker::status_services(&self.config.project, &self.compose_file);
+        let command =
+            docker::status_services(&self.config.project, &self.compose_file);
         return Instruction::basic(vec![command]);
     }
 
-    fn open_service_shell(&self, shell_type: &str, args: &[&str]) -> Instruction {
+    fn open_service_shell(
+        &self,
+        shell_type: &str,
+        args: &[&str],
+    ) -> Instruction {
         match shell_type {
             BASH | SH => {
                 if let Some(service) = args.first() {
@@ -312,7 +369,8 @@ impl Generator {
                 return Instruction::echo("--> service name is not provided");
             }
             _ => {
-                let message = format!("--> unknown shell type [ {} ]", shell_type);
+                let message =
+                    format!("--> unknown shell type [ {} ]", shell_type);
                 return Instruction::echo(&message);
             }
         }
@@ -323,14 +381,16 @@ impl Generator {
             .config
             .match_services_dependencies(args, Config::SERVICE);
 
-        let mut svc_names: Vec<_> = matches.iter().map(String::as_ref).collect();
+        let mut svc_names: Vec<_> =
+            matches.iter().map(String::as_ref).collect();
         svc_names.sort();
 
         let mut commands: Vec<Command> = Vec::new();
 
         for svc_name in svc_names {
             if let Some(service) = self.config.search_service(svc_name) {
-                if let Some(action) = self.config.search_action(&service.action) {
+                if let Some(action) = self.config.search_action(&service.action)
+                {
                     if let Some(dir) = self.config.service_directory(service) {
                         let raw = match what {
                             BUILD => &action.build,
@@ -342,7 +402,9 @@ impl Generator {
                             continue;
                         }
 
-                        let command = Command::new(raw, &dir, true, false, false, None, true);
+                        let command = Command::new(
+                            raw, &dir, true, false, false, None, true,
+                        );
                         commands.push(command);
                     }
                 }
@@ -366,7 +428,9 @@ impl Generator {
 
         self.config.use_groups(args);
 
-        if let Err(err) = docker::generate_compose_file(&self.compose_file, &self.config) {
+        if let Err(err) =
+            docker::generate_compose_file(&self.compose_file, &self.config)
+        {
             let message = format!(
                 "--> cannot generate compose file [ {} ]: {}",
                 &self.compose_file, err
@@ -398,9 +462,13 @@ impl Generator {
                 "update" | "resolve" => {
                     if let Some(machine) = &self.config.machine {
                         if *action == "update" {
-                            commands.push(dns::update(&machine.dns, &machine.name));
+                            commands
+                                .push(dns::update(&machine.dns, &machine.name));
                         } else {
-                            let raw = format!("sudo mkdir -p {}", dns::RESOLVER_FOLDER);
+                            let raw = format!(
+                                "sudo mkdir -p {}",
+                                dns::RESOLVER_FOLDER
+                            );
                             commands.push(Command::basic_show(&raw));
                             commands.push(dns::resolve(&machine.dns));
                         };
