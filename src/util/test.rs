@@ -89,3 +89,26 @@ fn test_path_exist() {
     assert!(path_exist("src/config/test.rs"));
     assert!(!path_exist("unknown/path/"));
 }
+
+#[test]
+fn test_normalize_spaces() {
+    let text = "   this   is  a        simple    world     ";
+    let expect = "this is a simple world";
+
+    let output = normalize_spaces(text);
+    assert_eq!(output, expect);
+}
+
+#[test]
+fn test_replace_shortcuts() {
+    let text = "git clone git@gitlab.com:phamlequang/turtle.git";
+    let expect = "clone git@gitlab.com:phamlequang/turtle.git";
+
+    let shortcut = Shortcut {
+        value: String::from("clone"),
+        prefixes: vec![String::from("git clone")],
+    };
+
+    let output = replace_shortcuts(text, &[shortcut]);
+    assert_eq!(output, expect);
+}

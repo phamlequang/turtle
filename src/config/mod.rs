@@ -2,7 +2,6 @@
 mod test;
 
 use serde_derive::{Deserialize, Serialize};
-
 use std::collections::HashSet;
 use std::fs;
 use std::io;
@@ -84,6 +83,12 @@ pub struct Group {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
+pub struct Shortcut {
+    pub value: String,
+    pub prefixes: Vec<String>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Config {
     pub project: String,
     pub using: Option<Vec<String>>,
@@ -94,6 +99,7 @@ pub struct Config {
     pub patterns: Option<Vec<Pattern>>,
     pub services: Option<Vec<Service>>,
     pub groups: Option<Vec<Group>>,
+    pub shortcuts: Option<Vec<Shortcut>>,
 }
 
 impl Config {
@@ -112,6 +118,7 @@ impl Config {
             patterns: None,
             services: None,
             groups: None,
+            shortcuts: None,
         };
     }
 
@@ -123,7 +130,9 @@ impl Config {
     pub fn parse(toml_text: &str) -> io::Result<Self> {
         match toml::from_str(&toml_text) {
             Ok(config) => return Ok(config),
-            Err(err) => return Err(io::Error::new(io::ErrorKind::InvalidData, err)),
+            Err(err) => {
+                return Err(io::Error::new(io::ErrorKind::InvalidData, err))
+            }
         }
     }
 
@@ -135,7 +144,9 @@ impl Config {
     pub fn to_toml(&self) -> io::Result<String> {
         match toml::to_string(&self) {
             Ok(toml_text) => Ok(toml_text),
-            Err(err) => return Err(io::Error::new(io::ErrorKind::InvalidData, err)),
+            Err(err) => {
+                return Err(io::Error::new(io::ErrorKind::InvalidData, err))
+            }
         }
     }
 
@@ -206,7 +217,8 @@ impl Config {
     }
 
     pub fn use_groups(&mut self, group_names: &[&str]) {
-        let using: Vec<String> = group_names.iter().map(|s| String::from(*s)).collect();
+        let using: Vec<String> =
+            group_names.iter().map(|s| String::from(*s)).collect();
         self.using = Some(using);
     }
 
@@ -262,8 +274,13 @@ impl Config {
     // Return name of all services and/or dependencies that match the names in args
     // or having their group or repository names that match the names in args
     // Special case: return all if args is empty
-    pub fn match_services_dependencies(&self, args: &[&str], choose: usize) -> HashSet<String> {
-        let names: Vec<String> = args.iter().map(|s| String::from(*s)).collect();
+    pub fn match_services_dependencies(
+        &self,
+        args: &[&str],
+        choose: usize,
+    ) -> HashSet<String> {
+        let names: Vec<String> =
+            args.iter().map(|s| String::from(*s)).collect();
         let filters: HashSet<String> = HashSet::from_iter(names);
         let accept_all = filters.is_empty();
 
@@ -288,9 +305,15 @@ impl Config {
                     if let Some(svc_names) = &group.services {
                         for svc_name in svc_names {
                             let accept_service = filters.contains(svc_name);
-                            if let Some(service) = self.search_service(svc_name) {
-                                let accept_repo = filters.contains(&service.repo);
-                                if accept_all || accept_group || accept_repo || accept_service {
+                            if let Some(service) = self.search_service(svc_name)
+                            {
+                                let accept_repo =
+                                    filters.contains(&service.repo);
+                                if accept_all
+                                    || accept_group
+                                    || accept_repo
+                                    || accept_service
+                                {
                                     result.insert(svc_name.to_owned());
                                 }
                             }
@@ -303,7 +326,11 @@ impl Config {
         return result;
     }
 
-    pub fn fill_patterns(&self, text: &str, service: Option<&Service>) -> String {
+    pub fn fill_patterns(
+        &self,
+        text: &str,
+        service: Option<&Service>,
+    ) -> String {
         let mut result = text.to_owned();
 
         if let Some(patterns) = &self.patterns {
@@ -313,11 +340,16 @@ impl Config {
         }
 
         if let Some(service) = service {
-            if result.contains(SERVICE_DIR_PATTERN) || result.contains(REPO_DIR_PATTERN) {
-                if let Some(repository) = self.search_repository(&service.repo) {
-                    let service_dir = format!("{}/{}", repository.local, service.folder);
+            if result.contains(SERVICE_DIR_PATTERN)
+                || result.contains(REPO_DIR_PATTERN)
+            {
+                if let Some(repository) = self.search_repository(&service.repo)
+                {
+                    let service_dir =
+                        format!("{}/{}", repository.local, service.folder);
                     result = result.replace(SERVICE_DIR_PATTERN, &service_dir);
-                    result = result.replace(REPO_DIR_PATTERN, &repository.local);
+                    result =
+                        result.replace(REPO_DIR_PATTERN, &repository.local);
                 }
             }
         }

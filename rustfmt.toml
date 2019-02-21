@@ -1,0 +1,12 @@
+# https://github.com/rust-lang/rustfmt/blob/master/Configurations.md
+
+max_width = 80
+comment_width = 80
+wrap_comments = true
+combine_control_expr = true
+condense_wildcard_suffixes = true
+format_strings = true
+merge_imports = true
+match_block_trailing_comma = true
+force_multiline_blocks = true
+fn_args_density = "Compressed"
